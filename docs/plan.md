@@ -166,14 +166,14 @@ Render a choropleth in both modes using small mock datasets and switch instantly
 
 #### B2. Add mock files
 Create:
-- [ ] `public/data/years.json`
-- [ ] `public/data/variables.json`
-- [ ] `public/data/metadata.json` including:
+- [x] `public/data/years.json`
+- [x] `public/data/variables.json`
+- [x] `public/data/metadata.json` including:
   - quantiles per geography: `quantiles.hex.*`, `quantiles.tract.*`
   - county averages per year for key metrics
-- [ ] `public/data/hexes/2023.json` (50–300 hexes)
-- [ ] `public/data/tracts/tracts.geojson` (10–50 tracts)
-- [ ] `public/data/tracts/2023.json` (values keyed by GEOID)
+- [x] `public/data/hexes/2023.json` (50–300 hexes)
+- [x] `public/data/tracts/tracts.geojson` (10–50 tracts)
+- [x] `public/data/tracts/2023.json` (values keyed by GEOID)
 
 #### B3. Implement loaders + caching
 - [ ] `src/data/loadData.js`:
@@ -198,8 +198,8 @@ Create:
 - [ ] Legend updates when toggling geo mode
 
 ### Validation commands
-- [ ] `npm run verify`
-- [ ] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run build`
 
 ---
 

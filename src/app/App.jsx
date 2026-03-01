@@ -23,8 +23,7 @@ function App() {
 
   useEffect(() => {
     try {
-      const wasDismissed =
-        globalThis.localStorage?.getItem(STORAGE_KEYS.welcomeDismissed) === '1';
+      const wasDismissed = globalThis.localStorage?.getItem(STORAGE_KEYS.welcomeDismissed) === '1';
       setIsWelcomeOpen(!wasDismissed);
     } catch {
       setIsWelcomeOpen(true);

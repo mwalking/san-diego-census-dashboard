@@ -1,0 +1,22 @@
+{
+  "metrics": [
+    {
+      "id": "home_value_median",
+      "label": "Median home value",
+      "group": "Income & Property",
+      "format": "currency",
+      "source_field": "home_value_median",
+      "description": "Synthetic median home value in dollars for mock data."
+    },
+    {
+      "id": "poverty_rate",
+      "label": "Poverty rate",
+      "group": "Income & Property",
+      "format": "percent",
+      "type": "ratio",
+      "numerator": "poverty_below",
+      "denominator": "poverty_universe",
+      "description": "Synthetic poverty rate computed as poverty_below / poverty_universe."
+    }
+  ]
+}
