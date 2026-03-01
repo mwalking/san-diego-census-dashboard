@@ -1,85 +1,81 @@
 <!-- docs/documentation.md -->
+
 # Project Log (Documentation)
 
 ## Current status
-- **Active milestone:** Milestone 0 — Project memory + Codex steering + baseline verify
+
+- **Active milestone:** Milestone 0 — completed
 - **Next milestone:** Milestone A — UI shell + geography toggle UI (non-functional)
 
 ## Repository overview
-This repo contains a static census dashboard web app for **San Diego County** with a map that can toggle between:
+
+This repo contains the San Diego Mosaic census dashboard project. The app target is a static web UI for
+San Diego County with a map that supports both:
+
 - **Hex bins (H3)**
-- **Census tracts (official boundaries)**
+- **Census tracts**
 
-Data are precomputed and committed under `public/data/`.
+The browser app must use precomputed files under `public/data/` and must not call the Census API at
+runtime.
 
-## How to run (web)
+## How to run
+
+Milestone 0 only sets up baseline tooling. App runtime scripts (`dev`/`build`) are expected in later
+milestones.
+
 ```bash
 npm install
-npm run dev
+```
 
 ## How to verify
+
+```bash
 npm run verify
+```
 
 ## How to build
-npm run build
 
-## How to run (data pipeline) — placeholder
+`npm run build` is not defined yet in Milestone 0 and is intentionally skipped by `npm run verify`.
 
-(Will be filled in once Python scripts exist.)
+## Demo flow (MVP target)
 
-Example
+1. Open app and dismiss the welcome modal.
+2. Use the geography toggle to switch hex bins and census tracts.
+3. Change year with the slider.
+4. Click a sidebar metric to recolor map and refresh legend.
+5. Hover and click features to inspect selected-area values.
+6. Switch to brush mode to multi-select.
+7. Use “Choose for me” to fly to an extreme feature and show callout details.
 
-## to-do (change this to use uv)
-python -m venv .venv && source .venv/bin/activate
-pip install -r scripts/py/requirements.txt
-export CENSUS_API_KEY="..."
-python scripts/py/build_data.py --config scripts/py/config.yaml
+## Milestone 0 changes
 
-## Demo flow (MVP)
+- Added root guidance in `AGENTS.md`.
+- Added baseline repo docs in `README.md` (what repo is, run, verify, build note).
+- Added `.gitignore` entries for `.env*`, `node_modules`, `.venv`, `dist`, and Python cache files.
+- Added Prettier config: `.prettierrc.json`, `.prettierignore`, scripts `format` and `format:check`.
+- Added ESLint config: `eslint.config.mjs`, script `lint`.
+- Added verify entrypoint: `scripts/verify.mjs` and `npm run verify`.
+- Added CI workflow `.github/workflows/ci.yml` to run `npm ci` + `npm run verify` on push/PR.
 
-Open the app
+## Commands run and results
 
-Dismiss Welcome modal
+- `npm install` (sandbox): failed with `EAI_AGAIN` reaching `registry.npmjs.org`.
+- `npm install` (escalated): passed.
+- `npm run format`: passed.
+- `npm run format:check`: passed.
+- `npm run lint`: passed.
+- `npm run verify`: passed (`build` step correctly skipped because no `build` script exists).
 
-Use the Geography toggle:
+## Decisions made
 
-Hex bins ↔ Census tracts
+- Kept Milestone 0 scoped to repo memory + verification tooling only; no app scaffold changes.
+- Implemented `verify` as a Node script so it can deterministically run `format:check` and `lint`,
+  then conditionally run `build` only if present.
+- Added pre-existing planning docs (`docs/prompt.md`, `docs/plan.md`, `docs/implement.md`) to
+  `.prettierignore` to avoid broad reformat churn while keeping Milestone 0 diffs minimal.
+- Used `npm ci` in CI because `package-lock.json` now exists.
 
-Use year slider to change year
+## Known issues / follow-ups
 
-Click a metric in the sidebar → map recolors + legend updates
-
-Hover a feature → highlight
-
-Click a feature → sidebar shows stats
-
-Switch to multi-select → brush select multiple features
-
-Click “Choose for me” → fly-to + callout shows feature value and county average
-
-Open “Data sources” and “About” modals
-
-Decisions
-
-(Pending) Choose placement of geography toggle (recommended: legend card header).
-
-(Pending) Tract boundary vintage and how to handle cross-year boundary changes.
-
-(Pending) Quantile computation scope:
-
-per geography (required)
-
-across all years (recommended for stable legend)
-
-Known issues / follow-ups
-
-None yet.
-
-Milestone notes (append-only log)
-YYYY-MM-DD — Milestone 0 started
-
-Planned: add docs + AGENTS + verify tooling + CI
-
-Commands to run: npm run verify
-
-(Each milestone completion should include: summary, changed files, commands run, results.)
+- No `dev` or `build` scripts yet; they are expected in Milestone A when the app scaffold is added.
+- Network access may require escalation for dependency installation in this environment.

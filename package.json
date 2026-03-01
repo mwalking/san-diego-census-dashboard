@@ -1,0 +1,16 @@
+{
+  "name": "san-diego-census-dashboard",
+  "private": true,
+  "version": "0.1.0",
+  "description": "San Diego Mosaic project tooling baseline",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "eslint": "^9.20.0",
+    "prettier": "^3.4.2"
+  }
+}

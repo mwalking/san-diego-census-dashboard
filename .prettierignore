@@ -1,0 +1,5 @@
+node_modules
+dist
+docs/prompt.md
+docs/plan.md
+docs/implement.md
