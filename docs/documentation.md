@@ -4,8 +4,13 @@
 
 ## Current status
 
+<<<<<<< Updated upstream
 - **Active milestone:** A3.1 responsive overlay layout fix — completed
 - **Next milestone:** Milestone B — map + dual overlays with mock data (hex + tract)
+=======
+- **Active milestone:** Milestone B1 — completed
+- **Next milestone:** Milestone B2 — mock data files and loaders
+>>>>>>> Stashed changes
 
 ## Repository overview
 
@@ -118,6 +123,7 @@ npm run build
 - Kept map rendering as placeholder only (no MapLibre or deck.gl added).
 - Updated ESLint `no-unused-vars` config to avoid false positives for JSX component identifiers.
 
+<<<<<<< Updated upstream
 ## Milestone A3.1 changes
 
 - Refactored app shell in `src/app/App.jsx` to viewport-fixed layout:
@@ -134,6 +140,22 @@ npm run build
 - Added width guards (`w-[360px] max-w-[92vw]` sidebar, bounded left cards) and kept root overflow hidden
   to prevent horizontal scrolling during common viewport resizes.
 - Kept this as a layout-only pre-step; no Milestone B libraries/features were started.
+=======
+## Milestone B1 changes
+
+- Installed mapping dependencies only (no additional unrelated libraries):
+  - `maplibre-gl`
+  - `react-map-gl`
+  - `@deck.gl/react`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/geo-layers`, `@deck.gl/mapbox`
+  - `d3-array`, `d3-scale`, `d3-format`
+  - `h3-js`
+- Updated `src/components/MapShell.jsx` to render:
+  - MapLibre basemap (`react-map-gl/maplibre`) with a dark style URL
+  - DeckGL overlay sharing the same controlled `viewState`
+  - empty placeholder deck layer (`ScatterplotLayer` with empty data), so no real data wiring yet
+- Imported MapLibre CSS in `src/main.jsx` (`maplibre-gl/dist/maplibre-gl.css`) so map tiles/controls render correctly.
+- Kept the existing floating UI shell layout and interaction wiring unchanged.
+>>>>>>> Stashed changes
 
 ## Commands run and results (latest milestone)
 
@@ -142,14 +164,24 @@ npm run build
 - Final validation state:
   - `npm run build`: passed.
   - `npm run verify`: passed.
+  - Note: Vite emitted a non-blocking warning from loaders.gl (`spawn` export from browser external) and a
+    large-chunk warning; build still completed successfully.
 
 ## Decisions made (latest milestone)
 
+<<<<<<< Updated upstream
 - Treated A3.1 as a milestone-scoped layout fix only and kept Milestone B untouched.
 - Used strict absolute anchoring against a map-relative container to keep cards pinned on resize.
 - Preserved future map pointer passthrough behavior by combining `pointer-events-none` wrapper +
   `pointer-events-auto` cards.
+=======
+- Scoped work strictly to Milestone B1 plumbing; no data loading or choropleth logic yet.
+- Used a controlled shared `viewState` between DeckGL and MapLibre so upcoming B2/B3 overlay state wiring is
+  straightforward.
+- Used an empty placeholder DeckGL layer to validate rendering pipeline without introducing mock data early.
+>>>>>>> Stashed changes
 
 ## Known issues / follow-ups
 
 - Network access may require escalation for dependency installation in this environment.
+- Bundle size is currently large after adding deck.gl/maplibre dependencies; optimize chunking later if needed.

@@ -1,6 +1,7 @@
 import { createElement, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './app/App.jsx';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import './styles/index.css';
 
 const root = document.getElementById('root');

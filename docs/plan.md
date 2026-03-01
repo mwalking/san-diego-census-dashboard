@@ -157,12 +157,12 @@ Render a choropleth in both modes using small mock datasets and switch instantly
 
 ### Tasks
 #### B1. Add mapping dependencies + basemap
-- [ ] Install:
+- [x] Install:
   - `maplibre-gl`, `react-map-gl`
   - `@deck.gl/react`, `@deck.gl/core`, `@deck.gl/layers`, `@deck.gl/geo-layers`, `@deck.gl/mapbox`
   - `d3-scale`, `d3-array`, `d3-format`
   - `h3-js`
-- [ ] Render MapLibre basemap with DeckGL overlay
+- [x] Render MapLibre basemap with DeckGL overlay
 
 #### B2. Add mock files
 Create:
