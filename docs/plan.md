@@ -49,18 +49,18 @@ Before implementing UI or data features, establish durable project memory and a 
 
 ### Tasks
 #### 0.1 Durable project memory files
-- [ ] Create/update:
-  - [ ] `docs/prompt.md`
-  - [ ] `docs/plan.md`
-  - [ ] `docs/implement.md`
-  - [ ] `docs/documentation.md`
-- [ ] Ensure documentation.md has:
+- [x] Create/update:
+  - [x] `docs/prompt.md`
+  - [x] `docs/plan.md`
+  - [x] `docs/implement.md`
+  - [x] `docs/documentation.md`
+- [x] Ensure documentation.md has:
   - how to run + verify
   - demo flow
   - decisions + known issues
 
 #### 0.2 Codex repo instructions
-- [ ] Create `AGENTS.md` with:
+- [x] Create `AGENTS.md` with:
   - read docs first
   - small diffs + validate + update docs/documentation.md
   - no new deps without noting
@@ -68,32 +68,32 @@ Before implementing UI or data features, establish durable project memory and a 
   - no runtime Census API calls
 
 #### 0.3 Repo hygiene
-- [ ] `.gitignore` covers: `.env*`, `node_modules`, `.venv`, `dist`, python caches
-- [ ] minimal `README.md` includes run/verify/build
+- [x] `.gitignore` covers: `.env*`, `node_modules`, `.venv`, `dist`, python caches
+- [x] minimal `README.md` includes run/verify/build
 
 #### 0.4 Tooling
-- [ ] Add Prettier:
-  - [ ] `.prettierrc` / config
-  - [ ] `.prettierignore`
-  - [ ] scripts: `format`, `format:check`
-- [ ] Add ESLint (minimal):
-  - [ ] config file
-  - [ ] script: `lint`
-- [ ] Add `npm run verify`:
+- [x] Add Prettier:
+  - [x] `.prettierrc` / config
+  - [x] `.prettierignore`
+  - [x] scripts: `format`, `format:check`
+- [x] Add ESLint (minimal):
+  - [x] config file
+  - [x] script: `lint`
+- [x] Add `npm run verify`:
   - must run `format:check` + `lint`
   - if a `build` script exists, run it; otherwise skip gracefully
   - recommended: `scripts/verify.mjs`
 
 #### 0.5 CI
-- [ ] `.github/workflows/ci.yml` runs `npm run verify` on push/PR
+- [x] `.github/workflows/ci.yml` runs `npm run verify` on push/PR
 
 #### 0.6 Log
-- [ ] Update `docs/documentation.md` with what changed + commands run
+- [x] Update `docs/documentation.md` with what changed + commands run
 
 ### Validation commands
-- [ ] `npm run format:check`
-- [ ] `npm run lint`
-- [ ] `npm run verify`
+- [x] `npm run format:check`
+- [x] `npm run lint`
+- [x] `npm run verify`
 
 ---
 
@@ -104,39 +104,49 @@ Create a working Vite+React+Tailwind app that matches the screenshot layout with
 
 ### Tasks
 #### A1. Bootstrap Vite + React + Tailwind
-- [ ] Initialize Vite React app
-- [ ] Install Tailwind and verify it loads
-- [ ] Create folder structure:
-  - `src/app/`
-  - `src/components/`
-  - `src/data/`
-  - `src/ui/` (microcopy)
+- [x] Initialize Vite React app
+- [x] Install Tailwind and verify it loads
+- [x] Create folder structure:
+  - [x] `src/app/`
+  - [x] `src/components/`
+  - [x] `src/data/`
+  - [x] `src/ui/` (microcopy)
 
 #### A2. Implement UI shells (static)
 Create:
-- [ ] `src/app/App.jsx`
-- [ ] `src/components/MapShell.jsx` (placeholder map container ok)
-- [ ] `src/components/Sidebar.jsx`
-- [ ] `src/components/LegendCard.jsx` (must include geo toggle UI)
-- [ ] `src/components/SelectionModeCard.jsx`
-- [ ] `src/components/Modal.jsx`
-- [ ] `src/components/WelcomeModal.jsx`
-- [ ] `src/components/AboutModal.jsx`
-- [ ] `src/components/DataSourcesModal.jsx`
+- [x] `src/app/App.jsx`
+- [x] `src/components/MapShell.jsx` (placeholder map container ok)
+- [x] `src/components/Sidebar.jsx`
+- [x] `src/components/LegendCard.jsx` (must include geo toggle UI)
+- [x] `src/components/SelectionModeCard.jsx`
+- [x] `src/components/Modal.jsx`
+- [x] `src/components/WelcomeModal.jsx`
+- [x] `src/components/AboutModal.jsx`
+- [x] `src/components/DataSourcesModal.jsx`
 
 Add:
-- [ ] Welcome modal shows on first load; dismiss persists in localStorage
-- [ ] Navbar links open/close modals
-- [ ] Sidebar groups render with placeholder rows
-- [ ] Selection mode buttons render (single/multi)
+- [x] Welcome modal shows on first load; dismiss persists in localStorage
+- [x] Navbar links open/close modals
+- [x] Sidebar groups render with placeholder rows
+- [x] Selection mode buttons render (single/multi)
 
 ### Acceptance checkpoint
 - [ ] `npm run dev` renders the full layout without console errors
-- [ ] geo toggle UI exists and changes app state (even if map not wired yet)
+- [x] geo toggle UI exists and changes app state (even if map not wired yet)
 
 ### Validation commands
-- [ ] `npm run verify`
-- [ ] `npm run build` (once build exists)
+- [x] `npm run verify`
+- [x] `npm run build` (once build exists)
+
+#### A3.1 Responsive overlay layout fix (pre-step)
+- [x] Refactor app shell to `h-screen w-screen overflow-hidden`
+- [x] Reserve navbar height and keep map region filling remaining height
+- [x] Anchor overlay cards to map area with absolute positioning:
+  - [x] Legend: `top-4 left-4`
+  - [x] Selection mode: `bottom-4 left-4`
+  - [x] Sidebar: `top-4 right-4 bottom-4` with fixed-ish width
+- [x] Use `pointer-events-none` overlay wrapper and `pointer-events-auto` per card
+- [x] Validate with `npm run build` and `npm run verify`
 
 ---
 

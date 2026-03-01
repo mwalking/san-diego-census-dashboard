@@ -4,7 +4,7 @@
 
 ## Current status
 
-- **Active milestone:** Milestone A3 — completed
+- **Active milestone:** A3.1 responsive overlay layout fix — completed
 - **Next milestone:** Milestone B — map + dual overlays with mock data (hex + tract)
 
 ## Repository overview
@@ -118,24 +118,37 @@ npm run build
 - Kept map rendering as placeholder only (no MapLibre or deck.gl added).
 - Updated ESLint `no-unused-vars` config to avoid false positives for JSX component identifiers.
 
+## Milestone A3.1 changes
+
+- Refactored app shell in `src/app/App.jsx` to viewport-fixed layout:
+  - root: `h-screen w-screen overflow-hidden`
+  - fixed-height navbar
+  - map area that fills remaining height
+- Anchored overlay cards to the map region using absolute positions:
+  - legend: `top-4 left-4`
+  - selection mode: `bottom-4 left-4`
+  - sidebar: `top-4 right-4 bottom-4` with fixed-ish width
+- Added overlay interaction layering for future map interactivity:
+  - overlay wrapper: `pointer-events-none`
+  - per-card containers: `pointer-events-auto`
+- Added width guards (`w-[360px] max-w-[92vw]` sidebar, bounded left cards) and kept root overflow hidden
+  to prevent horizontal scrolling during common viewport resizes.
+- Kept this as a layout-only pre-step; no Milestone B libraries/features were started.
+
 ## Commands run and results (latest milestone)
 
 - `npm run build`: passed.
-- `npm run verify`: initially failed on formatting (A3 files), then passed after formatting fixes.
-- `npm run verify`: then failed on ESLint false positives for JSX component imports, then passed after
-  minimal ESLint `varsIgnorePattern` update.
+- `npm run verify`: passed.
 - Final validation state:
   - `npm run build`: passed.
   - `npm run verify`: passed.
 
 ## Decisions made (latest milestone)
 
-- Scoped this milestone strictly to UI shell/chrome and placeholder interactions; no mapping libraries were
-  added.
-- Centralized nearly all user-facing shell text in `src/ui/microcopy.js` to keep component code lightweight.
-- Used localStorage key `san-diego-mosaic.welcome-dismissed-v1` for first-load welcome modal persistence.
-- Used a temporary Choose-for-me placeholder message in navbar; real behavior is deferred to Milestone E.
-- Kept A3 implementation static and state-driven to preserve clean handoff for Milestone B map integration.
+- Treated A3.1 as a milestone-scoped layout fix only and kept Milestone B untouched.
+- Used strict absolute anchoring against a map-relative container to keep cards pinned on resize.
+- Preserved future map pointer passthrough behavior by combining `pointer-events-none` wrapper +
+  `pointer-events-auto` cards.
 
 ## Known issues / follow-ups
 

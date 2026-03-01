@@ -46,71 +46,75 @@ function App() {
   const activeMetric = useMemo(() => getMetricById(activeMetricId), [activeMetricId]);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-100">
-      <MapShell />
-
-      <header className="absolute inset-x-0 top-0 z-30 border-b border-slate-200/10 bg-slate-950/70 px-4 py-3 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3">
-          <h1 className="text-lg font-semibold tracking-tight">{COPY.app.name}</h1>
-          <nav className="flex items-center gap-2">
+    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+      <header className="h-16 shrink-0 border-b border-slate-200/10 bg-slate-950/70 backdrop-blur">
+        <div className="flex h-full items-center justify-between gap-3 px-4">
+          <h1 className="min-w-0 truncate text-base font-semibold tracking-tight sm:text-lg">
+            {COPY.app.name}
+          </h1>
+          <nav className="flex shrink-0 items-center gap-1 sm:gap-2">
             <button
               type="button"
-              className="rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800"
+              className="rounded-md px-2 py-2 text-xs text-slate-200 hover:bg-slate-800 sm:px-3 sm:text-sm"
               onClick={() => setIsDataSourcesOpen(true)}
             >
               {COPY.nav.dataSources}
             </button>
             <button
               type="button"
-              className="rounded-md px-3 py-2 text-sm text-slate-200 hover:bg-slate-800"
+              className="rounded-md px-2 py-2 text-xs text-slate-200 hover:bg-slate-800 sm:px-3 sm:text-sm"
               onClick={() => setIsAboutOpen(true)}
             >
               {COPY.nav.about}
             </button>
             <button
               type="button"
-              className="rounded-md bg-emerald-400 px-3 py-2 text-sm font-semibold text-slate-900"
+              className="rounded-md bg-emerald-400 px-2 py-2 text-xs font-semibold text-slate-900 sm:px-3 sm:text-sm"
               onClick={handleChooseForMeClick}
             >
               {COPY.nav.chooseForMe}
             </button>
           </nav>
         </div>
-        {chooseForMeMessage ? (
-          <p className="mx-auto mt-2 w-full max-w-7xl text-xs text-emerald-300">
-            {chooseForMeMessage}
-          </p>
-        ) : null}
       </header>
 
-      <div className="pointer-events-none absolute inset-0 z-20 p-4 pt-24">
-        <div className="mx-auto flex h-full w-full max-w-7xl flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex w-full flex-col gap-4 lg:h-full lg:max-w-sm lg:justify-between">
-            <div className="pointer-events-auto">
+      <main className="relative min-h-0 h-[calc(100%-4rem)]">
+        <div className="relative h-full w-full">
+          <MapShell />
+
+          {chooseForMeMessage ? (
+            <p className="pointer-events-none absolute left-1/2 top-4 z-30 -translate-x-1/2 rounded-md border border-emerald-400/30 bg-slate-900/90 px-3 py-2 text-xs text-emerald-300">
+              {chooseForMeMessage}
+            </p>
+          ) : null}
+
+          <div className="pointer-events-none absolute inset-0 z-20">
+            <div className="pointer-events-auto absolute left-4 top-4 w-[320px] max-w-[92vw]">
               <LegendCard
                 geoMode={geoMode}
                 onGeoModeChange={setGeoMode}
                 activeMetricLabel={activeMetric?.label ?? ''}
               />
             </div>
-            <div className="pointer-events-auto lg:mb-0">
+
+            <div className="pointer-events-auto absolute bottom-4 left-4 w-[320px] max-w-[92vw]">
               <SelectionModeCard
                 selectionMode={selectionMode}
                 onSelectionModeChange={setSelectionMode}
               />
             </div>
-          </div>
 
-          <div className="pointer-events-auto w-full lg:max-w-md lg:self-stretch">
-            <Sidebar
-              year={year}
-              onYearChange={setYear}
-              activeMetricId={activeMetricId}
-              onActiveMetricChange={setActiveMetricId}
-            />
+            <div className="pointer-events-auto absolute bottom-4 right-4 top-4 w-[360px] max-w-[92vw]">
+              <Sidebar
+                year={year}
+                onYearChange={setYear}
+                activeMetricId={activeMetricId}
+                onActiveMetricChange={setActiveMetricId}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <WelcomeModal isOpen={isWelcomeOpen} onDismiss={handleWelcomeDismiss} />
       <AboutModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
