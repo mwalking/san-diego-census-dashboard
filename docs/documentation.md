@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone 0 — completed
-- **Next milestone:** Milestone A — UI shell + geography toggle UI (non-functional)
+- **Active milestone:** Milestone A1 — completed
+- **Next milestone:** Milestone A2 — UI shell + geography toggle UI (non-functional)
 
 ## Repository overview
 
@@ -20,11 +20,9 @@ runtime.
 
 ## How to run
 
-Milestone 0 only sets up baseline tooling. App runtime scripts (`dev`/`build`) are expected in later
-milestones.
-
 ```bash
 npm install
+npm run dev
 ```
 
 ## How to verify
@@ -35,7 +33,9 @@ npm run verify
 
 ## How to build
 
-`npm run build` is not defined yet in Milestone 0 and is intentionally skipped by `npm run verify`.
+```bash
+npm run build
+```
 
 ## Demo flow (MVP target)
 
@@ -57,25 +57,44 @@ npm run verify
 - Added verify entrypoint: `scripts/verify.mjs` and `npm run verify`.
 - Added CI workflow `.github/workflows/ci.yml` to run `npm ci` + `npm run verify` on push/PR.
 
-## Commands run and results
+## Milestone A1 changes
 
-- `npm install` (sandbox): failed with `EAI_AGAIN` reaching `registry.npmjs.org`.
-- `npm install` (escalated): passed.
-- `npm run format`: passed.
-- `npm run format:check`: passed.
-- `npm run lint`: passed.
-- `npm run verify`: passed (`build` step correctly skipped because no `build` script exists).
+- Installed Vite + React deps on the existing project:
+  - `react`, `react-dom`
+  - `vite`, `@vitejs/plugin-react`
+- Updated `package.json` scripts to add:
+  - `dev`
+  - `build`
+  - `preview`
+    while keeping `format`, `format:check`, `lint`, and `verify`.
+- Added minimal Vite React files:
+  - `index.html`
+  - `vite.config.mjs`
+  - `src/main.jsx`
+  - `src/app/App.jsx`
+- Added Milestone A1 folder skeleton:
+  - `src/components/.gitkeep`
+  - `src/data/.gitkeep`
+  - `src/ui/.gitkeep`
+- Updated ESLint config to include `.jsx` files and browser global `document`.
 
-## Decisions made
+## Commands run and results (latest milestone)
 
-- Kept Milestone 0 scoped to repo memory + verification tooling only; no app scaffold changes.
-- Implemented `verify` as a Node script so it can deterministically run `format:check` and `lint`,
-  then conditionally run `build` only if present.
-- Added pre-existing planning docs (`docs/prompt.md`, `docs/plan.md`, `docs/implement.md`) to
-  `.prettierignore` to avoid broad reformat churn while keeping Milestone 0 diffs minimal.
-- Used `npm ci` in CI because `package-lock.json` now exists.
+- `npm run build`: passed.
+- `npm run verify`: initially failed on ESLint (`src/main.jsx` + missing `document` global), then passed
+  after minimal lint-safe adjustments.
+- Final validation state:
+  - `npm run build`: passed.
+  - `npm run verify`: passed.
+
+## Decisions made (latest milestone)
+
+- Followed user instruction to avoid `npm create vite@latest .`; installed dependencies directly and added
+  only the minimal Vite files manually.
+- Kept diffs scoped to A1 setup only; no A2 UI shell work was added.
+- Deferred Tailwind setup to later Milestone A tasks to keep this change focused on Vite + React bootstrap.
 
 ## Known issues / follow-ups
 
-- No `dev` or `build` scripts yet; they are expected in Milestone A when the app scaffold is added.
 - Network access may require escalation for dependency installation in this environment.
+- Tailwind is not wired yet (planned for subsequent Milestone A work).
