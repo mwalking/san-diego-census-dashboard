@@ -23,7 +23,8 @@ function App() {
 
   useEffect(() => {
     try {
-      const wasDismissed = globalThis.localStorage?.getItem(STORAGE_KEYS.welcomeDismissed) === '1';
+      const wasDismissed =
+        globalThis.localStorage?.getItem(STORAGE_KEYS.welcomeDismissed) === '1';
       setIsWelcomeOpen(!wasDismissed);
     } catch {
       setIsWelcomeOpen(true);
@@ -46,7 +47,7 @@ function App() {
   const activeMetric = useMemo(() => getMetricById(activeMetricId), [activeMetricId]);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-slate-950 text-slate-100">
       <header className="h-16 shrink-0 border-b border-slate-200/10 bg-slate-950/70 backdrop-blur">
         <div className="flex h-full items-center justify-between gap-3 px-4">
           <h1 className="min-w-0 truncate text-base font-semibold tracking-tight sm:text-lg">
@@ -78,7 +79,7 @@ function App() {
         </div>
       </header>
 
-      <main className="relative min-h-0 h-[calc(100%-4rem)]">
+      <main className="relative flex-1 min-h-0">
         <div className="relative h-full w-full">
           <MapShell />
 
