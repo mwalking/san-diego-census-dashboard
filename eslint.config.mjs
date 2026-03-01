@@ -13,6 +13,7 @@ export default [
       globals: {
         console: 'readonly',
         document: 'readonly',
+        module: 'readonly',
         process: 'readonly',
       },
     },

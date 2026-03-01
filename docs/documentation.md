@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone A1 — completed
-- **Next milestone:** Milestone A2 — UI shell + geography toggle UI (non-functional)
+- **Active milestone:** Milestone A2 — completed
+- **Next milestone:** Milestone A3 — UI shell component implementation (static, no map wiring)
 
 ## Repository overview
 
@@ -78,23 +78,39 @@ npm run build
   - `src/ui/.gitkeep`
 - Updated ESLint config to include `.jsx` files and browser global `document`.
 
+## Milestone A2 changes
+
+- Installed Tailwind CSS + PostCSS dependencies:
+  - `tailwindcss`
+  - `postcss`
+  - `autoprefixer`
+- Added Tailwind config in `tailwind.config.cjs` with content paths:
+  - `./index.html`
+  - `./src/**/*.{js,jsx}`
+- Added PostCSS config in `postcss.config.cjs` with `tailwindcss` + `autoprefixer`.
+- Added Tailwind stylesheet entry in `src/styles/index.css`:
+  - `@tailwind base;`
+  - `@tailwind components;`
+  - `@tailwind utilities;`
+- Imported `src/styles/index.css` from `src/main.jsx`.
+- Updated `src/app/App.jsx` with minimal Tailwind utility classes for visible styling.
+- Added CommonJS global support (`module`) in ESLint config so `.cjs` config files lint cleanly.
+
 ## Commands run and results (latest milestone)
 
 - `npm run build`: passed.
-- `npm run verify`: initially failed on ESLint (`src/main.jsx` + missing `document` global), then passed
-  after minimal lint-safe adjustments.
+- `npm run verify`: initially failed on ESLint (`module` undefined in `postcss.config.cjs` and
+  `tailwind.config.cjs`), then passed after minimal ESLint global update.
 - Final validation state:
   - `npm run build`: passed.
   - `npm run verify`: passed.
 
 ## Decisions made (latest milestone)
 
-- Followed user instruction to avoid `npm create vite@latest .`; installed dependencies directly and added
-  only the minimal Vite files manually.
-- Kept diffs scoped to A1 setup only; no A2 UI shell work was added.
-- Deferred Tailwind setup to later Milestone A tasks to keep this change focused on Vite + React bootstrap.
+- Scoped this milestone strictly to Tailwind setup and proof-of-wiring only; no map/sidebar/modal UI work.
+- Used `.cjs` config files for Tailwind/PostCSS to avoid changing package module type.
+- Kept dependency additions limited to `tailwindcss`, `postcss`, and `autoprefixer` only.
 
 ## Known issues / follow-ups
 
 - Network access may require escalation for dependency installation in this environment.
-- Tailwind is not wired yet (planned for subsequent Milestone A work).

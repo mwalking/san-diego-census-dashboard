@@ -1,14 +1,7 @@
 function App() {
   return (
-    <main
-      style={{
-        minHeight: '100vh',
-        display: 'grid',
-        placeItems: 'center',
-        fontFamily: 'system-ui, sans-serif',
-      }}
-    >
-      <h1>San Diego Mosaic</h1>
+    <main className="grid min-h-screen place-items-center bg-slate-900 p-8 text-white">
+      <h1 className="text-4xl font-semibold tracking-tight">San Diego Mosaic</h1>
     </main>
   );
 }
