@@ -248,26 +248,25 @@ Make sidebar metric rows drive choropleth variable, and show selected-area demog
 - [x] Support MOE math for sums and derived ratios/proportions.
 - [x] For median aggregation over multi/in-view records, show N/A until distribution-based method is added.
 
-#### D2. Per-row metric values + broader sidebar stats
-- [ ] `src/data/metrics.js`: metric registry (value getter + label + format)
-- [ ] `src/data/format.js`: number/currency/percent formatting
-- [ ] Sidebar:
-  - clickable metric rows
-  - active row highlight
-  - “no selection” state
-- [ ] Compute:
-  - counts: sums
-  - rates: sum(num)/sum(den)
-  - medians: weighted-average approximation (document in Data Sources modal)
+#### D2. Per-row selected-area metric values + MOE
+- [x] Sidebar metric rows show selected-area estimate for each enabled metric.
+- [x] Sidebar metric rows show `± MOE` for each enabled metric when selection exists.
+- [x] Computation is centralized through `src/data/metricStats.js` (no duplicated MOE math in Sidebar).
+- [x] Aggregation behavior:
+  - [x] sums/counts: sum estimate + RSS MOE
+  - [x] ratios/proportions: aggregate numerator/denominator then derive estimate + MOE
+  - [x] medians: single-record supported; multi-record aggregation shows placeholder (`—`)
+- [x] Sidebar loads year data once per `(geoMode, year)`, indexes once, and reuses selected records across metrics.
+- [x] Map interaction behavior remains unchanged.
 
 ### Acceptance checkpoint
-- [ ] Clicking a metric recolors map and updates legend
-- [ ] Sidebar shows correct values for single selection
-- [ ] Sidebar shows aggregate values for multi selection
+- [x] Clicking a metric recolors map and updates legend
+- [x] Sidebar shows correct values for single selection
+- [x] Sidebar shows aggregate values for multi selection
 
 ### Validation commands
-- [ ] `npm run verify`
-- [ ] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run build`
 
 ---
 

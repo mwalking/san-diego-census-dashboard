@@ -13,6 +13,7 @@ function Sidebar({
   year,
   onYearChange,
   metricGroups = [],
+  metricDefinitionsById = {},
   activeMetricId,
   activeMetric,
   onActiveMetricChange,
@@ -115,11 +116,77 @@ function Sidebar({
     [activeMetric, selectedRecords],
   );
 
+  const selectedStatsByMetricId = useMemo(() => {
+    if (!Array.isArray(selectedRecords) || selectedRecords.length === 0) {
+      return {};
+    }
+
+    const statsByMetric = {};
+    for (const group of metricGroups) {
+      for (const metricRow of group.metrics) {
+        const metricDefinition = metricDefinitionsById?.[metricRow.id];
+        if (!metricDefinition) {
+          continue;
+        }
+        statsByMetric[metricRow.id] = computeAggregateMetricStats(
+          metricDefinition,
+          selectedRecords,
+        );
+      }
+    }
+
+    return statsByMetric;
+  }, [metricDefinitionsById, metricGroups, selectedRecords]);
+
   const isSummaryLoading = isLoading || isMetricStatsLoading;
   const inViewEstimateLabel = formatMetricEstimate(activeMetric, inViewStats?.estimate);
   const inViewMoeLabel = formatMetricMoe(activeMetric, inViewStats?.moe);
   const selectedEstimateLabel = formatMetricEstimate(activeMetric, selectedStats?.estimate);
   const selectedMoeLabel = formatMetricMoe(activeMetric, selectedStats?.moe);
+
+  function getMetricRowSummary(metricRow) {
+    if (!selectedIds.length) {
+      return {
+        estimateLabel: '—',
+        moeLabel: null,
+        note: null,
+      };
+    }
+
+    if (metricRow.isDisabled) {
+      return {
+        estimateLabel: '—',
+        moeLabel: null,
+        note: null,
+      };
+    }
+
+    const metricDefinition = metricDefinitionsById?.[metricRow.id];
+    if (!metricDefinition) {
+      return {
+        estimateLabel: '—',
+        moeLabel: null,
+        note: null,
+      };
+    }
+
+    const stats = selectedStatsByMetricId?.[metricRow.id] ?? { estimate: null, moe: null };
+    const estimateLabel = formatMetricEstimate(metricDefinition, stats.estimate);
+
+    if (stats?.note) {
+      return {
+        estimateLabel: '—',
+        moeLabel: '± —',
+        note: 'Aggregated medians not implemented yet.',
+      };
+    }
+
+    return {
+      estimateLabel,
+      moeLabel: `± ${formatMetricMoe(metricDefinition, stats.moe)}`,
+      note: null,
+    };
+  }
 
   return (
     <aside className="h-full w-full overflow-auto rounded-xl border border-slate-200/10 bg-slate-900/90 p-4 shadow-xl backdrop-blur">
@@ -161,6 +228,7 @@ function Sidebar({
               {group.metrics.map((metric) => {
                 const isActive = metric.id === activeMetricId;
                 const isDisabled = metric.isDisabled;
+                const rowSummary = getMetricRowSummary(metric);
                 return (
                   <button
                     key={metric.id}
@@ -181,7 +249,19 @@ function Sidebar({
                     }}
                   >
                     <span>{metric.label}</span>
-                    <span className="text-xs text-slate-400">{COPY.sidebar.placeholderValue}</span>
+                    <span className="text-right">
+                      <span className="block text-xs text-slate-300">
+                        {rowSummary.estimateLabel}
+                      </span>
+                      {rowSummary.moeLabel ? (
+                        <span
+                          className="block text-[10px] leading-tight text-slate-400"
+                          title={rowSummary.note ?? undefined}
+                        >
+                          {rowSummary.moeLabel}
+                        </span>
+                      ) : null}
+                    </span>
                   </button>
                 );
               })}

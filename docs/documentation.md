@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone D1 — completed
-- **Next milestone:** Milestone D2 — per-row sidebar metric values and broader aggregation UI
+- **Active milestone:** Milestone D2 — completed
+- **Next milestone:** Milestone E — Choose for me (both modes)
 
 ## Repository overview
 
@@ -315,7 +315,27 @@ npm run build
   - did not add per-row values for every metric (reserved for D2)
   - did not add demographic aggregation panels beyond active metric summaries.
 
-## Commands run and results (latest milestone)
+## Milestone D2 changes
+
+- Updated `src/app/App.jsx`:
+  - added `metricDefinitionsById` memo keyed by metric ID for the current geo mode.
+  - passed `metricDefinitionsById` into `Sidebar` so per-row values can use full metric definitions.
+- Updated `src/components/Sidebar.jsx`:
+  - added `metricDefinitionsById` prop.
+  - added memoized `selectedStatsByMetricId` computed from `selectedRecords` using
+    `computeAggregateMetricStats(...)` from `src/data/metricStats.js`.
+  - metric rows now show selected-area estimate and `± MOE` per enabled metric.
+  - zero-selection row state is now consistent placeholder output (`—`) without per-row MOE lines.
+  - for multi-record median metrics (`aggregation === "median"`), row output is placeholder
+    (`—`, `± —`) with note text (`Aggregated medians not implemented yet.`).
+- Kept D2 scope strict:
+  - no `MapShell` interaction changes
+  - no in-view per-row expansion (active metric only remains from D1)
+  - no new dependencies added.
+- Updated planning log:
+  - `docs/plan.md` D2 checklist and validation checklist marked complete.
+
+## Commands run and results (Milestone D1)
 
 - `node --test src/data/moe.test.mjs`: passed.
 - `npm run build`: passed.
@@ -331,7 +351,7 @@ npm run build
   - Includes `format:check`, `lint`, and `build`.
   - Build still emits same non-blocking warnings listed above.
 
-## Decisions made (latest milestone)
+## Decisions made (Milestone D1)
 
 - MOE formulas:
   - sums use RSS (`rssMoe`)
@@ -345,6 +365,24 @@ npm run build
 - Documentation scope decision (Step 0):
   - explicitly codified estimate ± MOE + in-view summary requirements in `docs/prompt.md`
   - split Milestone D planning into D1 (active metric summaries + MOE) and D2 (per-row/sidebar expansion).
+
+## Commands run and results (Milestone D2)
+
+- `node --test src/data/moe.test.mjs`: passed.
+- `npm run build`: passed.
+  - Non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run verify`: first run failed on formatting for `src/components/Sidebar.jsx`.
+- `npx prettier --write src/components/Sidebar.jsx`: applied formatting fix.
+- `npm run verify`: passed after formatting fix.
+  - Includes `format:check`, `lint`, and `build`.
+
+## Decisions made (Milestone D2)
+
+- Reused `metricStats.js` as the only computation path for per-row selected metrics to avoid duplicated MOE logic.
+- Kept no-selection row output minimal and consistent (`—`) across metric rows.
+- For median aggregation over multiple selected records, kept explicit placeholder behavior instead of a weighted approximation until distribution-based logic is implemented.
 
 ## Known issues / follow-ups
 

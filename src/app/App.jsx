@@ -292,6 +292,14 @@ function App() {
     return groups;
   }, [metricsForCurrentGeoMode]);
 
+  const metricDefinitionsById = useMemo(() => {
+    const nextById = {};
+    for (const metric of metricsForCurrentGeoMode) {
+      nextById[metric.id] = metric;
+    }
+    return nextById;
+  }, [metricsForCurrentGeoMode]);
+
   const availableMetricsForGeoMode = useMemo(
     () => metricsForCurrentGeoMode.filter((metric) => metric.isAvailable),
     [metricsForCurrentGeoMode],
@@ -425,6 +433,7 @@ function App() {
                 year={year}
                 onYearChange={setYear}
                 metricGroups={metricGroups}
+                metricDefinitionsById={metricDefinitionsById}
                 activeMetricId={activeMetricId}
                 activeMetric={activeMetric}
                 onActiveMetricChange={setActiveMetricId}
