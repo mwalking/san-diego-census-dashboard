@@ -188,14 +188,14 @@ Create:
   - get IDs, join tract values to geometry, compute centers
 
 #### B5. Render choropleths
-- [ ] Hex mode uses `H3HexagonLayer`
-- [ ] Tract mode uses `GeoJsonLayer` and joins values by GEOID
-- [ ] Legend reads quantiles for current `(geoMode, metric)`
-- [ ] No-data is a dark fill
+- [x] Hex mode uses `H3HexagonLayer`
+- [x] Tract mode uses `GeoJsonLayer` and joins values by GEOID
+- [x] Legend reads quantiles for current `(geoMode, metric)`
+- [x] No-data is a dark fill
 
 ### Acceptance checkpoint
-- [ ] Toggle switches between hex and tract choropleths
-- [ ] Legend updates when toggling geo mode
+- [x] Toggle switches between hex and tract choropleths
+- [x] Legend updates when toggling geo mode
 
 ### Validation commands
 - [x] `npm run verify`

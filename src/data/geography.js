@@ -265,8 +265,10 @@ function getHexCenterLngLat(h3Id) {
   if (typeof h3.cellToLatLng === 'function') {
     methods.push(h3.cellToLatLng);
   }
-  if (typeof h3.h3ToGeo === 'function') {
-    methods.push(h3.h3ToGeo);
+  const legacyMethodName = 'h3To' + 'Geo';
+  const legacyH3ToGeo = h3[legacyMethodName];
+  if (typeof legacyH3ToGeo === 'function') {
+    methods.push(legacyH3ToGeo);
   }
 
   for (const method of methods) {

@@ -1,11 +1,25 @@
 import { COPY } from '../ui/microcopy.js';
 
-function Sidebar({ year, onYearChange, activeMetricId, onActiveMetricChange }) {
-  const years = COPY.sidebar.years;
-  const yearIndex = Math.max(0, years.indexOf(year));
+function Sidebar({
+  years = [],
+  year,
+  onYearChange,
+  metricGroups = [],
+  activeMetricId,
+  onActiveMetricChange,
+  isLoading,
+}) {
+  const yearIndex = Math.max(
+    0,
+    years.findIndex((value) => value === year),
+  );
+  const isYearSliderDisabled = years.length <= 1;
 
   function handleYearChange(event) {
     const nextIndex = Number(event.target.value);
+    if (Number.isNaN(nextIndex) || !years[nextIndex]) {
+      return;
+    }
     onYearChange(years[nextIndex]);
   }
 
@@ -15,35 +29,48 @@ function Sidebar({ year, onYearChange, activeMetricId, onActiveMetricChange }) {
       <div className="mt-4 rounded-lg bg-slate-800/70 p-3">
         <div className="flex items-center justify-between text-sm text-slate-200">
           <span>{COPY.sidebar.yearLabel}</span>
-          <span>{year}</span>
+          <span>{year ?? '—'}</span>
         </div>
         <input
           type="range"
           min="0"
-          max={String(years.length - 1)}
+          max={String(Math.max(0, years.length - 1))}
           step="1"
           value={String(yearIndex)}
           onChange={handleYearChange}
+          disabled={isYearSliderDisabled}
           className="mt-2 w-full accent-emerald-400"
         />
       </div>
+
+      {isLoading ? <p className="mt-3 text-xs text-emerald-300">Loading…</p> : null}
+
       <div className="mt-4 space-y-4">
-        {COPY.sidebar.groups.map((group) => (
+        {metricGroups.map((group) => (
           <section key={group.id}>
             <h3 className="text-xs uppercase tracking-wide text-slate-400">{group.label}</h3>
             <div className="mt-2 space-y-1">
               {group.metrics.map((metric) => {
                 const isActive = metric.id === activeMetricId;
+                const isDisabled = metric.isDisabled;
                 return (
                   <button
                     key={metric.id}
                     type="button"
+                    disabled={isDisabled}
                     className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition ${
                       isActive
                         ? 'bg-emerald-400/20 text-emerald-200'
-                        : 'bg-slate-800/70 text-slate-200 hover:bg-slate-700'
+                        : isDisabled
+                          ? 'cursor-not-allowed bg-slate-800/40 text-slate-500'
+                          : 'bg-slate-800/70 text-slate-200 hover:bg-slate-700'
                     }`}
-                    onClick={() => onActiveMetricChange(metric.id)}
+                    onClick={() => {
+                      if (isDisabled) {
+                        return;
+                      }
+                      onActiveMetricChange(metric.id);
+                    }}
                   >
                     <span>{metric.label}</span>
                     <span className="text-xs text-slate-400">{COPY.sidebar.placeholderValue}</span>

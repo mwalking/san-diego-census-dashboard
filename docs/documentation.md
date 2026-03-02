@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone B4 — completed
-- **Next milestone:** Milestone B5 — render choropleths for hex + tract modes
+- **Active milestone:** Milestone B5 — completed
+- **Next milestone:** Milestone C — hover + selection + brush interactions
 
 ## Repository overview
 
@@ -148,24 +148,75 @@ npm run build
 - Kept B4 scoped to adapter utilities only:
   - no changes to `MapShell`, `App.jsx`, `loadData.js`, or UI components.
 
+## Milestone B5 changes
+
+- Wired shared dataset loading in `src/app/App.jsx` using `src/data/loadData.js`:
+  - `loadYears()`
+  - `loadMetadata()`
+  - `loadVariables()`
+- Used `years.json` to drive year state:
+  - normalize/validate available years
+  - default selected year to latest year from loaded years list
+  - keep year slider bound to loaded years
+- Added mode-aware metric availability guardrails from `variables.json` + `metadata.quantiles`:
+  - metrics not present in `variables.json` are hidden (not rendered)
+  - metrics present but missing quantiles for current `geoMode` are disabled in sidebar
+  - active metric auto-corrects to first available metric when mode/data changes
+- Added choropleth utilities in `src/data/choropleth.js`:
+  - quantile normalization
+  - discrete palette bucket mapping
+  - no-data dark fill color
+  - legend bin generation from quantile breaks
+- Updated `src/components/MapShell.jsx` to render data-driven deck.gl layers by geography:
+  - hex mode: `H3HexagonLayer` using `loadHexYear(year)` and `indexYearData('hex', raw)`
+  - tract mode: `GeoJsonLayer` using `loadTractGeometry()` + `loadTractYear(year)` and
+    `indexYearData('tract', raw)`
+  - tract geometry/value join via `getRecordFromLayerObject('tract', feature, tractYearIndex)`
+- Implemented metric value computation from variables spec in map rendering path:
+  - supports direct metrics (`type: "direct"` + `key`, and `source_field` compatibility)
+  - supports ratio metrics (`type: "ratio"` + `num`/`den`, with `numerator`/`denominator`
+    compatibility)
+  - missing metric or missing/invalid record values map to no-data
+- Updated `src/components/LegendCard.jsx`:
+  - shows active metric label
+  - shows formatted quantile bins from metadata quantiles (currency vs percent)
+  - shows current geography subtext
+  - shows minimal loading text while required data is fetching
+- Updated `src/components/Sidebar.jsx`:
+  - uses loaded year list for slider behavior
+  - renders data-driven metric groups from `variables.json`
+  - disables unavailable metrics for current mode
+  - shows minimal loading text
+- Kept B5 scope strict:
+  - did not implement hover, click selection, or brush selection (Milestone C)
+  - did not add new dependencies
+
 ## Commands run and results (latest milestone)
 
-- `npm run verify`: failed on `prettier --check` for `src/data/geography.js`.
-- `npx prettier --write src/data/geography.js`: passed.
+- `npm run build`: passed.
+  - Non-blocking warnings:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - large chunk size warning
+- `npm run verify`: failed on Prettier (App/Legend/MapShell formatting).
+- `npx prettier --write src/app/App.jsx src/components/LegendCard.jsx src/components/MapShell.jsx src/components/Sidebar.jsx src/data/choropleth.js src/data/geography.js docs/plan.md docs/documentation.md`:
+  passed.
 - `npm run verify`: passed.
-- Final validation state:
-  - `npm run verify`: passed.
-  - Includes `npm run build` pass inside verify.
-  - Vite emitted non-blocking warnings (loaders.gl browser external warning and large chunk warning).
+  - Includes `format:check`, `lint`, and `build`.
+  - Build still emits same non-blocking warnings listed above.
 
 ## Decisions made (latest milestone)
 
-- Centralized geo-mode branching and adapter logic in `src/data/geography.js`.
-- For H3 centers, implemented compatibility across `h3-js` APIs by trying `cellToLatLng` first and
-  falling back to `h3ToGeo`; both normalize to `[lng, lat]`.
-- For tract centers, prioritized explicit centroid context (`ctx.tractsCentroids`) over geometry
-  properties and return `null` when no centroid source exists.
-- Kept B4 strictly utility-scoped with no map rendering or UI wiring changes.
+- Implemented sidebar guardrails as:
+  - hide metrics not defined in `variables.json`
+  - disable metrics that are defined but missing quantile metadata for the active geography
+    This prevents metric selection that would break map coloring or legend labels.
+- Kept metric computation logic local to map rendering in B5 with compatibility for both:
+  - direct-key specs (`key` and `source_field`)
+  - ratio specs (`num`/`den` and `numerator`/`denominator`)
+- Kept loading UX minimal and milestone-scoped by showing `Loading…` in overlay cards only, without
+  adding new selection/interaction behavior.
+- Updated `geography.js` H3 fallback access to avoid static-export build warnings while retaining
+  compatibility behavior.
 
 ## Known issues / follow-ups
 
