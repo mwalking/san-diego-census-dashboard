@@ -5,7 +5,10 @@
       "label": "Median home value",
       "group": "Income & Property",
       "format": "currency",
+      "type": "direct",
       "source_field": "home_value_median",
+      "moeKey": "home_value_median_moe",
+      "aggregation": "median",
       "description": "Synthetic median home value in dollars for mock data."
     },
     {
@@ -16,6 +19,10 @@
       "type": "ratio",
       "numerator": "poverty_below",
       "denominator": "poverty_universe",
+      "numeratorMoeKey": "poverty_below_moe",
+      "denominatorMoeKey": "poverty_universe_moe",
+      "moeMethod": "proportion",
+      "aggregation": "ratio",
       "description": "Synthetic poverty rate computed as poverty_below / poverty_universe."
     }
   ]

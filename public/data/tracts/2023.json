@@ -2,81 +2,129 @@
   "06073000100": {
     "home_value_median": 401840,
     "poverty_below": 1518,
-    "poverty_universe": 5905
+    "poverty_universe": 5905,
+    "home_value_median_moe": 48221,
+    "poverty_below_moe": 152,
+    "poverty_universe_moe": 295
   },
   "06073000200": {
     "home_value_median": 405713,
     "poverty_below": 485,
-    "poverty_universe": 6059
+    "poverty_universe": 6059,
+    "home_value_median_moe": 48686,
+    "poverty_below_moe": 49,
+    "poverty_universe_moe": 303
   },
   "06073000300": {
     "home_value_median": 961702,
     "poverty_below": 567,
-    "poverty_universe": 3886
+    "poverty_universe": 3886,
+    "home_value_median_moe": 115404,
+    "poverty_below_moe": 57,
+    "poverty_universe_moe": 194
   },
   "06073000400": {
     "home_value_median": 965575,
     "poverty_below": 844,
-    "poverty_universe": 4039
+    "poverty_universe": 4039,
+    "home_value_median_moe": 115869,
+    "poverty_below_moe": 84,
+    "poverty_universe_moe": 202
   },
   "06073000500": {
     "home_value_median": 493212,
     "poverty_below": 1242,
-    "poverty_universe": 5401
+    "poverty_universe": 5401,
+    "home_value_median_moe": 59185,
+    "poverty_below_moe": 124,
+    "poverty_universe_moe": 270
   },
   "06073000600": {
     "home_value_median": 1129437,
     "poverty_below": 795,
-    "poverty_universe": 4276
+    "poverty_universe": 4276,
+    "home_value_median_moe": 135532,
+    "poverty_below_moe": 80,
+    "poverty_universe_moe": 214
   },
   "06073000700": {
     "home_value_median": 925426,
     "poverty_below": 530,
-    "poverty_universe": 2103
+    "poverty_universe": 2103,
+    "home_value_median_moe": 111051,
+    "poverty_below_moe": 53,
+    "poverty_universe_moe": 105
   },
   "06073000800": {
     "home_value_median": 605491,
     "poverty_below": 951,
-    "poverty_universe": 3470
+    "poverty_universe": 3470,
+    "home_value_median_moe": 72659,
+    "poverty_below_moe": 95,
+    "poverty_universe_moe": 174
   },
   "06073000900": {
     "home_value_median": 725288,
     "poverty_below": 726,
-    "poverty_universe": 5184
+    "poverty_universe": 5184,
+    "home_value_median_moe": 87035,
+    "poverty_below_moe": 73,
+    "poverty_universe_moe": 259
   },
   "06073001000": {
     "home_value_median": 529226,
     "poverty_below": 1286,
-    "poverty_universe": 5818
+    "poverty_universe": 5818,
+    "home_value_median_moe": 63507,
+    "poverty_below_moe": 129,
+    "poverty_universe_moe": 291
   },
   "06073001100": {
     "home_value_median": 409429,
     "poverty_below": 472,
-    "poverty_universe": 4104
+    "poverty_universe": 4104,
+    "home_value_median_moe": 49131,
+    "poverty_below_moe": 47,
+    "poverty_universe_moe": 205
   },
   "06073001200": {
     "home_value_median": 729364,
     "poverty_below": 255,
-    "poverty_universe": 2737
+    "poverty_universe": 2737,
+    "home_value_median_moe": 87524,
+    "poverty_below_moe": 26,
+    "poverty_universe_moe": 137
   },
   "06073001300": {
     "home_value_median": 877919,
     "poverty_below": 701,
-    "poverty_universe": 2588
+    "poverty_universe": 2588,
+    "home_value_median_moe": 105350,
+    "poverty_below_moe": 70,
+    "poverty_universe_moe": 129
   },
   "06073001400": {
     "home_value_median": 565502,
     "poverty_below": 288,
-    "poverty_universe": 2500
+    "poverty_universe": 2500,
+    "home_value_median_moe": 67860,
+    "poverty_below_moe": 29,
+    "poverty_universe_moe": 125
   },
   "06073001500": {
     "home_value_median": 1078057,
     "poverty_below": 659,
-    "poverty_universe": 4608
+    "poverty_universe": 4608,
+    "home_value_median_moe": 129367,
+    "poverty_below_moe": 66,
+    "poverty_universe_moe": 230
   },
   "06073001600": {
     "home_value_median": 765640,
     "poverty_below": 1026,
-    "poverty_universe": 4520
+    "poverty_universe": 4520,
+    "home_value_median_moe": 91877,
+    "poverty_below_moe": 103,
+    "poverty_universe_moe": 226
   }
 }

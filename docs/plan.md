@@ -242,6 +242,13 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
 Make sidebar metric rows drive choropleth variable, and show selected-area demographics in sidebar.
 
 ### Tasks
+#### D1. Active metric summaries + MOE
+- [x] Add active-metric **In view** summary at top of sidebar (active metric/year).
+- [x] Add active-metric **Selected area** summary with estimate ± MOE.
+- [x] Support MOE math for sums and derived ratios/proportions.
+- [x] For median aggregation over multi/in-view records, show N/A until distribution-based method is added.
+
+#### D2. Per-row metric values + broader sidebar stats
 - [ ] `src/data/metrics.js`: metric registry (value getter + label + format)
 - [ ] `src/data/format.js`: number/currency/percent formatting
 - [ ] Sidebar:

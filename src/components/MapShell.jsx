@@ -51,7 +51,20 @@ function getBrushBounds(startPoint, endPoint) {
   };
 }
 
+function areIdArraysEqual(left, right) {
+  if (!Array.isArray(left) || !Array.isArray(right)) {
+    return false;
+  }
+  if (left.length !== right.length) {
+    return false;
+  }
+  return left.every((value, index) => value === right[index]);
+}
+
 function toFiniteNumber(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -134,8 +147,15 @@ function MapShell({
   onDataLoadingChange,
   onHoverIdChange,
   onSelectedIdsChange,
+  onVisibleIdsChange,
 }) {
+  const containerRef = useRef(null);
   const deckRef = useRef(null);
+  const visibleUpdateTimeoutRef = useRef(null);
+  const lastVisibleIdsRef = useRef({
+    [GEO_MODES.HEX]: [],
+    [GEO_MODES.TRACT]: [],
+  });
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [hexYearIndex, setHexYearIndex] = useState({ byId: new globalThis.Map(), records: [] });
   const [tractYearIndex, setTractYearIndex] = useState({
@@ -466,8 +486,58 @@ function MapShell({
     resetBrush();
   }
 
+  useEffect(() => {
+    if (!onVisibleIdsChange) {
+      return undefined;
+    }
+
+    if (visibleUpdateTimeoutRef.current) {
+      globalThis.clearTimeout(visibleUpdateTimeoutRef.current);
+    }
+
+    visibleUpdateTimeoutRef.current = globalThis.setTimeout(() => {
+      const container = containerRef.current;
+      const viewportWidth = Math.floor(container?.clientWidth ?? 0);
+      const viewportHeight = Math.floor(container?.clientHeight ?? 0);
+
+      let nextVisibleIds = [];
+      if (viewportWidth > 0 && viewportHeight > 0 && deckRef.current?.pickObjects) {
+        const picks =
+          deckRef.current.pickObjects({
+            x: 0,
+            y: 0,
+            width: viewportWidth,
+            height: viewportHeight,
+            layerIds: [getLayerId(geoMode)],
+            maxObjects: 10000,
+          }) ?? [];
+
+        nextVisibleIds = getIdsFromBrushPicks(geoMode, picks).sort();
+      }
+
+      const previousVisibleIds = lastVisibleIdsRef.current[geoMode] ?? [];
+      if (areIdArraysEqual(previousVisibleIds, nextVisibleIds)) {
+        return;
+      }
+
+      lastVisibleIdsRef.current = {
+        ...lastVisibleIdsRef.current,
+        [geoMode]: nextVisibleIds,
+      };
+      onVisibleIdsChange(geoMode, nextVisibleIds);
+    }, 280);
+
+    return () => {
+      if (visibleUpdateTimeoutRef.current) {
+        globalThis.clearTimeout(visibleUpdateTimeoutRef.current);
+        visibleUpdateTimeoutRef.current = null;
+      }
+    };
+  }, [geoMode, hexYearIndex, onVisibleIdsChange, tractsGeojson, tractYearIndex, viewState, year]);
+
   return (
     <section
+      ref={containerRef}
       className="absolute inset-0"
       onPointerDown={handleBrushPointerDown}
       onPointerMove={handleBrushPointerMove}

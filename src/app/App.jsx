@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AboutModal from '../components/AboutModal.jsx';
 import DataSourcesModal from '../components/DataSourcesModal.jsx';
 import LegendCard from '../components/LegendCard.jsx';
@@ -87,6 +87,10 @@ function App() {
     [GEO_MODES.TRACT]: null,
   });
   const [selectedIdsByGeo, setSelectedIdsByGeo] = useState({
+    [GEO_MODES.HEX]: [],
+    [GEO_MODES.TRACT]: [],
+  });
+  const [visibleIdsByGeo, setVisibleIdsByGeo] = useState({
     [GEO_MODES.HEX]: [],
     [GEO_MODES.TRACT]: [],
   });
@@ -217,6 +221,38 @@ function App() {
       };
     });
   }
+
+  const handleVisibleIdsChange = useCallback((mode, nextVisibleIds) => {
+    if (mode !== GEO_MODES.HEX && mode !== GEO_MODES.TRACT) {
+      return;
+    }
+
+    const normalizedVisibleIds = Array.isArray(nextVisibleIds)
+      ? Array.from(
+          new Set(
+            nextVisibleIds
+              .map((value) => (value === undefined || value === null ? '' : String(value)))
+              .filter(Boolean),
+          ),
+        )
+      : [];
+
+    setVisibleIdsByGeo((previous) => {
+      const previousIds = previous[mode] ?? [];
+      const hasSameLength = previousIds.length === normalizedVisibleIds.length;
+      const hasSameValues =
+        hasSameLength && previousIds.every((value, index) => value === normalizedVisibleIds[index]);
+
+      if (hasSameValues) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [mode]: normalizedVisibleIds,
+      };
+    });
+  }, []);
 
   const quantilesByGeoMode = useMemo(() => metadata?.quantiles ?? {}, [metadata]);
 
@@ -355,6 +391,7 @@ function App() {
             onDataLoadingChange={setIsMapDataLoading}
             onHoverIdChange={handleHoverIdChange}
             onSelectedIdsChange={handleSelectedIdsChange}
+            onVisibleIdsChange={handleVisibleIdsChange}
           />
 
           {chooseForMeMessage ? (
@@ -389,7 +426,11 @@ function App() {
                 onYearChange={setYear}
                 metricGroups={metricGroups}
                 activeMetricId={activeMetricId}
+                activeMetric={activeMetric}
                 onActiveMetricChange={setActiveMetricId}
+                geoMode={geoMode}
+                selectedIds={selectedIdsByGeo[geoMode] ?? []}
+                visibleIds={visibleIdsByGeo[geoMode] ?? []}
                 isLoading={isLoading}
               />
             </div>

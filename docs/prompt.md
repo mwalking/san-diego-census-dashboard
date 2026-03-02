@@ -15,7 +15,8 @@ The app must support switching the map between **H3 hex bins** and **Census trac
    - hover to highlight a feature (hex or tract),
    - click to select one,
    - brush to select many (multi-select mode),
-   - see selected-area demographics in the sidebar.
+   - see selected-area demographics in the sidebar,
+   - see **In view** and **Selected area** summaries for the active metric/year with estimate ± MOE when available.
 6. “Choose for me” jumps the map to an interesting extreme feature (high/low) for the current metric/year and shows a callout.
 
 ## Geography modes (must-have)
@@ -111,6 +112,8 @@ All of the below must be true:
 - Single click selection works in both modes.
 - Brush selection works in both modes.
 - Sidebar shows selected-area stats (single and multi).
+- Sidebar shows active-metric **In view** and **Selected area** summaries with estimate ± MOE when available.
+- Aggregated medians (multi selection or in-view) may display N/A unless a distribution-based aggregation method is implemented.
 - “Choose for me” works in both modes (fly-to + callout shows value + county average).
 
 ### Data pipeline contract

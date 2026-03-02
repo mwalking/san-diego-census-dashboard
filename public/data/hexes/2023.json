@@ -3,720 +3,1080 @@
     "h3": "8829a40033fffff",
     "home_value_median": 556443,
     "poverty_below": 759,
-    "poverty_universe": 3087
+    "poverty_universe": 3087,
+    "home_value_median_moe": 66773,
+    "poverty_below_moe": 76,
+    "poverty_universe_moe": 154
   },
   {
     "h3": "8829a40055fffff",
     "home_value_median": 445911,
     "poverty_below": 963,
-    "poverty_universe": 4677
+    "poverty_universe": 4677,
+    "home_value_median_moe": 53509,
+    "poverty_below_moe": 96,
+    "poverty_universe_moe": 234
   },
   {
     "h3": "8829a40061fffff",
     "home_value_median": 1129622,
     "poverty_below": 1007,
-    "poverty_universe": 4194
+    "poverty_universe": 4194,
+    "home_value_median_moe": 135555,
+    "poverty_below_moe": 101,
+    "poverty_universe_moe": 210
   },
   {
     "h3": "8829a400b3fffff",
     "home_value_median": 361936,
     "poverty_below": 333,
-    "poverty_universe": 3833
+    "poverty_universe": 3833,
+    "home_value_median_moe": 43432,
+    "poverty_below_moe": 33,
+    "poverty_universe_moe": 192
   },
   {
     "h3": "8829a400c3fffff",
     "home_value_median": 391947,
     "poverty_below": 941,
-    "poverty_universe": 4003
+    "poverty_universe": 4003,
+    "home_value_median_moe": 47034,
+    "poverty_below_moe": 94,
+    "poverty_universe_moe": 200
   },
   {
     "h3": "8829a40139fffff",
     "home_value_median": 551388,
     "poverty_below": 749,
-    "poverty_universe": 3745
+    "poverty_universe": 3745,
+    "home_value_median_moe": 66167,
+    "poverty_below_moe": 75,
+    "poverty_universe_moe": 187
   },
   {
     "h3": "8829a40141fffff",
     "home_value_median": 580497,
     "poverty_below": 1018,
-    "poverty_universe": 3676
+    "poverty_universe": 3676,
+    "home_value_median_moe": 69660,
+    "poverty_below_moe": 102,
+    "poverty_universe_moe": 184
   },
   {
     "h3": "8829a4019bfffff",
     "home_value_median": 893641,
     "poverty_below": 780,
-    "poverty_universe": 3133
+    "poverty_universe": 3133,
+    "home_value_median_moe": 107237,
+    "poverty_below_moe": 78,
+    "poverty_universe_moe": 157
   },
   {
     "h3": "8829a401bdfffff",
     "home_value_median": 398506,
     "poverty_below": 1222,
-    "poverty_universe": 5092
+    "poverty_universe": 5092,
+    "home_value_median_moe": 47821,
+    "poverty_below_moe": 122,
+    "poverty_universe_moe": 255
   },
   {
     "h3": "8829a401cdfffff",
     "home_value_median": 550717,
     "poverty_below": 741,
-    "poverty_universe": 3385
+    "poverty_universe": 3385,
+    "home_value_median_moe": 66086,
+    "poverty_below_moe": 74,
+    "poverty_universe_moe": 169
   },
   {
     "h3": "8829a40205fffff",
     "home_value_median": 433910,
     "poverty_below": 461,
-    "poverty_universe": 3493
+    "poverty_universe": 3493,
+    "home_value_median_moe": 52069,
+    "poverty_below_moe": 46,
+    "poverty_universe_moe": 175
   },
   {
     "h3": "8829a40219fffff",
     "home_value_median": 1082713,
     "poverty_below": 106,
-    "poverty_universe": 1677
+    "poverty_universe": 1677,
+    "home_value_median_moe": 129926,
+    "poverty_below_moe": 11,
+    "poverty_universe_moe": 84
   },
   {
     "h3": "8829a40299fffff",
     "home_value_median": 1138545,
     "poverty_below": 527,
-    "poverty_universe": 3788
+    "poverty_universe": 3788,
+    "home_value_median_moe": 136625,
+    "poverty_below_moe": 53,
+    "poverty_universe_moe": 189
   },
   {
     "h3": "8829a402a9fffff",
     "home_value_median": 1166441,
     "poverty_below": 414,
-    "poverty_universe": 3041
+    "poverty_universe": 3041,
+    "home_value_median_moe": 139973,
+    "poverty_below_moe": 41,
+    "poverty_universe_moe": 152
   },
   {
     "h3": "8829a40355fffff",
     "home_value_median": 1060696,
     "poverty_below": 517,
-    "poverty_universe": 2722
+    "poverty_universe": 2722,
+    "home_value_median_moe": 127284,
+    "poverty_below_moe": 52,
+    "poverty_universe_moe": 136
   },
   {
     "h3": "8829a40361fffff",
     "home_value_median": 1113333,
     "poverty_below": 543,
-    "poverty_universe": 3002
+    "poverty_universe": 3002,
+    "home_value_median_moe": 133600,
+    "poverty_below_moe": 54,
+    "poverty_universe_moe": 150
   },
   {
     "h3": "8829a4040bfffff",
     "home_value_median": 848283,
     "poverty_below": 271,
-    "poverty_universe": 1244
+    "poverty_universe": 1244,
+    "home_value_median_moe": 101794,
+    "poverty_below_moe": 27,
+    "poverty_universe_moe": 62
   },
   {
     "h3": "8829a40465fffff",
     "home_value_median": 483686,
     "poverty_below": 573,
-    "poverty_universe": 1983
+    "poverty_universe": 1983,
+    "home_value_median_moe": 58042,
+    "poverty_below_moe": 57,
+    "poverty_universe_moe": 99
   },
   {
     "h3": "8829a40489fffff",
     "home_value_median": 779156,
     "poverty_below": 489,
-    "poverty_universe": 3327
+    "poverty_universe": 3327,
+    "home_value_median_moe": 93499,
+    "poverty_below_moe": 49,
+    "poverty_universe_moe": 166
   },
   {
     "h3": "8829a404b3fffff",
     "home_value_median": 1056844,
     "poverty_below": 684,
-    "poverty_universe": 4072
+    "poverty_universe": 4072,
+    "home_value_median_moe": 126821,
+    "poverty_below_moe": 68,
+    "poverty_universe_moe": 204
   },
   {
     "h3": "8829a404e5fffff",
     "home_value_median": 962307,
     "poverty_below": 660,
-    "poverty_universe": 3769
+    "poverty_universe": 3769,
+    "home_value_median_moe": 115477,
+    "poverty_below_moe": 66,
+    "poverty_universe_moe": 188
   },
   {
     "h3": "8829a40531fffff",
     "home_value_median": 1039968,
     "poverty_below": 1323,
-    "poverty_universe": 4882
+    "poverty_universe": 4882,
+    "home_value_median_moe": 124796,
+    "poverty_below_moe": 132,
+    "poverty_universe_moe": 244
   },
   {
     "h3": "8829a40541fffff",
     "home_value_median": 812869,
     "poverty_below": 104,
-    "poverty_universe": 1366
+    "poverty_universe": 1366,
+    "home_value_median_moe": 97544,
+    "poverty_below_moe": 10,
+    "poverty_universe_moe": 68
   },
   {
     "h3": "8829a40593fffff",
     "home_value_median": 1155280,
     "poverty_below": 833,
-    "poverty_universe": 3736
+    "poverty_universe": 3736,
+    "home_value_median_moe": 138634,
+    "poverty_below_moe": 83,
+    "poverty_universe_moe": 187
   },
   {
     "h3": "8829a405bdfffff",
     "home_value_median": 549854,
     "poverty_below": 725,
-    "poverty_universe": 3642
+    "poverty_universe": 3642,
+    "home_value_median_moe": 65982,
+    "poverty_below_moe": 73,
+    "poverty_universe_moe": 182
   },
   {
     "h3": "8829a405c5fffff",
     "home_value_median": 447372,
     "poverty_below": 797,
-    "poverty_universe": 4128
+    "poverty_universe": 4128,
+    "home_value_median_moe": 53685,
+    "poverty_below_moe": 80,
+    "poverty_universe_moe": 206
   },
   {
     "h3": "8829a40611fffff",
     "home_value_median": 462749,
     "poverty_below": 196,
-    "poverty_universe": 1296
+    "poverty_universe": 1296,
+    "home_value_median_moe": 55530,
+    "poverty_below_moe": 20,
+    "poverty_universe_moe": 65
   },
   {
     "h3": "8829a4062bfffff",
     "home_value_median": 1008291,
     "poverty_below": 443,
-    "poverty_universe": 3630
+    "poverty_universe": 3630,
+    "home_value_median_moe": 120995,
+    "poverty_below_moe": 44,
+    "poverty_universe_moe": 182
   },
   {
     "h3": "8829a4064dfffff",
     "home_value_median": 1060931,
     "poverty_below": 392,
-    "poverty_universe": 1740
+    "poverty_universe": 1740,
+    "home_value_median_moe": 127312,
+    "poverty_below_moe": 39,
+    "poverty_universe_moe": 87
   },
   {
     "h3": "8829a40691fffff",
     "home_value_median": 974613,
     "poverty_below": 1184,
-    "poverty_universe": 3947
+    "poverty_universe": 3947,
+    "home_value_median_moe": 116954,
+    "poverty_below_moe": 118,
+    "poverty_universe_moe": 197
   },
   {
     "h3": "8829a406a9fffff",
     "home_value_median": 1125077,
     "poverty_below": 838,
-    "poverty_universe": 2952
+    "poverty_universe": 2952,
+    "home_value_median_moe": 135009,
+    "poverty_below_moe": 84,
+    "poverty_universe_moe": 148
   },
   {
     "h3": "8829a40757fffff",
     "home_value_median": 954774,
     "poverty_below": 112,
-    "poverty_universe": 1344
+    "poverty_universe": 1344,
+    "home_value_median_moe": 114573,
+    "poverty_below_moe": 11,
+    "poverty_universe_moe": 67
   },
   {
     "h3": "8829a40767fffff",
     "home_value_median": 499167,
     "poverty_below": 291,
-    "poverty_universe": 1005
+    "poverty_universe": 1005,
+    "home_value_median_moe": 59900,
+    "poverty_below_moe": 29,
+    "poverty_universe_moe": 50
   },
   {
     "h3": "8829a40855fffff",
     "home_value_median": 714703,
     "poverty_below": 95,
-    "poverty_universe": 1554
+    "poverty_universe": 1554,
+    "home_value_median_moe": 85764,
+    "poverty_below_moe": 10,
+    "poverty_universe_moe": 78
   },
   {
     "h3": "8829a4086dfffff",
     "home_value_median": 401559,
     "poverty_below": 187,
-    "poverty_universe": 2096
+    "poverty_universe": 2096,
+    "home_value_median_moe": 48187,
+    "poverty_below_moe": 19,
+    "poverty_universe_moe": 105
   },
   {
     "h3": "8829a408b1fffff",
     "home_value_median": 1069226,
     "poverty_below": 604,
-    "poverty_universe": 2286
+    "poverty_universe": 2286,
+    "home_value_median_moe": 128307,
+    "poverty_below_moe": 60,
+    "poverty_universe_moe": 114
   },
   {
     "h3": "8829a408c3fffff",
     "home_value_median": 389891,
     "poverty_below": 600,
-    "poverty_universe": 4030
+    "poverty_universe": 4030,
+    "home_value_median_moe": 46787,
+    "poverty_below_moe": 60,
+    "poverty_universe_moe": 202
   },
   {
     "h3": "8829a408edfffff",
     "home_value_median": 644042,
     "poverty_below": 644,
-    "poverty_universe": 2826
+    "poverty_universe": 2826,
+    "home_value_median_moe": 77285,
+    "poverty_below_moe": 64,
+    "poverty_universe_moe": 141
   },
   {
     "h3": "8829a40939fffff",
     "home_value_median": 753572,
     "poverty_below": 238,
-    "poverty_universe": 2620
+    "poverty_universe": 2620,
+    "home_value_median_moe": 90429,
+    "poverty_below_moe": 24,
+    "poverty_universe_moe": 131
   },
   {
     "h3": "8829a40941fffff",
     "home_value_median": 611433,
     "poverty_below": 440,
-    "poverty_universe": 2933
+    "poverty_universe": 2933,
+    "home_value_median_moe": 73372,
+    "poverty_below_moe": 44,
+    "poverty_universe_moe": 147
   },
   {
     "h3": "8829a40987fffff",
     "home_value_median": 940723,
     "poverty_below": 776,
-    "poverty_universe": 4817
+    "poverty_universe": 4817,
+    "home_value_median_moe": 112887,
+    "poverty_below_moe": 78,
+    "poverty_universe_moe": 241
   },
   {
     "h3": "8829a4099bfffff",
     "home_value_median": 764529,
     "poverty_below": 1189,
-    "poverty_universe": 4756
+    "poverty_universe": 4756,
+    "home_value_median_moe": 91743,
+    "poverty_below_moe": 119,
+    "poverty_universe_moe": 238
   },
   {
     "h3": "8829a409cdfffff",
     "home_value_median": 372629,
     "poverty_below": 645,
-    "poverty_universe": 2286
+    "poverty_universe": 2286,
+    "home_value_median_moe": 44715,
+    "poverty_below_moe": 65,
+    "poverty_universe_moe": 114
   },
   {
     "h3": "8829a40a05fffff",
     "home_value_median": 770097,
     "poverty_below": 116,
-    "poverty_universe": 1876
+    "poverty_universe": 1876,
+    "home_value_median_moe": 92412,
+    "poverty_below_moe": 12,
+    "poverty_universe_moe": 94
   },
   {
     "h3": "8829a40a19fffff",
     "home_value_median": 482230,
     "poverty_below": 434,
-    "poverty_universe": 2333
+    "poverty_universe": 2333,
+    "home_value_median_moe": 57868,
+    "poverty_below_moe": 43,
+    "poverty_universe_moe": 117
   },
   {
     "h3": "8829a40ad7fffff",
     "home_value_median": 1131559,
     "poverty_below": 1226,
-    "poverty_universe": 4558
+    "poverty_universe": 4558,
+    "home_value_median_moe": 135787,
+    "poverty_below_moe": 123,
+    "poverty_universe_moe": 228
   },
   {
     "h3": "8829a40ae3fffff",
     "home_value_median": 769336,
     "poverty_below": 396,
-    "poverty_universe": 3602
+    "poverty_universe": 3602,
+    "home_value_median_moe": 92320,
+    "poverty_below_moe": 40,
+    "poverty_universe_moe": 180
   },
   {
     "h3": "8829a40b55fffff",
     "home_value_median": 921761,
     "poverty_below": 296,
-    "poverty_universe": 1220
+    "poverty_universe": 1220,
+    "home_value_median_moe": 110611,
+    "poverty_below_moe": 30,
+    "poverty_universe_moe": 61
   },
   {
     "h3": "8829a40b61fffff",
     "home_value_median": 1162324,
     "poverty_below": 471,
-    "poverty_universe": 1955
+    "poverty_universe": 1955,
+    "home_value_median_moe": 139479,
+    "poverty_below_moe": 47,
+    "poverty_universe_moe": 98
   },
   {
     "h3": "8829a40c55fffff",
     "home_value_median": 809160,
     "poverty_below": 822,
-    "poverty_universe": 2958
+    "poverty_universe": 2958,
+    "home_value_median_moe": 97099,
+    "poverty_below_moe": 82,
+    "poverty_universe_moe": 148
   },
   {
     "h3": "8829a40c65fffff",
     "home_value_median": 623601,
     "poverty_below": 513,
-    "poverty_universe": 3053
+    "poverty_universe": 3053,
+    "home_value_median_moe": 74832,
+    "poverty_below_moe": 51,
+    "poverty_universe_moe": 153
   },
   {
     "h3": "8829a40c89fffff",
     "home_value_median": 1048039,
     "poverty_below": 703,
-    "poverty_universe": 4395
+    "poverty_universe": 4395,
+    "home_value_median_moe": 125765,
+    "poverty_below_moe": 70,
+    "poverty_universe_moe": 220
   },
   {
     "h3": "8829a40cb3fffff",
     "home_value_median": 1113747,
     "poverty_below": 116,
-    "poverty_universe": 1111
+    "poverty_universe": 1111,
+    "home_value_median_moe": 133650,
+    "poverty_below_moe": 12,
+    "poverty_universe_moe": 56
   },
   {
     "h3": "8829a40ce5fffff",
     "home_value_median": 362104,
     "poverty_below": 147,
-    "poverty_universe": 2584
+    "poverty_universe": 2584,
+    "home_value_median_moe": 43452,
+    "poverty_below_moe": 15,
+    "poverty_universe_moe": 129
   },
   {
     "h3": "8829a40d31fffff",
     "home_value_median": 841061,
     "poverty_below": 602,
-    "poverty_universe": 4704
+    "poverty_universe": 4704,
+    "home_value_median_moe": 100927,
+    "poverty_below_moe": 60,
+    "poverty_universe_moe": 235
   },
   {
     "h3": "8829a40d41fffff",
     "home_value_median": 1068160,
     "poverty_below": 253,
-    "poverty_universe": 4020
+    "poverty_universe": 4020,
+    "home_value_median_moe": 128179,
+    "poverty_below_moe": 25,
+    "poverty_universe_moe": 201
   },
   {
     "h3": "8829a40d93fffff",
     "home_value_median": 1141265,
     "poverty_below": 387,
-    "poverty_universe": 1674
+    "poverty_universe": 1674,
+    "home_value_median_moe": 136952,
+    "poverty_below_moe": 39,
+    "poverty_universe_moe": 84
   },
   {
     "h3": "8829a40dbdfffff",
     "home_value_median": 771767,
     "poverty_below": 385,
-    "poverty_universe": 4051
+    "poverty_universe": 4051,
+    "home_value_median_moe": 92612,
+    "poverty_below_moe": 39,
+    "poverty_universe_moe": 203
   },
   {
     "h3": "8829a40dc5fffff",
     "home_value_median": 466721,
     "poverty_below": 597,
-    "poverty_universe": 2509
+    "poverty_universe": 2509,
+    "home_value_median_moe": 56007,
+    "poverty_below_moe": 60,
+    "poverty_universe_moe": 125
   },
   {
     "h3": "8829a40e1bfffff",
     "home_value_median": 829997,
     "poverty_below": 935,
-    "poverty_universe": 3192
+    "poverty_universe": 3192,
+    "home_value_median_moe": 99600,
+    "poverty_below_moe": 94,
+    "poverty_universe_moe": 160
   },
   {
     "h3": "8829a40e2bfffff",
     "home_value_median": 428816,
     "poverty_below": 353,
-    "poverty_universe": 1547
+    "poverty_universe": 1547,
+    "home_value_median_moe": 51458,
+    "poverty_below_moe": 35,
+    "poverty_universe_moe": 77
   },
   {
     "h3": "8829a40e9dfffff",
     "home_value_median": 1089123,
     "poverty_below": 1412,
-    "poverty_universe": 5078
+    "poverty_universe": 5078,
+    "home_value_median_moe": 130695,
+    "poverty_below_moe": 141,
+    "poverty_universe_moe": 254
   },
   {
     "h3": "8829a40ea9fffff",
     "home_value_median": 813778,
     "poverty_below": 337,
-    "poverty_universe": 3175
+    "poverty_universe": 3175,
+    "home_value_median_moe": 97653,
+    "poverty_below_moe": 34,
+    "poverty_universe_moe": 159
   },
   {
     "h3": "8829a40f57fffff",
     "home_value_median": 527359,
     "poverty_below": 360,
-    "poverty_universe": 4343
+    "poverty_universe": 4343,
+    "home_value_median_moe": 63283,
+    "poverty_below_moe": 36,
+    "poverty_universe_moe": 217
   },
   {
     "h3": "8829a40f67fffff",
     "home_value_median": 982966,
     "poverty_below": 637,
-    "poverty_universe": 4682
+    "poverty_universe": 4682,
+    "home_value_median_moe": 117956,
+    "poverty_below_moe": 64,
+    "poverty_universe_moe": 234
   },
   {
     "h3": "8829a4105dfffff",
     "home_value_median": 731805,
     "poverty_below": 865,
-    "poverty_universe": 3100
+    "poverty_universe": 3100,
+    "home_value_median_moe": 87817,
+    "poverty_below_moe": 87,
+    "poverty_universe_moe": 155
   },
   {
     "h3": "8829a4106dfffff",
     "home_value_median": 504428,
     "poverty_below": 395,
-    "poverty_universe": 2686
+    "poverty_universe": 2686,
+    "home_value_median_moe": 60531,
+    "poverty_below_moe": 40,
+    "poverty_universe_moe": 134
   },
   {
     "h3": "8829a410bbfffff",
     "home_value_median": 903166,
     "poverty_below": 537,
-    "poverty_universe": 4712
+    "poverty_universe": 4712,
+    "home_value_median_moe": 108380,
+    "poverty_below_moe": 54,
+    "poverty_universe_moe": 236
   },
   {
     "h3": "8829a410c3fffff",
     "home_value_median": 621016,
     "poverty_below": 864,
-    "poverty_universe": 4855
+    "poverty_universe": 4855,
+    "home_value_median_moe": 74522,
+    "poverty_below_moe": 86,
+    "poverty_universe_moe": 243
   },
   {
     "h3": "8829a410edfffff",
     "home_value_median": 863309,
     "poverty_below": 1129,
-    "poverty_universe": 4462
+    "poverty_universe": 4462,
+    "home_value_median_moe": 103597,
+    "poverty_below_moe": 113,
+    "poverty_universe_moe": 223
   },
   {
     "h3": "8829a41139fffff",
     "home_value_median": 828447,
     "poverty_below": 639,
-    "poverty_universe": 3134
+    "poverty_universe": 3134,
+    "home_value_median_moe": 99414,
+    "poverty_below_moe": 64,
+    "poverty_universe_moe": 157
   },
   {
     "h3": "8829a41149fffff",
     "home_value_median": 706022,
     "poverty_below": 836,
-    "poverty_universe": 3440
+    "poverty_universe": 3440,
+    "home_value_median_moe": 84723,
+    "poverty_below_moe": 84,
+    "poverty_universe_moe": 172
   },
   {
     "h3": "8829a41187fffff",
     "home_value_median": 589468,
     "poverty_below": 227,
-    "poverty_universe": 2028
+    "poverty_universe": 2028,
+    "home_value_median_moe": 70736,
+    "poverty_below_moe": 23,
+    "poverty_universe_moe": 101
   },
   {
     "h3": "8829a4119bfffff",
     "home_value_median": 921510,
     "poverty_below": 727,
-    "poverty_universe": 4462
+    "poverty_universe": 4462,
+    "home_value_median_moe": 110581,
+    "poverty_below_moe": 73,
+    "poverty_universe_moe": 223
   },
   {
     "h3": "8829a411cdfffff",
     "home_value_median": 584782,
     "poverty_below": 944,
-    "poverty_universe": 3114
+    "poverty_universe": 3114,
+    "home_value_median_moe": 70174,
+    "poverty_below_moe": 94,
+    "poverty_universe_moe": 156
   },
   {
     "h3": "8829a41205fffff",
     "home_value_median": 869585,
     "poverty_below": 577,
-    "poverty_universe": 4806
+    "poverty_universe": 4806,
+    "home_value_median_moe": 104350,
+    "poverty_below_moe": 58,
+    "poverty_universe_moe": 240
   },
   {
     "h3": "8829a41219fffff",
     "home_value_median": 410710,
     "poverty_below": 296,
-    "poverty_universe": 3016
+    "poverty_universe": 3016,
+    "home_value_median_moe": 49285,
+    "poverty_below_moe": 30,
+    "poverty_universe_moe": 151
   },
   {
     "h3": "8829a412d7fffff",
     "home_value_median": 671303,
     "poverty_below": 1235,
-    "poverty_universe": 5061
+    "poverty_universe": 5061,
+    "home_value_median_moe": 80556,
+    "poverty_below_moe": 124,
+    "poverty_universe_moe": 253
   },
   {
     "h3": "8829a412e3fffff",
     "home_value_median": 672984,
     "poverty_below": 456,
-    "poverty_universe": 2052
+    "poverty_universe": 2052,
+    "home_value_median_moe": 80758,
+    "poverty_below_moe": 46,
+    "poverty_universe_moe": 103
   },
   {
     "h3": "8829a41351fffff",
     "home_value_median": 971507,
     "poverty_below": 376,
-    "poverty_universe": 2200
+    "poverty_universe": 2200,
+    "home_value_median_moe": 116581,
+    "poverty_below_moe": 38,
+    "poverty_universe_moe": 110
   },
   {
     "h3": "8829a41361fffff",
     "home_value_median": 480806,
     "poverty_below": 1035,
-    "poverty_universe": 4208
+    "poverty_universe": 4208,
+    "home_value_median_moe": 57697,
+    "poverty_below_moe": 104,
+    "poverty_universe_moe": 210
   },
   {
     "h3": "8829a41433fffff",
     "home_value_median": 1070468,
     "poverty_below": 965,
-    "poverty_universe": 4551
+    "poverty_universe": 4551,
+    "home_value_median_moe": 128456,
+    "poverty_below_moe": 97,
+    "poverty_universe_moe": 228
   },
   {
     "h3": "8829a41455fffff",
     "home_value_median": 894612,
     "poverty_below": 1235,
-    "poverty_universe": 4900
+    "poverty_universe": 4900,
+    "home_value_median_moe": 107353,
+    "poverty_below_moe": 124,
+    "poverty_universe_moe": 245
   },
   {
     "h3": "8829a41465fffff",
     "home_value_median": 1171693,
     "poverty_below": 1184,
-    "poverty_universe": 3999
+    "poverty_universe": 3999,
+    "home_value_median_moe": 140603,
+    "poverty_below_moe": 118,
+    "poverty_universe_moe": 200
   },
   {
     "h3": "8829a414b3fffff",
     "home_value_median": 810159,
     "poverty_below": 147,
-    "poverty_universe": 1066
+    "poverty_universe": 1066,
+    "home_value_median_moe": 97219,
+    "poverty_below_moe": 15,
+    "poverty_universe_moe": 53
   },
   {
     "h3": "8829a414c3fffff",
     "home_value_median": 801620,
     "poverty_below": 454,
-    "poverty_universe": 3086
+    "poverty_universe": 3086,
+    "home_value_median_moe": 96194,
+    "poverty_below_moe": 45,
+    "poverty_universe_moe": 154
   },
   {
     "h3": "8829a41539fffff",
     "home_value_median": 766987,
     "poverty_below": 669,
-    "poverty_universe": 3468
+    "poverty_universe": 3468,
+    "home_value_median_moe": 92038,
+    "poverty_below_moe": 67,
+    "poverty_universe_moe": 173
   },
   {
     "h3": "8829a41541fffff",
     "home_value_median": 769586,
     "poverty_below": 344,
-    "poverty_universe": 1252
+    "poverty_universe": 1252,
+    "home_value_median_moe": 92350,
+    "poverty_below_moe": 34,
+    "poverty_universe_moe": 63
   },
   {
     "h3": "8829a415bdfffff",
     "home_value_median": 1162101,
     "poverty_below": 188,
-    "poverty_universe": 2769
+    "poverty_universe": 2769,
+    "home_value_median_moe": 139452,
+    "poverty_below_moe": 19,
+    "poverty_universe_moe": 138
   },
   {
     "h3": "8829a415cdfffff",
     "home_value_median": 1170594,
     "poverty_below": 559,
-    "poverty_universe": 2530
+    "poverty_universe": 2530,
+    "home_value_median_moe": 140471,
+    "poverty_below_moe": 56,
+    "poverty_universe_moe": 127
   },
   {
     "h3": "8829a4161bfffff",
     "home_value_median": 833197,
     "poverty_below": 1035,
-    "poverty_universe": 3684
+    "poverty_universe": 3684,
+    "home_value_median_moe": 99984,
+    "poverty_below_moe": 104,
+    "poverty_universe_moe": 184
   },
   {
     "h3": "8829a4162bfffff",
     "home_value_median": 738672,
     "poverty_below": 837,
-    "poverty_universe": 4474
+    "poverty_universe": 4474,
+    "home_value_median_moe": 88641,
+    "poverty_below_moe": 84,
+    "poverty_universe_moe": 224
   },
   {
     "h3": "8829a41699fffff",
     "home_value_median": 668506,
     "poverty_below": 1158,
-    "poverty_universe": 4369
+    "poverty_universe": 4369,
+    "home_value_median_moe": 80221,
+    "poverty_below_moe": 116,
+    "poverty_universe_moe": 218
   },
   {
     "h3": "8829a416a9fffff",
     "home_value_median": 374642,
     "poverty_below": 701,
-    "poverty_universe": 4026
+    "poverty_universe": 4026,
+    "home_value_median_moe": 44957,
+    "poverty_below_moe": 70,
+    "poverty_universe_moe": 201
   },
   {
     "h3": "8829a41757fffff",
     "home_value_median": 945569,
     "poverty_below": 495,
-    "poverty_universe": 4713
+    "poverty_universe": 4713,
+    "home_value_median_moe": 113468,
+    "poverty_below_moe": 50,
+    "poverty_universe_moe": 236
   },
   {
     "h3": "8829a41761fffff",
     "home_value_median": 1178538,
     "poverty_below": 374,
-    "poverty_universe": 1233
+    "poverty_universe": 1233,
+    "home_value_median_moe": 141425,
+    "poverty_below_moe": 37,
+    "poverty_universe_moe": 62
   },
   {
     "h3": "8829a41827fffff",
     "home_value_median": 661327,
     "poverty_below": 761,
-    "poverty_universe": 3786
+    "poverty_universe": 3786,
+    "home_value_median_moe": 79359,
+    "poverty_below_moe": 76,
+    "poverty_universe_moe": 189
   },
   {
     "h3": "8829a4183bfffff",
     "home_value_median": 532949,
     "poverty_below": 930,
-    "poverty_universe": 3173
+    "poverty_universe": 3173,
+    "home_value_median_moe": 63954,
+    "poverty_below_moe": 93,
+    "poverty_universe_moe": 159
   },
   {
     "h3": "8829a4185dfffff",
     "home_value_median": 399413,
     "poverty_below": 553,
-    "poverty_universe": 3547
+    "poverty_universe": 3547,
+    "home_value_median_moe": 47930,
+    "poverty_below_moe": 55,
+    "poverty_universe_moe": 177
   },
   {
     "h3": "8829a4186dfffff",
     "home_value_median": 411492,
     "poverty_below": 731,
-    "poverty_universe": 3137
+    "poverty_universe": 3137,
+    "home_value_median_moe": 49379,
+    "poverty_below_moe": 73,
+    "poverty_universe_moe": 157
   },
   {
     "h3": "8829a418bbfffff",
     "home_value_median": 1127542,
     "poverty_below": 726,
-    "poverty_universe": 4480
+    "poverty_universe": 4480,
+    "home_value_median_moe": 135305,
+    "poverty_below_moe": 73,
+    "poverty_universe_moe": 224
   },
   {
     "h3": "8829a418cbfffff",
     "home_value_median": 980613,
     "poverty_below": 392,
-    "poverty_universe": 3731
+    "poverty_universe": 3731,
+    "home_value_median_moe": 117674,
+    "poverty_below_moe": 39,
+    "poverty_universe_moe": 187
   },
   {
     "h3": "8829a41939fffff",
     "home_value_median": 1112231,
     "poverty_below": 1343,
-    "poverty_universe": 5087
+    "poverty_universe": 5087,
+    "home_value_median_moe": 133468,
+    "poverty_below_moe": 134,
+    "poverty_universe_moe": 254
   },
   {
     "h3": "8829a41949fffff",
     "home_value_median": 567598,
     "poverty_below": 279,
-    "poverty_universe": 1622
+    "poverty_universe": 1622,
+    "home_value_median_moe": 68112,
+    "poverty_below_moe": 28,
+    "poverty_universe_moe": 81
   },
   {
     "h3": "8829a41987fffff",
     "home_value_median": 1157700,
     "poverty_below": 228,
-    "poverty_universe": 1030
+    "poverty_universe": 1030,
+    "home_value_median_moe": 138924,
+    "poverty_below_moe": 23,
+    "poverty_universe_moe": 52
   },
   {
     "h3": "8829a4199bfffff",
     "home_value_median": 1153998,
     "poverty_below": 347,
-    "poverty_universe": 1176
+    "poverty_universe": 1176,
+    "home_value_median_moe": 138480,
+    "poverty_below_moe": 35,
+    "poverty_universe_moe": 59
   },
   {
     "h3": "8829a41a05fffff",
     "home_value_median": 1103510,
     "poverty_below": 278,
-    "poverty_universe": 1446
+    "poverty_universe": 1446,
+    "home_value_median_moe": 132421,
+    "poverty_below_moe": 28,
+    "poverty_universe_moe": 72
   },
   {
     "h3": "8829a41a53fffff",
     "home_value_median": 444455,
     "poverty_below": 605,
-    "poverty_universe": 3904
+    "poverty_universe": 3904,
+    "home_value_median_moe": 53335,
+    "poverty_below_moe": 61,
+    "poverty_universe_moe": 195
   },
   {
     "h3": "8829a41ad7fffff",
     "home_value_median": 730912,
     "poverty_below": 479,
-    "poverty_universe": 3031
+    "poverty_universe": 3031,
+    "home_value_median_moe": 87709,
+    "poverty_below_moe": 48,
+    "poverty_universe_moe": 152
   },
   {
     "h3": "8829a41ae3fffff",
     "home_value_median": 967319,
     "poverty_below": 950,
-    "poverty_universe": 4078
+    "poverty_universe": 4078,
+    "home_value_median_moe": 116078,
+    "poverty_below_moe": 95,
+    "poverty_universe_moe": 204
   },
   {
     "h3": "8829a41b51fffff",
     "home_value_median": 686906,
     "poverty_below": 1105,
-    "poverty_universe": 5046
+    "poverty_universe": 5046,
+    "home_value_median_moe": 82429,
+    "poverty_below_moe": 111,
+    "poverty_universe_moe": 252
   },
   {
     "h3": "8829a41b61fffff",
     "home_value_median": 1171079,
     "poverty_below": 649,
-    "poverty_universe": 4536
+    "poverty_universe": 4536,
+    "home_value_median_moe": 140529,
+    "poverty_below_moe": 65,
+    "poverty_universe_moe": 227
   },
   {
     "h3": "8829a4210dfffff",
     "home_value_median": 568582,
     "poverty_below": 459,
-    "poverty_universe": 1852
+    "poverty_universe": 1852,
+    "home_value_median_moe": 68230,
+    "poverty_below_moe": 46,
+    "poverty_universe_moe": 93
   },
   {
     "h3": "8829a42137fffff",
     "home_value_median": 361948,
     "poverty_below": 1470,
-    "poverty_universe": 4819
+    "poverty_universe": 4819,
+    "home_value_median_moe": 43434,
+    "poverty_below_moe": 147,
+    "poverty_universe_moe": 241
   },
   {
     "h3": "8829a4232dfffff",
     "home_value_median": 842754,
     "poverty_below": 677,
-    "poverty_universe": 2358
+    "poverty_universe": 2358,
+    "home_value_median_moe": 101130,
+    "poverty_below_moe": 68,
+    "poverty_universe_moe": 118
   },
   {
     "h3": "8829a42803fffff",
     "home_value_median": 1034584,
     "poverty_below": 199,
-    "poverty_universe": 1698
+    "poverty_universe": 1698,
+    "home_value_median_moe": 124150,
+    "poverty_below_moe": 20,
+    "poverty_universe_moe": 85
   },
   {
     "h3": "8829a4282dfffff",
     "home_value_median": 877681,
     "poverty_below": 383,
-    "poverty_universe": 4260
+    "poverty_universe": 4260,
+    "home_value_median_moe": 105322,
+    "poverty_below_moe": 38,
+    "poverty_universe_moe": 213
   },
   {
     "h3": "8829a4290dfffff",
     "home_value_median": 999726,
     "poverty_below": 1020,
-    "poverty_universe": 3355
+    "poverty_universe": 3355,
+    "home_value_median_moe": 119967,
+    "poverty_below_moe": 102,
+    "poverty_universe_moe": 168
   },
   {
     "h3": "8829a42a17fffff",
     "home_value_median": 1048118,
     "poverty_below": 953,
-    "poverty_universe": 4293
+    "poverty_universe": 4293,
+    "home_value_median_moe": 125774,
+    "poverty_below_moe": 95,
+    "poverty_universe_moe": 215
   },
   {
     "h3": "8829a42a23fffff",
     "home_value_median": 446795,
     "poverty_below": 804,
-    "poverty_universe": 3791
+    "poverty_universe": 3791,
+    "home_value_median_moe": 53615,
+    "poverty_below_moe": 80,
+    "poverty_universe_moe": 190
   }
 ]

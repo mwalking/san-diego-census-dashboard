@@ -1,3 +1,11 @@
+import { useEffect, useMemo, useState } from 'react';
+import {
+  computeAggregateMetricStats,
+  formatMetricEstimate,
+  formatMetricMoe,
+} from '../data/metricStats.js';
+import { GEO_MODES, indexYearData } from '../data/geography.js';
+import { loadHexYear, loadTractYear } from '../data/loadData.js';
 import { COPY } from '../ui/microcopy.js';
 
 function Sidebar({
@@ -6,10 +14,16 @@ function Sidebar({
   onYearChange,
   metricGroups = [],
   activeMetricId,
+  activeMetric,
   onActiveMetricChange,
+  geoMode,
+  selectedIds = [],
+  visibleIds = [],
   isLoading,
 }) {
-  const yearIndex = Math.max(
+  const [yearDataIndex, setYearDataIndex] = useState({ byId: new globalThis.Map(), records: [] });
+  const [isMetricStatsLoading, setIsMetricStatsLoading] = useState(false);
+  const yearSliderIndex = Math.max(
     0,
     years.findIndex((value) => value === year),
   );
@@ -22,6 +36,90 @@ function Sidebar({
     }
     onYearChange(years[nextIndex]);
   }
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadYearIndex() {
+      if (!year || !geoMode) {
+        setYearDataIndex({ byId: new globalThis.Map(), records: [] });
+        setIsMetricStatsLoading(false);
+        return;
+      }
+
+      setIsMetricStatsLoading(true);
+      try {
+        if (geoMode === GEO_MODES.HEX) {
+          const rawHexData = await loadHexYear(year);
+          if (isCancelled) {
+            return;
+          }
+          setYearDataIndex(indexYearData(GEO_MODES.HEX, rawHexData));
+          return;
+        }
+
+        if (geoMode === GEO_MODES.TRACT) {
+          const rawTractData = await loadTractYear(year);
+          if (isCancelled) {
+            return;
+          }
+          setYearDataIndex(indexYearData(GEO_MODES.TRACT, rawTractData));
+          return;
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          console.error('Failed to load sidebar year data:', error);
+          setYearDataIndex({ byId: new globalThis.Map(), records: [] });
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsMetricStatsLoading(false);
+        }
+      }
+    }
+
+    loadYearIndex();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [geoMode, year]);
+
+  const selectedRecords = useMemo(() => {
+    if (!Array.isArray(selectedIds) || selectedIds.length === 0) {
+      return [];
+    }
+
+    return selectedIds
+      .map((id) => yearDataIndex.byId?.get(id) ?? null)
+      .filter((record) => record && typeof record === 'object');
+  }, [selectedIds, yearDataIndex]);
+
+  const visibleRecords = useMemo(() => {
+    if (!Array.isArray(visibleIds) || visibleIds.length === 0) {
+      return [];
+    }
+
+    return visibleIds
+      .map((id) => yearDataIndex.byId?.get(id) ?? null)
+      .filter((record) => record && typeof record === 'object');
+  }, [visibleIds, yearDataIndex]);
+
+  const inViewStats = useMemo(
+    () => computeAggregateMetricStats(activeMetric, visibleRecords),
+    [activeMetric, visibleRecords],
+  );
+
+  const selectedStats = useMemo(
+    () => computeAggregateMetricStats(activeMetric, selectedRecords),
+    [activeMetric, selectedRecords],
+  );
+
+  const isSummaryLoading = isLoading || isMetricStatsLoading;
+  const inViewEstimateLabel = formatMetricEstimate(activeMetric, inViewStats?.estimate);
+  const inViewMoeLabel = formatMetricMoe(activeMetric, inViewStats?.moe);
+  const selectedEstimateLabel = formatMetricEstimate(activeMetric, selectedStats?.estimate);
+  const selectedMoeLabel = formatMetricMoe(activeMetric, selectedStats?.moe);
 
   return (
     <aside className="h-full w-full overflow-auto rounded-xl border border-slate-200/10 bg-slate-900/90 p-4 shadow-xl backdrop-blur">
@@ -36,14 +134,24 @@ function Sidebar({
           min="0"
           max={String(Math.max(0, years.length - 1))}
           step="1"
-          value={String(yearIndex)}
+          value={String(yearSliderIndex)}
           onChange={handleYearChange}
           disabled={isYearSliderDisabled}
           className="mt-2 w-full accent-emerald-400"
         />
       </div>
 
-      {isLoading ? <p className="mt-3 text-xs text-emerald-300">Loading…</p> : null}
+      {isSummaryLoading ? <p className="mt-3 text-xs text-emerald-300">Loading…</p> : null}
+
+      <section className="mt-4 rounded-lg bg-slate-800/70 p-3">
+        <h3 className="text-xs uppercase tracking-wide text-slate-400">In view</h3>
+        <p className="mt-1 text-xs text-slate-400">{activeMetric?.label ?? 'No active metric'}</p>
+        <p className="mt-2 text-lg font-semibold text-slate-100">{inViewEstimateLabel}</p>
+        <p className="mt-1 text-xs text-slate-300">± {inViewMoeLabel}</p>
+        {inViewStats?.note ? (
+          <p className="mt-1 text-xs text-slate-400">Not available for aggregated medians.</p>
+        ) : null}
+      </section>
 
       <div className="mt-4 space-y-4">
         {metricGroups.map((group) => (
@@ -85,7 +193,20 @@ function Sidebar({
         <h3 className="text-xs uppercase tracking-wide text-slate-400">
           {COPY.sidebar.selectedAreaTitle}
         </h3>
-        <p className="mt-2 text-sm text-slate-300">{COPY.sidebar.noAreaSelected}</p>
+        {selectedIds.length === 0 ? (
+          <p className="mt-2 text-sm text-slate-300">{COPY.sidebar.noAreaSelected}</p>
+        ) : (
+          <>
+            <p className="mt-1 text-xs text-slate-400">
+              {activeMetric?.label ?? 'No active metric'}
+            </p>
+            <p className="mt-2 text-lg font-semibold text-slate-100">{selectedEstimateLabel}</p>
+            <p className="mt-1 text-xs text-slate-300">± {selectedMoeLabel}</p>
+            {selectedStats?.note ? (
+              <p className="mt-1 text-xs text-slate-400">Not available for aggregated medians.</p>
+            ) : null}
+          </>
+        )}
       </section>
     </aside>
   );

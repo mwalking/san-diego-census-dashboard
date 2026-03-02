@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone C3 — completed
-- **Next milestone:** Milestone D — sidebar aggregation/stats
+- **Active milestone:** Milestone D1 — completed
+- **Next milestone:** Milestone D2 — per-row sidebar metric values and broader aggregation UI
 
 ## Repository overview
 
@@ -265,25 +265,86 @@ npm run build
   - no demographic aggregation/sidebar stats changes
   - no new dependencies
 
+## Milestone D1 changes
+
+- Updated docs scope requirements for D1:
+  - `docs/prompt.md` now explicitly requires estimate ± MOE for selected and in-view sidebar summaries.
+  - `docs/prompt.md` now explicitly allows N/A for aggregated medians until a distribution method exists.
+  - `docs/plan.md` Milestone D now includes D1-specific bullets for active metric summaries + MOE support.
+- Updated mock data contract for MOE-enabled testing:
+  - `public/data/hexes/2023.json` records now include:
+    - `home_value_median_moe`
+    - `poverty_below_moe`
+    - `poverty_universe_moe`
+  - `public/data/tracts/2023.json` values now include the same MOE fields.
+  - `public/data/variables.json` metrics now include MOE metadata and aggregation hints:
+    - direct metric: `moeKey`, `aggregation`
+    - ratio metric: `numeratorMoeKey`, `denominatorMoeKey`, `moeMethod`, `aggregation`
+- Added MOE utility module:
+  - `src/data/moe.js`
+  - functions:
+    - `rssMoe(moes)`
+    - `moeRatio(X, MOE_X, Y, MOE_Y)`
+    - `moeProportion(X, MOE_X, Y, MOE_Y)` with fallback to ratio form when proportion discriminant is negative
+- Added metric stats module:
+  - `src/data/metricStats.js`
+  - computes estimate + MOE for:
+    - single record
+    - aggregate record set (sum, ratio/proportion, median with multi-record N/A note)
+  - includes formatting helpers for currency, percent, and number outputs.
+- Added MOE tests:
+  - `src/data/moe.test.mjs`
+  - covers RSS, ratio/proportion formulas, fallback behavior, and null guards.
+- Updated map visibility reporting (Option A in-view):
+  - `src/components/MapShell.jsx` now accepts optional `onVisibleIdsChange(geoMode, ids)`.
+  - Added debounced (280ms) full-viewport `deckRef.pickObjects(...)` using active base layer ID.
+  - Dedupes picks with `getIdsFromBrushPicks(geoMode, picks)`.
+  - Emits visible IDs only when changed to avoid render loops.
+  - Triggered by geo/year/data/view changes.
+- Updated app state wiring:
+  - `src/app/App.jsx` now tracks `visibleIdsByGeo = { hex: [], tract: [] }`.
+  - passes current geo mode `visibleIds`, `selectedIds`, `activeMetric`, and `geoMode` into sidebar.
+- Updated sidebar summaries:
+  - `src/components/Sidebar.jsx` now loads/indexes year data via cached loaders (`loadHexYear`, `loadTractYear`, `indexYearData`).
+  - Added top **In view** section for active metric/year showing estimate ± MOE.
+  - Updated **Selected area** section to show estimate ± MOE for current metric:
+    - 0 selected -> existing no-selection message
+    - 1 selected -> estimate ± MOE
+    - N selected -> aggregated estimate ± MOE (or N/A note for median aggregation)
+- Kept D1 scope strict:
+  - did not add per-row values for every metric (reserved for D2)
+  - did not add demographic aggregation panels beyond active metric summaries.
+
 ## Commands run and results (latest milestone)
 
+- `node --test src/data/moe.test.mjs`: passed.
 - `npm run build`: passed.
   - Non-blocking warnings:
     - loaders.gl browser external warning (`spawn` export in browser bundle)
     - large chunk size warning
+- `npm run verify`: initially failed due formatting/lint while integrating D1.
+- Applied fixes:
+  - Prettier formatting updates
+  - `globalThis.setTimeout/clearTimeout` for lint-safe timer usage
+  - null-guard normalization in MOE/stat helpers
 - `npm run verify`: passed.
   - Includes `format:check`, `lint`, and `build`.
   - Build still emits same non-blocking warnings listed above.
 
 ## Decisions made (latest milestone)
 
-- Kept click and brush behavior strictly separated by mode:
-  - `single` mode uses click selection
-  - `multi` mode uses rectangle brush, and click-like gestures are ignored
-- Constrained brush picking to the active base layer ID to avoid hover/selected overlay layers
-  interfering with selection capture.
-- Used pointer capture and local screen-space bounds in `MapShell` to keep brush interaction stable
-  across mouse/touch drag flows.
+- MOE formulas:
+  - sums use RSS (`rssMoe`)
+  - derived rates use ACS-style ratio/proportion formulas
+  - proportion MOE falls back to ratio MOE when discriminant is negative.
+- Median aggregation policy:
+  - single-record median shows estimate ± MOE
+  - multi-record selected/in-view medians show N/A with note until distribution-based aggregation is implemented.
+- In-view debounce strategy:
+  - used debounced full-viewport `pickObjects` updates (~280ms) and emit-on-change ID comparison to avoid render loops.
+- Documentation scope decision (Step 0):
+  - explicitly codified estimate ± MOE + in-view summary requirements in `docs/prompt.md`
+  - split Milestone D planning into D1 (active metric summaries + MOE) and D2 (per-row/sidebar expansion).
 
 ## Known issues / follow-ups
 
