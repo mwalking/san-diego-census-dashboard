@@ -210,8 +210,8 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
 
 ### Tasks
 #### C1. Hover highlight
-- [ ] Track hover ID per geoMode
-- [ ] Highlight hovered feature:
+- [x] Track hover ID per geoMode
+- [x] Highlight hovered feature:
   - hex outline or separate highlight layer
   - tract line color/width
 
@@ -226,7 +226,7 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
 - [ ] Deduplicate IDs and store in `selectedIdsByGeo[geoMode]`
 
 ### Acceptance checkpoint
-- [ ] Hover works in both modes
+- [x] Hover works in both modes
 - [ ] Click selection works in both modes
 - [ ] Brush selection works in both modes
 

@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone B5 — completed
-- **Next milestone:** Milestone C — hover + selection + brush interactions
+- **Active milestone:** Milestone C1 — completed
+- **Next milestone:** Milestone C2 — click selection
 
 ## Repository overview
 
@@ -191,32 +191,41 @@ npm run build
   - did not implement hover, click selection, or brush selection (Milestone C)
   - did not add new dependencies
 
+## Milestone C1 changes
+
+- Added hover state tracking per geography mode in `src/app/App.jsx`:
+  - `hoverIdByGeo = { hex: null, tract: null }`
+  - updates are stored independently per mode so toggling geography preserves each mode's hover state.
+- Updated `src/components/MapShell.jsx` for hover picking:
+  - choropleth layers are now `pickable: true` in both hex and tract modes
+  - added DeckGL `onHover` handler
+  - hover IDs are extracted via `getPickedId(geoMode, info)` from `src/data/geography.js`
+- Added hover-only visual outlines without changing fill colors:
+  - hex mode: added a separate hover `H3HexagonLayer` with outline styling for hovered hex
+  - tract mode: added a separate hover `GeoJsonLayer` with thicker line styling for hovered tract
+  - base fill/color logic remains unchanged
+- Kept C1 scope strict:
+  - no click selection
+  - no brush selection
+  - no sidebar stats changes
+
 ## Commands run and results (latest milestone)
 
 - `npm run build`: passed.
   - Non-blocking warnings:
     - loaders.gl browser external warning (`spawn` export in browser bundle)
     - large chunk size warning
-- `npm run verify`: failed on Prettier (App/Legend/MapShell formatting).
-- `npx prettier --write src/app/App.jsx src/components/LegendCard.jsx src/components/MapShell.jsx src/components/Sidebar.jsx src/data/choropleth.js src/data/geography.js docs/plan.md docs/documentation.md`:
-  passed.
 - `npm run verify`: passed.
   - Includes `format:check`, `lint`, and `build`.
   - Build still emits same non-blocking warnings listed above.
 
 ## Decisions made (latest milestone)
 
-- Implemented sidebar guardrails as:
-  - hide metrics not defined in `variables.json`
-  - disable metrics that are defined but missing quantile metadata for the active geography
-    This prevents metric selection that would break map coloring or legend labels.
-- Kept metric computation logic local to map rendering in B5 with compatibility for both:
-  - direct-key specs (`key` and `source_field`)
-  - ratio specs (`num`/`den` and `numerator`/`denominator`)
-- Kept loading UX minimal and milestone-scoped by showing `Loading…` in overlay cards only, without
-  adding new selection/interaction behavior.
-- Updated `geography.js` H3 fallback access to avoid static-export build warnings while retaining
-  compatibility behavior.
+- Used one DeckGL hover callback with `getPickedId(geoMode, info)` to keep hover ID parsing
+  centralized in the geography adapter and avoid mode-specific parsing logic in the component.
+- Implemented hover visualization with separate overlay layers (hex + tract) so hover only affects
+  outlines and never alters choropleth fill color logic.
+- Preserved milestone scope by deferring all click/selection/brush state to C2/C3.
 
 ## Known issues / follow-ups
 

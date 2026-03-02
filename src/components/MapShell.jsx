@@ -7,7 +7,9 @@ import MapGL from 'react-map-gl/maplibre';
 import { getFillColorForValue } from '../data/choropleth.js';
 import {
   GEO_MODES,
+  getFeatureId,
   getLayerId,
+  getPickedId,
   getRecordFromLayerObject,
   indexYearData,
 } from '../data/geography.js';
@@ -23,6 +25,8 @@ const INITIAL_VIEW_STATE = {
 
 const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
 const TRACT_LINE_COLOR = [51, 65, 85, 180];
+const HEX_HOVER_LINE_COLOR = [244, 114, 182, 255];
+const TRACT_HOVER_LINE_COLOR = [244, 114, 182, 255];
 const EMPTY_GEOJSON = { type: 'FeatureCollection', features: [] };
 
 function toFiniteNumber(value) {
@@ -101,8 +105,10 @@ function MapShell({
   year,
   activeMetric,
   quantileBreaks,
+  hoverId,
   defaultViewState = INITIAL_VIEW_STATE,
   onDataLoadingChange,
+  onHoverIdChange,
 }) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [hexYearIndex, setHexYearIndex] = useState({ byId: new globalThis.Map(), records: [] });
@@ -190,11 +196,11 @@ function MapShell({
     }
 
     if (geoMode === GEO_MODES.HEX) {
-      return [
+      const nextLayers = [
         new H3HexagonLayer({
           id: getLayerId(GEO_MODES.HEX),
           data: hexYearIndex.records,
-          pickable: false,
+          pickable: true,
           filled: true,
           stroked: false,
           extruded: false,
@@ -206,14 +212,33 @@ function MapShell({
           },
         }),
       ];
+
+      const hoveredHexRecord = hoverId ? hexYearIndex.byId?.get(hoverId) : null;
+      if (hoveredHexRecord) {
+        nextLayers.push(
+          new H3HexagonLayer({
+            id: `${getLayerId(GEO_MODES.HEX)}-hover`,
+            data: [hoveredHexRecord],
+            pickable: false,
+            filled: false,
+            stroked: true,
+            extruded: false,
+            getHexagon: (record) => record.h3,
+            getLineColor: HEX_HOVER_LINE_COLOR,
+            lineWidthMinPixels: 3,
+          }),
+        );
+      }
+
+      return nextLayers;
     }
 
     if (geoMode === GEO_MODES.TRACT) {
-      return [
+      const nextLayers = [
         new GeoJsonLayer({
           id: getLayerId(GEO_MODES.TRACT),
           data: tractsGeojson,
-          pickable: false,
+          pickable: true,
           filled: true,
           stroked: true,
           lineWidthMinPixels: 0.75,
@@ -228,10 +253,38 @@ function MapShell({
           },
         }),
       ];
+
+      if (hoverId && Array.isArray(tractsGeojson?.features)) {
+        const hoveredFeature =
+          tractsGeojson.features.find(
+            (feature) => getFeatureId(GEO_MODES.TRACT, feature) === hoverId,
+          ) ?? null;
+
+        if (hoveredFeature) {
+          nextLayers.push(
+            new GeoJsonLayer({
+              id: `${getLayerId(GEO_MODES.TRACT)}-hover`,
+              data: { type: 'FeatureCollection', features: [hoveredFeature] },
+              pickable: false,
+              filled: false,
+              stroked: true,
+              lineWidthMinPixels: 3,
+              getLineColor: TRACT_HOVER_LINE_COLOR,
+            }),
+          );
+        }
+      }
+
+      return nextLayers;
     }
 
     return [];
-  }, [activeMetric, geoMode, hexYearIndex, quantileBreaks, tractYearIndex, tractsGeojson]);
+  }, [activeMetric, geoMode, hexYearIndex, hoverId, quantileBreaks, tractYearIndex, tractsGeojson]);
+
+  function handleLayerHover(info) {
+    const hoveredId = getPickedId(geoMode, info);
+    onHoverIdChange?.(geoMode, hoveredId);
+  }
 
   return (
     <section className="absolute inset-0">
@@ -239,6 +292,7 @@ function MapShell({
         viewState={viewState}
         controller
         layers={layers}
+        onHover={handleLayerHover}
         onViewStateChange={({ viewState: nextViewState }) => setViewState(nextViewState)}
         style={{ position: 'absolute', inset: 0 }}
       >

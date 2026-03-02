@@ -82,6 +82,10 @@ function formatLegendTick(value, format) {
 
 function App() {
   const [geoMode, setGeoMode] = useState(GEO_MODES.HEX);
+  const [hoverIdByGeo, setHoverIdByGeo] = useState({
+    [GEO_MODES.HEX]: null,
+    [GEO_MODES.TRACT]: null,
+  });
   const [selectionMode, setSelectionMode] = useState('single');
   const [activeMetricId, setActiveMetricId] = useState(null);
   const [year, setYear] = useState(null);
@@ -156,6 +160,25 @@ function App() {
 
   function handleChooseForMeClick() {
     setChooseForMeMessage(COPY.app.chooseForMePlaceholder);
+  }
+
+  function handleHoverIdChange(mode, nextHoverId) {
+    const normalizedHoverId = nextHoverId ?? null;
+
+    setHoverIdByGeo((previous) => {
+      if (mode !== GEO_MODES.HEX && mode !== GEO_MODES.TRACT) {
+        return previous;
+      }
+
+      if (previous[mode] === normalizedHoverId) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [mode]: normalizedHoverId,
+      };
+    });
   }
 
   const quantilesByGeoMode = useMemo(() => metadata?.quantiles ?? {}, [metadata]);
@@ -288,8 +311,10 @@ function App() {
             year={year}
             activeMetric={activeMetric}
             quantileBreaks={quantileBreaks}
+            hoverId={hoverIdByGeo[geoMode]}
             defaultViewState={defaultViewState}
             onDataLoadingChange={setIsMapDataLoading}
+            onHoverIdChange={handleHoverIdChange}
           />
 
           {chooseForMeMessage ? (
