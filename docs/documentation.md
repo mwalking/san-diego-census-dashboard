@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone B2 — completed
-- **Next milestone:** Milestone B3 — loaders + caching
+- **Active milestone:** Milestone B3 — completed
+- **Next milestone:** Milestone B4 — geography adapter and choropleth wiring
 
 ## Repository overview
 
@@ -100,12 +100,31 @@ npm run build
   - quantiles for hex + tract for both metric IDs
   - 2023 averages
 
+## Milestone B3 changes
+
+- Added `src/data/loadData.js` with async data loading functions:
+  - `loadYears()`
+  - `loadMetadata()`
+  - `loadVariables()`
+  - `loadHexYear(year)`
+  - `loadTractGeometry()`
+  - `loadTractYear(year)`
+- Implemented in-memory caching:
+  - singleton cache for years/metadata/variables/tract geometry
+  - per-year cache map for hex data
+  - per-year cache map for tract values
+  - failed requests are evicted from cache so retries can succeed
+- Implemented BASE_URL-aware path resolution for GitHub Pages/subpath deploys:
+  - resolves data paths via `import.meta.env.BASE_URL` and fetches `${base}data/...`
+- Added clear fetch error messages:
+  - network errors include the requested URL
+  - HTTP failures include requested URL + status code + status text
+- Kept this milestone scoped to loader utilities only; no UI, map shell, or layer wiring changes.
+
 ## Commands run and results (latest milestone)
 
-- `node .tmp_generate_b2_data.mjs`: passed, then temp script removed.
-- `npm run verify`: initially failed on formatting (`public/data/metadata.json`,
-  `public/data/tracts/tracts.geojson`, `public/data/years.json`, and `src/app/App.jsx`).
-- `npx prettier --write public/data/metadata.json public/data/tracts/tracts.geojson public/data/years.json src/app/App.jsx`: passed.
+- `npm run verify`: initially failed on ESLint in `src/data/loadData.js` (`fetch` undefined).
+- Updated loader to use `globalThis.fetch(...)`.
 - `npm run verify`: passed.
 - Final validation state:
   - `npm run verify`: passed.
@@ -114,10 +133,10 @@ npm run build
 
 ## Decisions made (latest milestone)
 
-- Used deterministic synthetic value generation so mock files are stable and non-uniform.
-- Kept tract geometry lightweight and synthetic (simple grid polygons) with valid GEOID strings.
-- Kept B2 scoped to data files only; no loader wiring or map/render logic changes.
-- Resolved prior merge conflict markers in `docs/documentation.md` before continuing B2 work.
+- Used promise-based caches so repeated calls avoid duplicate fetches and in-flight requests are shared.
+- Used per-year cache maps for hex and tract values to keep year datasets isolated.
+- Used `import.meta.env.BASE_URL` normalization to keep fetch paths compatible with GitHub Pages subpaths.
+- Kept B3 scoped to `src/data/loadData.js` only; no UI or map rendering changes.
 
 ## Known issues / follow-ups
 
