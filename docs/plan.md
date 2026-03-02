@@ -216,8 +216,8 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
   - tract line color/width
 
 #### C2. Click selection
-- [ ] Click sets selected IDs for current geoMode
-- [ ] Store selections separately per geography:
+- [x] Click sets selected IDs for current geoMode
+- [x] Store selections separately per geography:
   - `selectedIdsByGeo.hex`, `selectedIdsByGeo.tract`
 
 #### C3. Brush selection
@@ -227,7 +227,7 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
 
 ### Acceptance checkpoint
 - [x] Hover works in both modes
-- [ ] Click selection works in both modes
+- [x] Click selection works in both modes
 - [ ] Brush selection works in both modes
 
 ### Validation commands

@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone C1 — completed
-- **Next milestone:** Milestone C2 — click selection
+- **Active milestone:** Milestone C2 — completed
+- **Next milestone:** Milestone C3 — brush selection
 
 ## Repository overview
 
@@ -209,23 +209,53 @@ npm run build
   - no brush selection
   - no sidebar stats changes
 
+## Milestone C2 changes
+
+- Added single-selection state in `src/app/App.jsx`:
+  - `selectedIdsByGeo = { hex: [], tract: [] }`
+  - selection is stored separately per geography mode.
+- Passed current-mode selection props into `MapShell`:
+  - `selectionMode`
+  - `selectedIds={selectedIdsByGeo[geoMode]}`
+  - `onSelectedIdsChange`
+- Added click handling in `src/components/MapShell.jsx` using `getPickedId(geoMode, info)`:
+  - in `selectionMode === "single"`:
+    - click on a feature sets selected IDs to `[id]`
+    - click on empty map clears selected IDs to `[]`
+  - in `selectionMode === "multi"`:
+    - click is a no-op (reserved for C3 brush flow)
+- Added selected-outline highlight layers for both geographies:
+  - hex selected layer:
+    - built by looking up selected IDs in `hexYearIndex.byId`
+  - tract selected layer:
+    - built by filtering `tractsGeojson.features` against selected GEOID set
+  - selected outlines are stronger than hover outlines
+  - highlight layers are `pickable: false` so base choropleth layers continue to drive picking.
+- Kept C2 scope strict:
+  - no brush selection
+  - no sidebar aggregation changes
+
 ## Commands run and results (latest milestone)
 
 - `npm run build`: passed.
   - Non-blocking warnings:
     - loaders.gl browser external warning (`spawn` export in browser bundle)
     - large chunk size warning
+- `npm run verify`: initially failed due Prettier in `src/app/App.jsx`.
+- `npx prettier --write src/app/App.jsx src/components/MapShell.jsx`: passed.
 - `npm run verify`: passed.
   - Includes `format:check`, `lint`, and `build`.
   - Build still emits same non-blocking warnings listed above.
 
 ## Decisions made (latest milestone)
 
-- Used one DeckGL hover callback with `getPickedId(geoMode, info)` to keep hover ID parsing
-  centralized in the geography adapter and avoid mode-specific parsing logic in the component.
-- Implemented hover visualization with separate overlay layers (hex + tract) so hover only affects
-  outlines and never alters choropleth fill color logic.
-- Preserved milestone scope by deferring all click/selection/brush state to C2/C3.
+- Kept the click-selection contract strictly mode-aware:
+  - `single` mode handles feature click + empty-map clear
+  - `multi` mode ignores clicks so C3 can own rectangle-brush behavior.
+- Used separate selected overlay layers (drawn after hover layers) so selected outlines remain
+  visually dominant while preserving hover feedback.
+- Used Sets for selected ID membership and tract feature filtering to keep selected-layer lookups
+  efficient.
 
 ## Known issues / follow-ups
 

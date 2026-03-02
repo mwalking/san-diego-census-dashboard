@@ -27,6 +27,8 @@ const BASEMAP_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/sty
 const TRACT_LINE_COLOR = [51, 65, 85, 180];
 const HEX_HOVER_LINE_COLOR = [244, 114, 182, 255];
 const TRACT_HOVER_LINE_COLOR = [244, 114, 182, 255];
+const HEX_SELECTED_LINE_COLOR = [250, 204, 21, 255];
+const TRACT_SELECTED_LINE_COLOR = [250, 204, 21, 255];
 const EMPTY_GEOJSON = { type: 'FeatureCollection', features: [] };
 
 function toFiniteNumber(value) {
@@ -106,9 +108,12 @@ function MapShell({
   activeMetric,
   quantileBreaks,
   hoverId,
+  selectionMode,
+  selectedIds = [],
   defaultViewState = INITIAL_VIEW_STATE,
   onDataLoadingChange,
   onHoverIdChange,
+  onSelectedIdsChange,
 }) {
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [hexYearIndex, setHexYearIndex] = useState({ byId: new globalThis.Map(), records: [] });
@@ -117,6 +122,7 @@ function MapShell({
     records: [],
   });
   const [tractsGeojson, setTractsGeojson] = useState(EMPTY_GEOJSON);
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
   useEffect(() => {
     if (!defaultViewState) {
@@ -230,6 +236,32 @@ function MapShell({
         );
       }
 
+      if (selectedIdSet.size > 0) {
+        const selectedHexRecords = [];
+        selectedIdSet.forEach((selectedId) => {
+          const selectedRecord = hexYearIndex.byId?.get(selectedId);
+          if (selectedRecord) {
+            selectedHexRecords.push(selectedRecord);
+          }
+        });
+
+        if (selectedHexRecords.length > 0) {
+          nextLayers.push(
+            new H3HexagonLayer({
+              id: `${getLayerId(GEO_MODES.HEX)}-selected`,
+              data: selectedHexRecords,
+              pickable: false,
+              filled: false,
+              stroked: true,
+              extruded: false,
+              getHexagon: (record) => record.h3,
+              getLineColor: HEX_SELECTED_LINE_COLOR,
+              lineWidthMinPixels: 5,
+            }),
+          );
+        }
+      }
+
       return nextLayers;
     }
 
@@ -275,15 +307,53 @@ function MapShell({
         }
       }
 
+      if (selectedIdSet.size > 0 && Array.isArray(tractsGeojson?.features)) {
+        const selectedTractFeatures = tractsGeojson.features.filter((feature) =>
+          selectedIdSet.has(getFeatureId(GEO_MODES.TRACT, feature)),
+        );
+
+        if (selectedTractFeatures.length > 0) {
+          nextLayers.push(
+            new GeoJsonLayer({
+              id: `${getLayerId(GEO_MODES.TRACT)}-selected`,
+              data: { type: 'FeatureCollection', features: selectedTractFeatures },
+              pickable: false,
+              filled: false,
+              stroked: true,
+              lineWidthMinPixels: 5,
+              getLineColor: TRACT_SELECTED_LINE_COLOR,
+            }),
+          );
+        }
+      }
+
       return nextLayers;
     }
 
     return [];
-  }, [activeMetric, geoMode, hexYearIndex, hoverId, quantileBreaks, tractYearIndex, tractsGeojson]);
+  }, [
+    activeMetric,
+    geoMode,
+    hexYearIndex,
+    hoverId,
+    quantileBreaks,
+    selectedIdSet,
+    tractYearIndex,
+    tractsGeojson,
+  ]);
 
   function handleLayerHover(info) {
     const hoveredId = getPickedId(geoMode, info);
     onHoverIdChange?.(geoMode, hoveredId);
+  }
+
+  function handleLayerClick(info) {
+    if (selectionMode !== 'single') {
+      return;
+    }
+
+    const pickedId = getPickedId(geoMode, info);
+    onSelectedIdsChange?.(geoMode, pickedId ? [pickedId] : []);
   }
 
   return (
@@ -293,6 +363,7 @@ function MapShell({
         controller
         layers={layers}
         onHover={handleLayerHover}
+        onClick={handleLayerClick}
         onViewStateChange={({ viewState: nextViewState }) => setViewState(nextViewState)}
         style={{ position: 'absolute', inset: 0 }}
       >

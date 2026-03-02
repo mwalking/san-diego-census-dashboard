@@ -86,6 +86,10 @@ function App() {
     [GEO_MODES.HEX]: null,
     [GEO_MODES.TRACT]: null,
   });
+  const [selectedIdsByGeo, setSelectedIdsByGeo] = useState({
+    [GEO_MODES.HEX]: [],
+    [GEO_MODES.TRACT]: [],
+  });
   const [selectionMode, setSelectionMode] = useState('single');
   const [activeMetricId, setActiveMetricId] = useState(null);
   const [year, setYear] = useState(null);
@@ -177,6 +181,39 @@ function App() {
       return {
         ...previous,
         [mode]: normalizedHoverId,
+      };
+    });
+  }
+
+  function handleSelectedIdsChange(mode, nextSelectedIds) {
+    if (mode !== GEO_MODES.HEX && mode !== GEO_MODES.TRACT) {
+      return;
+    }
+
+    const normalizedSelectedIds = Array.isArray(nextSelectedIds)
+      ? Array.from(
+          new Set(
+            nextSelectedIds
+              .map((value) => (value === undefined || value === null ? '' : String(value)))
+              .filter(Boolean),
+          ),
+        )
+      : [];
+
+    setSelectedIdsByGeo((previous) => {
+      const previousIds = previous[mode] ?? [];
+      const hasSameLength = previousIds.length === normalizedSelectedIds.length;
+      const hasSameValues =
+        hasSameLength &&
+        previousIds.every((value, index) => value === normalizedSelectedIds[index]);
+
+      if (hasSameValues) {
+        return previous;
+      }
+
+      return {
+        ...previous,
+        [mode]: normalizedSelectedIds,
       };
     });
   }
@@ -312,9 +349,12 @@ function App() {
             activeMetric={activeMetric}
             quantileBreaks={quantileBreaks}
             hoverId={hoverIdByGeo[geoMode]}
+            selectionMode={selectionMode}
+            selectedIds={selectedIdsByGeo[geoMode] ?? []}
             defaultViewState={defaultViewState}
             onDataLoadingChange={setIsMapDataLoading}
             onHoverIdChange={handleHoverIdChange}
+            onSelectedIdsChange={handleSelectedIdsChange}
           />
 
           {chooseForMeMessage ? (
