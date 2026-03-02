@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone C2 — completed
-- **Next milestone:** Milestone C3 — brush selection
+- **Active milestone:** Milestone C3 — completed
+- **Next milestone:** Milestone D — sidebar aggregation/stats
 
 ## Repository overview
 
@@ -235,27 +235,55 @@ npm run build
   - no brush selection
   - no sidebar aggregation changes
 
+## Milestone C3 changes
+
+- Added rectangle brush selection for multi-select mode in `src/components/MapShell.jsx`.
+- Implemented local brush interaction state in `MapShell`:
+  - `isBrushing`
+  - `brushStart`
+  - `brushEnd`
+- Added `DeckGL` ref (`deckRef`) and used `pickObjects(...)` on brush release:
+  - rectangle bounds are computed in screen pixels
+  - picks are constrained to active geography base layer via
+    `layerIds: [getLayerId(geoMode)]`
+  - picked objects are converted to unique IDs via
+    `getIdsFromBrushPicks(geoMode, picks)`
+  - results are saved through existing `onSelectedIdsChange(geoMode, ids)`
+- Added pointer-based brush handlers (mouse/touch) for multi mode:
+  - pointer down starts brushing
+  - pointer move updates rectangle
+  - pointer up finalizes selection
+  - pointer cancel clears brush state
+- Added brush rectangle overlay rendered as an absolute positioned div with
+  `pointer-events: none` so zoom wheel/input passthrough is preserved.
+- Interaction rules implemented:
+  - in `selectionMode === "multi"`: drag-pan disabled via DeckGL controller options
+  - in `selectionMode === "multi"`: scroll zoom remains enabled
+  - in `selectionMode === "single"`: existing click-to-select behavior unchanged
+  - in `selectionMode === "multi"`: click remains a no-op (tiny click-like brush gestures are ignored)
+- Kept C3 scope strict:
+  - no demographic aggregation/sidebar stats changes
+  - no new dependencies
+
 ## Commands run and results (latest milestone)
 
 - `npm run build`: passed.
   - Non-blocking warnings:
     - loaders.gl browser external warning (`spawn` export in browser bundle)
     - large chunk size warning
-- `npm run verify`: initially failed due Prettier in `src/app/App.jsx`.
-- `npx prettier --write src/app/App.jsx src/components/MapShell.jsx`: passed.
 - `npm run verify`: passed.
   - Includes `format:check`, `lint`, and `build`.
   - Build still emits same non-blocking warnings listed above.
 
 ## Decisions made (latest milestone)
 
-- Kept the click-selection contract strictly mode-aware:
-  - `single` mode handles feature click + empty-map clear
-  - `multi` mode ignores clicks so C3 can own rectangle-brush behavior.
-- Used separate selected overlay layers (drawn after hover layers) so selected outlines remain
-  visually dominant while preserving hover feedback.
-- Used Sets for selected ID membership and tract feature filtering to keep selected-layer lookups
-  efficient.
+- Kept click and brush behavior strictly separated by mode:
+  - `single` mode uses click selection
+  - `multi` mode uses rectangle brush, and click-like gestures are ignored
+- Constrained brush picking to the active base layer ID to avoid hover/selected overlay layers
+  interfering with selection capture.
+- Used pointer capture and local screen-space bounds in `MapShell` to keep brush interaction stable
+  across mouse/touch drag flows.
 
 ## Known issues / follow-ups
 

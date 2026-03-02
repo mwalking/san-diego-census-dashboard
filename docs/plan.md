@@ -221,18 +221,18 @@ Implement hover highlight, click-to-select (single), and brush selection (multi)
   - `selectedIdsByGeo.hex`, `selectedIdsByGeo.tract`
 
 #### C3. Brush selection
-- [ ] Multi-select mode uses rectangle brush UI
-- [ ] On mouse up, call deck `pickObjects` with `layerIds=[activeLayerId]`
-- [ ] Deduplicate IDs and store in `selectedIdsByGeo[geoMode]`
+- [x] Multi-select mode uses rectangle brush UI
+- [x] On mouse up, call deck `pickObjects` with `layerIds=[activeLayerId]`
+- [x] Deduplicate IDs and store in `selectedIdsByGeo[geoMode]`
 
 ### Acceptance checkpoint
 - [x] Hover works in both modes
 - [x] Click selection works in both modes
-- [ ] Brush selection works in both modes
+- [x] Brush selection works in both modes
 
 ### Validation commands
-- [ ] `npm run verify`
-- [ ] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run build`
 
 ---
 

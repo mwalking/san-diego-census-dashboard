@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import DeckGL from '@deck.gl/react';
@@ -8,6 +8,7 @@ import { getFillColorForValue } from '../data/choropleth.js';
 import {
   GEO_MODES,
   getFeatureId,
+  getIdsFromBrushPicks,
   getLayerId,
   getPickedId,
   getRecordFromLayerObject,
@@ -29,7 +30,26 @@ const HEX_HOVER_LINE_COLOR = [244, 114, 182, 255];
 const TRACT_HOVER_LINE_COLOR = [244, 114, 182, 255];
 const HEX_SELECTED_LINE_COLOR = [250, 204, 21, 255];
 const TRACT_SELECTED_LINE_COLOR = [250, 204, 21, 255];
+const BRUSH_MIN_DRAG_PX = 4;
 const EMPTY_GEOJSON = { type: 'FeatureCollection', features: [] };
+
+function getBrushBounds(startPoint, endPoint) {
+  if (!startPoint || !endPoint) {
+    return null;
+  }
+
+  const minX = Math.min(startPoint.x, endPoint.x);
+  const minY = Math.min(startPoint.y, endPoint.y);
+  const maxX = Math.max(startPoint.x, endPoint.x);
+  const maxY = Math.max(startPoint.y, endPoint.y);
+
+  return {
+    minX,
+    minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+}
 
 function toFiniteNumber(value) {
   const parsed = Number(value);
@@ -115,6 +135,7 @@ function MapShell({
   onHoverIdChange,
   onSelectedIdsChange,
 }) {
+  const deckRef = useRef(null);
   const [viewState, setViewState] = useState(INITIAL_VIEW_STATE);
   const [hexYearIndex, setHexYearIndex] = useState({ byId: new globalThis.Map(), records: [] });
   const [tractYearIndex, setTractYearIndex] = useState({
@@ -122,7 +143,11 @@ function MapShell({
     records: [],
   });
   const [tractsGeojson, setTractsGeojson] = useState(EMPTY_GEOJSON);
+  const [isBrushing, setIsBrushing] = useState(false);
+  const [brushStart, setBrushStart] = useState(null);
+  const [brushEnd, setBrushEnd] = useState(null);
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const brushBounds = useMemo(() => getBrushBounds(brushStart, brushEnd), [brushStart, brushEnd]);
 
   useEffect(() => {
     if (!defaultViewState) {
@@ -356,11 +381,103 @@ function MapShell({
     onSelectedIdsChange?.(geoMode, pickedId ? [pickedId] : []);
   }
 
+  function resetBrush() {
+    setIsBrushing(false);
+    setBrushStart(null);
+    setBrushEnd(null);
+  }
+
+  function getPointerPosition(event) {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return {
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    };
+  }
+
+  function handleBrushPointerDown(event) {
+    if (selectionMode !== 'multi') {
+      return;
+    }
+
+    if (event.pointerType === 'mouse' && event.button !== 0) {
+      return;
+    }
+
+    const pointerPosition = getPointerPosition(event);
+    setIsBrushing(true);
+    setBrushStart(pointerPosition);
+    setBrushEnd(pointerPosition);
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    event.preventDefault();
+  }
+
+  function handleBrushPointerMove(event) {
+    if (selectionMode !== 'multi' || !isBrushing || !brushStart) {
+      return;
+    }
+
+    setBrushEnd(getPointerPosition(event));
+    event.preventDefault();
+  }
+
+  function handleBrushPointerUp(event) {
+    if (selectionMode !== 'multi' || !isBrushing || !brushStart) {
+      return;
+    }
+
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+
+    const finalPointerPosition = getPointerPosition(event);
+    const finalBounds = getBrushBounds(brushStart, finalPointerPosition);
+
+    if (!finalBounds) {
+      resetBrush();
+      return;
+    }
+
+    const isClickLikeBrush =
+      finalBounds.width < BRUSH_MIN_DRAG_PX && finalBounds.height < BRUSH_MIN_DRAG_PX;
+    if (isClickLikeBrush) {
+      resetBrush();
+      return;
+    }
+
+    const picks =
+      deckRef.current?.pickObjects?.({
+        x: Math.floor(finalBounds.minX),
+        y: Math.floor(finalBounds.minY),
+        width: Math.ceil(finalBounds.width),
+        height: Math.ceil(finalBounds.height),
+        layerIds: [getLayerId(geoMode)],
+      }) ?? [];
+
+    const selectedBrushIds = getIdsFromBrushPicks(geoMode, picks);
+    onSelectedIdsChange?.(geoMode, selectedBrushIds);
+    resetBrush();
+  }
+
+  function handleBrushPointerCancel(event) {
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) {
+      event.currentTarget.releasePointerCapture?.(event.pointerId);
+    }
+    resetBrush();
+  }
+
   return (
-    <section className="absolute inset-0">
+    <section
+      className="absolute inset-0"
+      onPointerDown={handleBrushPointerDown}
+      onPointerMove={handleBrushPointerMove}
+      onPointerUp={handleBrushPointerUp}
+      onPointerCancel={handleBrushPointerCancel}
+    >
       <DeckGL
+        ref={deckRef}
         viewState={viewState}
-        controller
+        controller={selectionMode === 'multi' ? { dragPan: false, scrollZoom: true } : true}
         layers={layers}
         onHover={handleLayerHover}
         onClick={handleLayerClick}
@@ -374,6 +491,18 @@ function MapShell({
           style={{ width: '100%', height: '100%' }}
         />
       </DeckGL>
+
+      {selectionMode === 'multi' && isBrushing && brushBounds ? (
+        <div
+          className="pointer-events-none absolute border border-emerald-300/80 bg-emerald-300/10"
+          style={{
+            left: `${brushBounds.minX}px`,
+            top: `${brushBounds.minY}px`,
+            width: `${brushBounds.width}px`,
+            height: `${brushBounds.height}px`,
+          }}
+        />
+      ) : null}
     </section>
   );
 }
