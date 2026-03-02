@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone B3 — completed
-- **Next milestone:** Milestone B4 — geography adapter and choropleth wiring
+- **Active milestone:** Milestone B4 — completed
+- **Next milestone:** Milestone B5 — render choropleths for hex + tract modes
 
 ## Repository overview
 
@@ -121,10 +121,37 @@ npm run build
   - HTTP failures include requested URL + status code + status text
 - Kept this milestone scoped to loader utilities only; no UI, map shell, or layer wiring changes.
 
+## Milestone B4 changes
+
+- Added `src/data/geography.js` to centralize geography-mode adapter logic and branching.
+- Exported geography constants and metadata helpers:
+  - `GEO_MODES`
+  - `assertGeoMode(geoMode)`
+  - `getGeoLabel(geoMode)`
+  - `getGeoNoun(geoMode)`
+  - `getGeoNounPlural(geoMode)`
+  - `getIdKey(geoMode)` for `h3`/`GEOID`
+  - `getLayerId(geoMode)` for `layer-hex`/`layer-tract`
+- Added indexing and lookup utilities:
+  - `indexYearData(geoMode, rawYearData)` -> `{ byId: Map, records: [] }`
+  - `getFeatureId(geoMode, obj)`
+  - `getPickedId(geoMode, pickInfo)`
+  - `getRecordFromLayerObject(geoMode, layerObject, yearIndex)`
+  - `getRecordById(geoMode, id, yearIndex)`
+  - `getIdsFromBrushPicks(geoMode, picks)`
+- Added center lookup utility:
+  - `getCenterLngLat(geoMode, id, ctx)`
+  - Hex mode computes centers via `h3-js` using `cellToLatLng` with fallback to `h3ToGeo`, returning
+    `[lng, lat]`.
+  - Tract mode prefers `ctx.tractsCentroids[GEOID]`, then falls back to
+    `ctx.tractsGeojson.features[].properties.centroid_lon/centroid_lat`.
+- Kept B4 scoped to adapter utilities only:
+  - no changes to `MapShell`, `App.jsx`, `loadData.js`, or UI components.
+
 ## Commands run and results (latest milestone)
 
-- `npm run verify`: initially failed on ESLint in `src/data/loadData.js` (`fetch` undefined).
-- Updated loader to use `globalThis.fetch(...)`.
+- `npm run verify`: failed on `prettier --check` for `src/data/geography.js`.
+- `npx prettier --write src/data/geography.js`: passed.
 - `npm run verify`: passed.
 - Final validation state:
   - `npm run verify`: passed.
@@ -133,10 +160,12 @@ npm run build
 
 ## Decisions made (latest milestone)
 
-- Used promise-based caches so repeated calls avoid duplicate fetches and in-flight requests are shared.
-- Used per-year cache maps for hex and tract values to keep year datasets isolated.
-- Used `import.meta.env.BASE_URL` normalization to keep fetch paths compatible with GitHub Pages subpaths.
-- Kept B3 scoped to `src/data/loadData.js` only; no UI or map rendering changes.
+- Centralized geo-mode branching and adapter logic in `src/data/geography.js`.
+- For H3 centers, implemented compatibility across `h3-js` APIs by trying `cellToLatLng` first and
+  falling back to `h3ToGeo`; both normalize to `[lng, lat]`.
+- For tract centers, prioritized explicit centroid context (`ctx.tractsCentroids`) over geometry
+  properties and return `null` when no centroid source exists.
+- Kept B4 strictly utility-scoped with no map rendering or UI wiring changes.
 
 ## Known issues / follow-ups
 

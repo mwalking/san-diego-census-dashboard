@@ -176,7 +176,7 @@ Create:
 - [x] `public/data/tracts/2023.json` (values keyed by GEOID)
 
 #### B3. Implement loaders + caching
-- [ ] `src/data/loadData.js`:
+- [x] `src/data/loadData.js`:
   - load metadata, years, variables
   - load hex year
   - load tract geometry (once)
@@ -184,7 +184,7 @@ Create:
   - cache everything in-memory
 
 #### B4. Implement geography adapter (centralize mode logic)
-- [ ] `src/data/geography.js`:
+- [x] `src/data/geography.js`:
   - get IDs, join tract values to geometry, compute centers
 
 #### B5. Render choropleths
