@@ -276,23 +276,23 @@ Make sidebar metric rows drive choropleth variable, and show selected-area demog
 Implement “Choose for me” to select a high/low extreme feature and fly to it with a callout.
 
 ### Tasks
-- [ ] Choose logic:
+- [x] Choose logic:
   - filter non-null values
   - pick randomly among top/bottom ~1–2%
-- [ ] Fly-to:
+- [x] Fly-to:
   - hex center via h3-js
   - tract center via centroids (recommended) or geojson properties
-- [ ] Callout shows:
+- [x] Callout shows:
   - high/low descriptor
   - selected value
   - county average
 
 ### Acceptance checkpoint
-- [ ] Choose-for-me works in hex and tract modes
+- [x] Choose-for-me works in hex and tract modes
 
 ### Validation commands
-- [ ] `npm run verify`
-- [ ] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run build`
 
 ---
 

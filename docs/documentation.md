@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone D2 — completed
-- **Next milestone:** Milestone E — Choose for me (both modes)
+- **Active milestone:** Milestone E — completed
+- **Next milestone:** Milestone F — Python pipeline outputs (San Diego County)
 
 ## Repository overview
 
@@ -383,6 +383,48 @@ npm run build
 - Reused `metricStats.js` as the only computation path for per-row selected metrics to avoid duplicated MOE logic.
 - Kept no-selection row output minimal and consistent (`—`) across metric rows.
 - For median aggregation over multiple selected records, kept explicit placeholder behavior instead of a weighted approximation until distribution-based logic is implemented.
+
+## Milestone E changes
+
+- Updated `src/app/App.jsx` to implement full choose-for-me behavior for both geographies:
+  - uses active `geoMode`, `year`, and `activeMetric`.
+  - builds candidates from year-indexed records (`hex` and `tract`) using cached loader data.
+  - computes per-record estimate/MOE via `computeRecordMetricStats(...)`.
+  - filters non-finite estimates.
+  - randomly picks high vs low each click.
+  - selects randomly within extreme candidates (top/bottom ~2%).
+  - for smaller datasets, falls back to quantile edge buckets from `metadata.quantiles[geoMode][metricId]`.
+  - forces `selectionMode` to `single` and sets `selectedIdsByGeo[geoMode] = [id]`.
+- Added choose-for-me fly-to wiring:
+  - `MapShell` now accepts `flyToTarget`.
+  - applies `FlyToInterpolator` with ~1200ms transition for center animation.
+- Replaced the choose placeholder banner with a real callout in `App.jsx`:
+  - includes High/Low label, active metric label, selected estimate ± MOE, and county average.
+  - supports dismiss via `X`.
+  - updates each time choose-for-me runs.
+  - dismisses when selection changes away from the chosen feature.
+- Updated tract center fallback in `src/data/geography.js`:
+  - if centroid properties are unavailable, computes a safe bbox-midpoint centroid from the selected tract feature geometry.
+- Updated planning log:
+  - `docs/plan.md` Milestone E checklist, acceptance, and validation checkboxes marked complete.
+
+## Commands run and results (Milestone E)
+
+- `npm run build`: passed.
+  - Non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run verify`: first run failed on formatting in `src/app/App.jsx`.
+- `npx prettier --write src/app/App.jsx src/components/MapShell.jsx src/data/geography.js`: applied formatting fix (`App.jsx` changed; others unchanged).
+- `npm run verify`: passed after formatting fix.
+  - Includes `format:check`, `lint`, and `build`.
+  - Build emitted the same non-blocking warnings listed above.
+
+## Decisions made (Milestone E)
+
+- Chose a small-dataset threshold of fewer than 50 finite records before switching to quantile-edge fallback instead of percentile slicing.
+- County average lookup prefers geography-specific averages (`averages[geoMode][year][metricId]`) and falls back to county-wide year averages (`averages[year][metricId]`).
+- Implemented tract center fallback directly in `getCenterLngLat(...)` so both choose-for-me and future center lookups share the same safe behavior.
 
 ## Known issues / follow-ups
 

@@ -287,6 +287,64 @@ function getHexCenterLngLat(h3Id) {
   return null;
 }
 
+function collectGeometryLngLatPairs(coordinates, outPairs) {
+  if (!Array.isArray(coordinates) || !Array.isArray(outPairs)) {
+    return;
+  }
+
+  if (
+    coordinates.length >= 2 &&
+    typeof coordinates[0] === 'number' &&
+    typeof coordinates[1] === 'number'
+  ) {
+    const lng = toFiniteNumber(coordinates[0]);
+    const lat = toFiniteNumber(coordinates[1]);
+    if (lng !== null && lat !== null) {
+      outPairs.push([lng, lat]);
+    }
+    return;
+  }
+
+  for (const value of coordinates) {
+    collectGeometryLngLatPairs(value, outPairs);
+  }
+}
+
+function centroidFromFeatureGeometry(feature) {
+  const geometry = feature?.geometry;
+  if (!geometry || !Array.isArray(geometry.coordinates)) {
+    return null;
+  }
+
+  const coordinatePairs = [];
+  collectGeometryLngLatPairs(geometry.coordinates, coordinatePairs);
+  if (!coordinatePairs.length) {
+    return null;
+  }
+
+  let minLng = coordinatePairs[0][0];
+  let maxLng = coordinatePairs[0][0];
+  let minLat = coordinatePairs[0][1];
+  let maxLat = coordinatePairs[0][1];
+
+  for (const [lng, lat] of coordinatePairs) {
+    if (lng < minLng) {
+      minLng = lng;
+    }
+    if (lng > maxLng) {
+      maxLng = lng;
+    }
+    if (lat < minLat) {
+      minLat = lat;
+    }
+    if (lat > maxLat) {
+      maxLat = lat;
+    }
+  }
+
+  return [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
+}
+
 function findTractCenterInGeojson(tractId, tractsGeojson) {
   const features = tractsGeojson?.features;
   if (!Array.isArray(features)) {
@@ -303,7 +361,7 @@ function findTractCenterInGeojson(tractId, tractsGeojson) {
     if (lng !== null && lat !== null) {
       return [lng, lat];
     }
-    return null;
+    return centroidFromFeatureGeometry(feature);
   }
 
   return null;

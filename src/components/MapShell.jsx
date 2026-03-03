@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { FlyToInterpolator } from '@deck.gl/core';
 import { GeoJsonLayer } from '@deck.gl/layers';
 import { H3HexagonLayer } from '@deck.gl/geo-layers';
 import DeckGL from '@deck.gl/react';
@@ -31,6 +32,7 @@ const TRACT_HOVER_LINE_COLOR = [244, 114, 182, 255];
 const HEX_SELECTED_LINE_COLOR = [250, 204, 21, 255];
 const TRACT_SELECTED_LINE_COLOR = [250, 204, 21, 255];
 const BRUSH_MIN_DRAG_PX = 4;
+const FLY_TO_DURATION_MS = 1200;
 const EMPTY_GEOJSON = { type: 'FeatureCollection', features: [] };
 
 function getBrushBounds(startPoint, endPoint) {
@@ -143,6 +145,7 @@ function MapShell({
   hoverId,
   selectionMode,
   selectedIds = [],
+  flyToTarget = null,
   defaultViewState = INITIAL_VIEW_STATE,
   onDataLoadingChange,
   onHoverIdChange,
@@ -179,6 +182,26 @@ function MapShell({
       ...defaultViewState,
     }));
   }, [defaultViewState]);
+
+  useEffect(() => {
+    const longitude = toFiniteNumber(flyToTarget?.lngLat?.[0]);
+    const latitude = toFiniteNumber(flyToTarget?.lngLat?.[1]);
+    if (longitude === null || latitude === null) {
+      return;
+    }
+
+    const zoom = toFiniteNumber(flyToTarget?.zoom);
+    const durationMs = toFiniteNumber(flyToTarget?.durationMs) ?? FLY_TO_DURATION_MS;
+
+    setViewState((previous) => ({
+      ...previous,
+      longitude,
+      latitude,
+      ...(zoom !== null ? { zoom } : {}),
+      transitionInterpolator: new FlyToInterpolator(),
+      transitionDuration: durationMs,
+    }));
+  }, [flyToTarget]);
 
   useEffect(() => {
     let isCancelled = false;
