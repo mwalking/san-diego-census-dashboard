@@ -2,7 +2,9 @@
   "years": [2023],
   "h3_resolution": 8,
   "region": {
-    "name": "San Diego County, CA (mock)",
+    "name": "San Diego County, CA",
+    "state": "06",
+    "counties": ["06073"],
     "defaultView": {
       "longitude": -117.1611,
       "latitude": 32.7157,
@@ -17,14 +19,14 @@
       "poverty_rate": [0.0569, 0.1388, 0.1995, 0.2464, 0.305]
     },
     "tract": {
-      "home_value_median": [401840, 520223, 727326, 934495, 1129437],
-      "poverty_rate": [0.08, 0.1338, 0.1974, 0.2355, 0.2741]
+      "home_value_median": [522580, 628230, 747100, 894500, 1259480],
+      "poverty_rate": [0.027059, 0.054699, 0.081843, 0.118712, 0.215335]
     }
   },
   "averages": {
     "2023": {
-      "home_value_median": 757241,
-      "poverty_rate": 0.1889
+      "home_value_median": 791600,
+      "poverty_rate": 0.1035269729034036
     },
     "hex": {
       "2023": {
@@ -34,9 +36,19 @@
     },
     "tract": {
       "2023": {
-        "home_value_median": 723051,
-        "poverty_rate": 0.1837
+        "home_value_median": 791600,
+        "poverty_rate": 0.1035269729034036
       }
     }
+  },
+  "sources": {
+    "tract_geometry": {
+      "tiger_year": 2023,
+      "source_url": "https://www2.census.gov/geo/tiger/TIGER2023/TRACT/tl_2023_06_tract.zip",
+      "zip_path": "/home/mwalker/san-diego-census-dashboard/scripts/py/.cache/tl_2023_06_tract.zip"
+    },
+    "acs_survey": "acs5",
+    "acs_moe_level": 90,
+    "quantile_year": 2023
   }
 }

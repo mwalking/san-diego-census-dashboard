@@ -1,0 +1,15 @@
+[project]
+name = "san-diego-census-dashboard-pipeline"
+version = "0.1.0"
+description = "Python data pipeline for San Diego Mosaic"
+requires-python = ">=3.11"
+dependencies = [
+  "pytidycensus==0.1.8",
+  "pandas>=2.2.0,<3.0.0",
+  "numpy>=1.26.0",
+  "geopandas>=0.14.0",
+  "shapely>=2.0.0",
+  "pyproj>=3.6.0",
+  "requests>=2.31.0",
+  "python-dotenv>=1.0.0",
+]

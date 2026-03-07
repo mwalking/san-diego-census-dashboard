@@ -1,5 +1,8 @@
 export default [
   {
+    ignores: ['**/.venv/**'],
+  },
+  {
     files: ['**/*.{js,mjs,cjs,jsx}'],
     ignores: ['node_modules/**', 'dist/**'],
     languageOptions: {

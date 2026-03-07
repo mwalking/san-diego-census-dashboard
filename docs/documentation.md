@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** Milestone E — completed
-- **Next milestone:** Milestone F — Python pipeline outputs (San Diego County)
+- **Active milestone:** Milestone F1 — tract pipeline (completed)
+- **Next milestone:** Milestone F2 — hex pipeline
 
 ## Repository overview
 
@@ -425,6 +425,52 @@ npm run build
 - Chose a small-dataset threshold of fewer than 50 finite records before switching to quantile-edge fallback instead of percentile slicing.
 - County average lookup prefers geography-specific averages (`averages[geoMode][year][metricId]`) and falls back to county-wide year averages (`averages[year][metricId]`).
 - Implemented tract center fallback directly in `getCenterLngLat(...)` so both choose-for-me and future center lookups share the same safe behavior.
+
+## Milestone F1 changes
+
+- Added uv-managed Python pipeline scaffolding at repo root and `scripts/py/`:
+  - `pyproject.toml` with tract-pipeline dependencies.
+  - generated `uv.lock`.
+  - new pipeline modules:
+    - `scripts/py/config.py`
+    - `scripts/py/build_tracts.py`
+    - `scripts/py/utils_io.py`
+    - `scripts/py/utils_geo.py`
+    - `scripts/py/utils_acs.py`
+- Implemented tract-only real data build flow (no hex generation in F1):
+  - pulls ACS 5-year tract estimates + MOEs for 2023 (San Diego County) via `pytidycensus`.
+  - downloads TIGER tract geometry, filters to `STATEFP=06`, `COUNTYFP=073`, simplifies geometry, and writes representative-point centroids.
+  - writes app-compatible files:
+    - `public/data/years.json`
+    - `public/data/variables.json`
+    - `public/data/metadata.json`
+    - `public/data/tracts/tracts.geojson`
+    - `public/data/tracts/2023.json`
+- Added in-script validation at end of `build_tracts.py`:
+  - non-empty tracts assertion
+  - 11-digit GEOID assertions
+  - required metric key assertions per record
+- Updated `README.md` with uv workflow commands (`uv sync`, `uv run --env-file .env -- python scripts/py/build_tracts.py`) and uv environment behavior.
+- Updated `eslint.config.mjs` to globally ignore `.venv/**` so JS linting does not traverse third-party files created by uv.
+
+## Commands run and results (Milestone F1)
+
+- `uv sync`:
+  - first attempt failed because `pytidycensus` latest dependency chain required building `fiona`/GDAL on this environment.
+  - resolved by pinning `pytidycensus==0.1.8` and `pandas<3.0`, then rerunning `uv sync`.
+  - final result: passed, `.venv` created and `uv.lock` generated.
+- `uv run --env-file .env -- python scripts/py/build_tracts.py`:
+  - first attempt failed due API mismatch (`PytidyCensus` import) with pinned version.
+  - fixed by using module-level `pytidycensus.get_acs(...)`.
+  - second attempt failed with pandas 3.x compatibility inside `pytidycensus`.
+  - after pandas pin (`<3.0`), rerun passed and wrote real tract outputs.
+
+## Decisions made (Milestone F1)
+
+- Pinned `pytidycensus` to `0.1.8` to avoid GDAL/Fiona build failures from newer transitive dependencies on this platform.
+- Pinned `pandas` to `<3.0` because `pytidycensus 0.1.8` triggers a runtime error with pandas 3.x during ACS post-processing.
+- Preserved existing `metadata.quantiles.hex` and `metadata.averages.hex` in F1 so the current hex UI continues to load while tract data is made real.
+- Computed tract quantiles from the configured/latest tract year output and county reference averages from county-level ACS values as required.
 
 ## Known issues / follow-ups
 

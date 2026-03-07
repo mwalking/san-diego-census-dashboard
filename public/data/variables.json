@@ -9,7 +9,13 @@
       "source_field": "home_value_median",
       "moeKey": "home_value_median_moe",
       "aggregation": "median",
-      "description": "Synthetic median home value in dollars for mock data."
+      "description": "ACS 5-year median home value (owner-occupied units).",
+      "provenance": {
+        "dataset": "ACS 5-year",
+        "table": "B25077",
+        "variable": "B25077_001",
+        "moe_level": 90
+      }
     },
     {
       "id": "poverty_rate",
@@ -23,7 +29,14 @@
       "denominatorMoeKey": "poverty_universe_moe",
       "moeMethod": "proportion",
       "aggregation": "ratio",
-      "description": "Synthetic poverty rate computed as poverty_below / poverty_universe."
+      "description": "ACS 5-year poverty rate computed as B17001_002 / B17001_001.",
+      "provenance": {
+        "dataset": "ACS 5-year",
+        "table": "B17001",
+        "numerator": "B17001_002",
+        "denominator": "B17001_001",
+        "moe_level": 90
+      }
     }
   ]
 }

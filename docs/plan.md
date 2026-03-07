@@ -296,35 +296,74 @@ Implement “Choose for me” to select a high/low extreme feature and fly to it
 
 ---
 
-## Milestone F — Python pipeline outputs (San Diego County)
+## Milestone F1 — Real Tract Pipeline (San Diego County)
 
 ### Objective
-Create Python scripts to generate `public/data/*` for San Diego County across configured years.
+Generate real tract-level ACS + TIGER outputs for San Diego County using a uv-managed Python pipeline.
 
 ### Outputs
 - `public/data/years.json`
 - `public/data/variables.json`
 - `public/data/metadata.json` (quantiles per geography + averages)
-- `public/data/hexes/<YEAR>.json`
 - `public/data/tracts/tracts.geojson`
 - `public/data/tracts/<YEAR>.json`
-- optional `public/data/tracts/centroids.json`
 
 ### Tasks
-- [ ] `scripts/py/requirements.txt`
-- [ ] `scripts/py/config.example.yaml`
-- [ ] `scripts/py/build_data.py`
-- [ ] Use env var `CENSUS_API_KEY` (never commit keys)
-- [ ] Inflation adjust dollar vars to target year
-- [ ] Validate outputs:
+- [x] Add uv Python project config:
+  - [x] `pyproject.toml`
+  - [x] `uv.lock`
+- [x] Add tract pipeline modules:
+  - [x] `scripts/py/config.py`
+  - [x] `scripts/py/build_tracts.py`
+  - [x] `scripts/py/utils_io.py`
+  - [x] `scripts/py/utils_geo.py`
+  - [x] `scripts/py/utils_acs.py`
+- [x] Use env var `CENSUS_API_KEY` (never commit keys)
+- [x] Fetch ACS 5-year tract estimates + MOEs for:
+  - [x] `home_value_median` (`B25077_001`)
+  - [x] `poverty_below` (`B17001_002`)
+  - [x] `poverty_universe` (`B17001_001`)
+- [x] Write TIGER tract geometry in EPSG:4326 with:
+  - [x] `properties.GEOID`
+  - [x] `properties.centroid_lon`
+  - [x] `properties.centroid_lat`
+- [x] Validate outputs:
   - required keys present
   - no duplicate IDs
   - sanity checks on denominators
   - file sizes reasonable
 
 ### Acceptance checkpoint
-- [ ] Running the script produces files that the web app can load
-- [ ] At least one year fully works end-to-end
+- [x] Running the script produces files that the web app can load
+- [x] At least one year fully works end-to-end
+
+### Validation commands
+- [x] `uv sync`
+- [x] `uv run --env-file .env -- python scripts/py/build_tracts.py`
+- [x] `npm run verify`
+
+---
+
+## Milestone F2 — Hex Pipeline Outputs (San Diego County)
+
+### Objective
+Generate real hex-level data outputs from tract/census inputs and wire them into `public/data/hexes`.
+
+### Outputs
+- `public/data/hexes/<YEAR>.json`
+- `metadata.quantiles.hex.*` and `metadata.averages.hex.*` from real pipeline output
+
+### Tasks
+- [ ] Add hex generation script/module (compatible with F1 config and uv workflow)
+- [ ] Interpolate/aggregate tract estimates onto configured H3 resolution
+- [ ] Carry through required estimate + MOE fields for active metrics
+- [ ] Write `public/data/hexes/<YEAR>.json` for configured years
+- [ ] Recompute `metadata.quantiles.hex` for enabled metrics
+- [ ] Validate file contract and map render compatibility
+
+### Acceptance checkpoint
+- [ ] Hex files are generated and load in app without schema changes
+- [ ] Hex quantiles/averages are real pipeline outputs (not mock)
 
 ---
 

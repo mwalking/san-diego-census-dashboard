@@ -17,4 +17,23 @@ npm run verify
 
 ## How to build
 
-`npm run build` will be available once the web app scaffold is added in a later milestone.
+```bash
+npm run build
+```
+
+## Python Data Pipeline (uv)
+
+The tract data pipeline uses `uv` for dependency and environment management. `uv` keeps the project
+environment synced, creates `.venv/`, and maintains `uv.lock`.
+
+```bash
+uv sync
+uv run --env-file .env -- python scripts/py/build_tracts.py
+```
+
+If you prefer exporting the key manually:
+
+```bash
+export CENSUS_API_KEY=...
+uv run -- python scripts/py/build_tracts.py
+```
