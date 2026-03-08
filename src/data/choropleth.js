@@ -86,7 +86,7 @@ export function getFillColorForValue(value, quantileBreaks) {
 export function buildLegendBins(quantileBreaks, formatValue) {
   const breaks = normalizeQuantileBreaks(quantileBreaks);
   if (!breaks.length) {
-    return [{ label: 'No data', color: NO_DATA_COLOR }];
+    return [{ label: 'No data', color: NO_DATA_COLOR, bucketIndex: -1, isNoData: true }];
   }
 
   const palette = getPaletteForBucketCount(breaks.length + 1);
@@ -102,9 +102,14 @@ export function buildLegendBins(quantileBreaks, formatValue) {
       label = `${formatValue(breaks[index - 1])} - ${formatValue(breaks[index])}`;
     }
 
-    bins.push({ label, color: palette[index] });
+    bins.push({
+      label,
+      color: palette[index],
+      bucketIndex: index,
+      isNoData: false,
+    });
   }
 
-  bins.push({ label: 'No data', color: NO_DATA_COLOR });
+  bins.push({ label: 'No data', color: NO_DATA_COLOR, bucketIndex: -1, isNoData: true });
   return bins;
 }

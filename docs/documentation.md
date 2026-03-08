@@ -4,7 +4,7 @@
 
 ## Current status
 
-- **Active milestone:** Milestone F1 — tract pipeline (completed)
+- **Active milestone:** F1.1 — remove / erase water from tract geometries (completed)
 - **Next milestone:** Milestone F2 — hex pipeline
 
 ## Repository overview
@@ -471,6 +471,184 @@ npm run build
 - Pinned `pandas` to `<3.0` because `pytidycensus 0.1.8` triggers a runtime error with pandas 3.x during ACS post-processing.
 - Preserved existing `metadata.quantiles.hex` and `metadata.averages.hex` in F1 so the current hex UI continues to load while tract data is made real.
 - Computed tract quantiles from the configured/latest tract year output and county reference averages from county-level ACS values as required.
+
+## UI-1 changes
+
+- Updated `src/components/Sidebar.jsx`:
+  - replaced separate **In view** and **Selected area** summary cards with a single top summary strip.
+  - summary strip now renders three columns:
+    - `Selected (N)`
+    - `In view (M)`
+    - `All (K)`
+  - each column shows estimate and `± MOE` (or `± —`).
+  - kept year data loading/indexing single-pass per `(geoMode, year)` and reused:
+    - `selectedRecords`
+    - `visibleRecords`
+    - `allRecords`.
+  - added all-data summary computation:
+    - non-median metrics aggregate from `allRecords` via `computeAggregateMetricStats(...)`.
+    - median metrics use metadata average fallback (`metadata.averages[...]`) with optional MOE fallback (`metadata.averages_moe[...]`).
+  - removed the bottom standalone Selected area summary card.
+- Updated `src/app/App.jsx`:
+  - passed `metadata` into `Sidebar` so UI-1 all-data median fallback can read metadata averages.
+- No map/selection interaction behavior changes were made in this milestone.
+
+## Commands run and results (UI-1)
+
+- `npm run build`: passed.
+  - non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run verify`: passed.
+  - includes `format:check`, `lint`, and `build`.
+- `npm run dev -- --host 127.0.0.1 --port 4173`:
+  - first run in sandbox failed with `EPERM` bind error.
+  - rerun with elevated permissions started successfully (`VITE v7.3.1 ready`), confirming dev startup.
+
+## Decisions made (UI-1)
+
+- Chose compact summary labels with counts (`Selected (N)`, `In view (M)`, `All (K)`) to keep context visible in a ~360px sidebar.
+- For median metrics in the **All** column, avoided fake aggregate medians and used metadata regional averages when available; if absent, displayed `—`.
+- Kept per-metric row summaries tied to selected-area aggregation only (no change to row-level interaction behavior).
+- Next milestone set to UI-2 legend bucket selection/filter.
+
+## UI-2 changes
+
+- Updated `src/data/choropleth.js`:
+  - retained shared bucket resolver `getBucketIndexForValue(...)`.
+  - extended `buildLegendBins(...)` to include `bucketIndex` and `isNoData` metadata so legend rows map
+    1:1 to fill-color buckets.
+- Updated `src/components/LegendCard.jsx`:
+  - legend quantile buckets now use button semantics.
+  - active bucket gets visual state (background/ring) and `aria-pressed`.
+  - added small `Clear` button shown when legend filter is active.
+  - no-data legend row remains non-clickable.
+- Updated `src/app/App.jsx`:
+  - added legend filter state (`geoMode`, `metricId`, `year`, `bucketIndex`).
+  - added `computeLegendBucketSelection(...)` to compute IDs from current year index:
+    - loads indexed year data via cached loaders + `indexYearData(...)`
+    - iterates `yearIndex.byId` entries
+    - computes record estimate with `computeRecordMetricStats(...)`
+    - assigns buckets via `getBucketIndexForValue(...)`
+    - collects IDs matching clicked bucket index
+  - applying legend filter now sets `selectedIdsByGeo[geoMode]` to bucket members.
+  - clicking same bucket again clears filter and restores pre-filter selection snapshot.
+  - auto-clears legend filter on:
+    - active metric changes
+    - geo mode changes
+    - year changes
+    - normal map selection actions (click/brush)
+    - choose-for-me selection action
+  - legend filter does not change `selectionMode`.
+- Updated `src/components/MapShell.jsx`:
+  - added optional dimming of non-matching fills while legend filter is active.
+  - matching features keep full choropleth color.
+  - existing hover and selected outline layers remain intact.
+
+## Commands run and results (UI-2)
+
+- `npm run build`: passed.
+  - non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run verify`: first run failed on formatting in `src/app/App.jsx`; after Prettier fix, passed.
+  - includes `format:check`, `lint`, and `build`.
+- `npm run dev -- --host 127.0.0.1 --port 4173`:
+  - first run in sandbox failed (`EPERM` bind).
+  - rerun with elevated permissions started successfully (`VITE v7.3.1 ready`).
+- Manual interaction smoke checks for legend click/toggle were not executed in this CLI-only run.
+
+## Decisions made (UI-2)
+
+- Previous selection restore behavior:
+  - first bucket filter captures the pre-filter selection for the active geography.
+  - clearing the same bucket (or using Clear) restores that captured selection.
+  - switching between buckets in the same filter context preserves the original snapshot until filter clear.
+- Auto-clear behavior:
+  - context changes (metric/geo/year) clear and restore prior selection.
+  - user-driven map/choose selections clear filter without restoring snapshot so newest intent wins.
+- Bucket consistency:
+  - legend bucket membership and map fill buckets both use `getBucketIndexForValue(...)` so color classes
+    and click filter membership remain aligned.
+- Next milestone reset to Milestone F2 (hex pipeline).
+
+## F1.1 changes
+
+- Added `pygris>=0.2.1,<0.3.0` to the uv-managed Python pipeline dependencies and refreshed `uv.lock`.
+- Updated `scripts/py/config.py`:
+  - added configurable `tract_water_erase_area_threshold = 0.75`.
+- Updated `scripts/py/utils_geo.py`:
+  - kept detailed TIGER/Line tracts as the geometry source (`cb=False` equivalent path via direct TIGER zip).
+  - applied `pygris.utils.erase_water(...)` before simplification using the matched TIGER year.
+  - retained cleanup entirely on the Python side; no frontend masking/filtering was added.
+  - added defensive cleanup after erase:
+    - normalize `GEOID`, `TRACTCE`, and `ALAND`
+    - dissolve duplicate `GEOID` rows if overlay splits a tract
+    - drop `ALAND <= 0`
+    - drop `TRACTCE` in `990000`-`990099`
+    - drop empty / invalid / non-polygon geometries
+  - recomputed representative-point `centroid_lon` / `centroid_lat` after final cleaned geometry.
+- Updated `scripts/py/build_tracts.py`:
+  - filtered ACS tract values down to the cleaned geometry GEOID set before writing `public/data/tracts/2023.json`.
+  - expanded validation to fail if cleaned tract geometry has:
+    - empty geometries
+    - missing or duplicate GEOIDs
+    - `ALAND <= 0`
+    - remaining `TRACTCE` in `990000`-`990099`
+  - added GEOID-set equality checks between cleaned tract geometry, `tracts.geojson`, and tract values.
+- Regenerated real tract outputs:
+  - `public/data/tracts/tracts.geojson`
+  - `public/data/tracts/2023.json`
+  - `public/data/metadata.json`
+- Build result:
+  - tract geometry count changed from 737 source tract rows to 736 cleaned tract features.
+  - the dropped tract was `GEOID 06073990100`, which had `ALAND = 0` and therefore remained excluded even
+    though its `TRACTCE` sits just outside the `990000`-`990099` fallback range.
+- Updated `README.md` to note that tract geometries are cleaned to erase water during the Python build.
+
+## Commands run and results (F1.1)
+
+- `uv sync`: passed.
+  - refreshed the lockfile and installed `pygris==0.2.1`.
+- `uv run --env-file .env -- python scripts/py/build_tracts.py`:
+  - first run failed because `erase_water` is not re-exported at the top level of the locked `pygris`
+    package.
+  - fixed by importing `erase_water` from `pygris.utils`.
+  - rerun passed and regenerated cleaned tract geometry + values.
+- Output inspection after build:
+  - `tracts.geojson` features: `736`
+  - `tracts/2023.json` records: `736`
+  - GEOID sets match: `true`
+  - metadata source now records:
+    - `water_erase_area_threshold: 0.75`
+    - `feature_count_before_cleanup: 737`
+    - `feature_count_after_cleanup: 736`
+- `npm run verify`: first run failed on Prettier formatting for regenerated JSON outputs.
+  - fixed by running Prettier on:
+    - `public/data/metadata.json`
+    - `public/data/tracts/tracts.geojson`
+    - `public/data/years.json`
+  - rerun passed.
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (F1.1)
+
+- Kept the existing direct TIGER/Line zip download for tract geometry because it already uses detailed
+  tracts rather than simplified cartographic boundaries; only the water-removal step changed.
+- Applied `pygris.utils.erase_water(...)` before simplification so water erasing operates on the detailed
+  tract geometry, which is the closest Python analogue to the tigris/tidycensus workflow the milestone
+  called for.
+- Set the default water erase threshold to `0.75` to remove larger proximate water areas without trying to
+  subtract every small water polygon.
+- Kept fallback filters explicit after erase:
+  - `ALAND > 0`
+  - no `TRACTCE` in `990000`-`990099`
+  - no empty / invalid geometries
+- Kept the frontend untouched; schema consistency is maintained by filtering tract value outputs to the
+  cleaned geometry GEOID set.
+- Next milestone reset to Milestone F2 (hex pipeline).
 
 ## Known issues / follow-ups
 

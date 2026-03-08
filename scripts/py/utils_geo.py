@@ -3,11 +3,16 @@ from __future__ import annotations
 from pathlib import Path
 
 import geopandas as gpd
+import pandas as pd
 import requests
+from pygris.utils import erase_water
+from shapely import make_valid
 
 from utils_io import download_with_cache
 
 TIGER_TRACT_URL_TEMPLATE = 'https://www2.census.gov/geo/tiger/TIGER{year}/TRACT/tl_{year}_{state_fips}_tract.zip'
+WATER_TRACTCE_MIN = 990000
+WATER_TRACTCE_MAX = 990099
 
 
 def county_fips3(county_fips: str) -> str:
@@ -49,13 +54,42 @@ def _download_tiger_tract_zip(
     raise RuntimeError(message)
 
 
+def _normalize_tract_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    normalized = gdf.copy()
+    normalized['GEOID'] = normalized['GEOID'].astype(str).str.replace('.0', '', regex=False).str.zfill(11)
+    normalized['TRACTCE'] = (
+        normalized['TRACTCE'].astype(str).str.replace('.0', '', regex=False).str.zfill(6)
+    )
+    normalized['ALAND'] = pd.to_numeric(normalized['ALAND'], errors='coerce')
+    return normalized
+
+
+def _is_water_tract(tractce: pd.Series) -> pd.Series:
+    tractce_numeric = pd.to_numeric(tractce, errors='coerce')
+    return tractce_numeric.between(WATER_TRACTCE_MIN, WATER_TRACTCE_MAX, inclusive='both')
+
+
+def _cleanup_geometry(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    cleaned = gdf.copy()
+    cleaned['geometry'] = cleaned.geometry.apply(lambda geom: make_valid(geom) if geom is not None else None)
+    cleaned = cleaned[cleaned.geometry.notna()].copy()
+    cleaned = cleaned[~cleaned.geometry.is_empty].copy()
+    cleaned = cleaned[cleaned.geometry.geom_type.isin(['Polygon', 'MultiPolygon'])].copy()
+    cleaned = cleaned[cleaned.is_valid].copy()
+    return gpd.GeoDataFrame(cleaned, geometry='geometry', crs=gdf.crs)
+
+
 def load_tract_geometry(
     year: int,
     state_fips: str,
     counties: list[str],
     cache_dir: Path,
     simplify_tolerance: float,
+    water_area_threshold: float,
 ) -> tuple[gpd.GeoDataFrame, dict[str, object]]:
+    if water_area_threshold < 0 or water_area_threshold > 1:
+        raise ValueError('water_area_threshold must be between 0 and 1.')
+
     zip_path, tiger_year, source_url = _download_tiger_tract_zip(year, state_fips, cache_dir)
 
     gdf = gpd.read_file(f'zip://{zip_path}')
@@ -72,25 +106,51 @@ def load_tract_geometry(
     if filtered.empty:
         raise RuntimeError('No tract geometry rows found for configured counties.')
 
-    filtered['GEOID'] = filtered['GEOID'].astype(str).str.zfill(11)
+    filtered = _normalize_tract_columns(filtered[['GEOID', 'TRACTCE', 'ALAND', 'geometry']])
+
+    feature_count_before_cleanup = int(len(filtered))
+    filtered = erase_water(
+        filtered,
+        area_threshold=water_area_threshold,
+        year=tiger_year,
+        cache=False,
+    )
+    filtered = _normalize_tract_columns(filtered)
+    filtered = _cleanup_geometry(filtered)
+
+    if filtered['GEOID'].duplicated().any():
+        filtered = filtered.dissolve(by='GEOID', as_index=False, aggfunc='first')
+        filtered = _normalize_tract_columns(filtered)
+        filtered = _cleanup_geometry(filtered)
+
+    filtered = filtered[filtered['ALAND'].notna() & (filtered['ALAND'] > 0)].copy()
+    filtered = filtered[~_is_water_tract(filtered['TRACTCE'])].copy()
+    filtered = _cleanup_geometry(filtered)
+
+    if filtered.empty:
+        raise RuntimeError('No tract geometries remained after water cleanup.')
 
     if simplify_tolerance > 0:
         filtered['geometry'] = filtered.geometry.simplify(
             simplify_tolerance,
             preserve_topology=True,
         )
+        filtered = _cleanup_geometry(filtered)
 
     representative_points = filtered.geometry.representative_point()
     filtered['centroid_lon'] = representative_points.x.astype(float)
     filtered['centroid_lat'] = representative_points.y.astype(float)
 
-    filtered = filtered[['GEOID', 'centroid_lon', 'centroid_lat', 'geometry']]
+    filtered = filtered[['GEOID', 'TRACTCE', 'ALAND', 'centroid_lon', 'centroid_lat', 'geometry']]
     filtered = filtered.sort_values('GEOID').reset_index(drop=True)
 
     source_meta = {
         'tiger_year': tiger_year,
         'source_url': source_url,
         'zip_path': str(zip_path),
+        'water_erase_area_threshold': water_area_threshold,
+        'feature_count_before_cleanup': feature_count_before_cleanup,
+        'feature_count_after_cleanup': int(len(filtered)),
     }
 
     return filtered, source_meta

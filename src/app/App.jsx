@@ -6,7 +6,11 @@ import MapShell from '../components/MapShell.jsx';
 import SelectionModeCard from '../components/SelectionModeCard.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import WelcomeModal from '../components/WelcomeModal.jsx';
-import { buildLegendBins, normalizeQuantileBreaks } from '../data/choropleth.js';
+import {
+  buildLegendBins,
+  getBucketIndexForValue,
+  normalizeQuantileBreaks,
+} from '../data/choropleth.js';
 import {
   GEO_MODES,
   getCenterLngLat,
@@ -193,6 +197,59 @@ function getCountyAverage(metadata, geoMode, year, metricId) {
   return toFiniteNumber(metadata?.averages?.[yearKey]?.[metricId]);
 }
 
+async function loadYearIndexForGeoMode(geoMode, year) {
+  const yearKey = String(year ?? '');
+  if (!yearKey) {
+    return { byId: new globalThis.Map(), records: [] };
+  }
+
+  if (geoMode === GEO_MODES.HEX) {
+    const rawHexData = await loadHexYear(yearKey);
+    return indexYearData(GEO_MODES.HEX, rawHexData);
+  }
+
+  if (geoMode === GEO_MODES.TRACT) {
+    const rawTractData = await loadTractYear(yearKey);
+    return indexYearData(GEO_MODES.TRACT, rawTractData);
+  }
+
+  return { byId: new globalThis.Map(), records: [] };
+}
+
+async function computeLegendBucketSelection({
+  geoMode,
+  year,
+  metric,
+  quantileBreaks,
+  bucketIndex,
+}) {
+  const normalizedBucketIndex = Number(bucketIndex);
+  if (!Number.isInteger(normalizedBucketIndex) || normalizedBucketIndex < 0 || !metric) {
+    return [];
+  }
+
+  const breaks = normalizeQuantileBreaks(quantileBreaks);
+  if (!breaks.length) {
+    return [];
+  }
+
+  const yearIndex = await loadYearIndexForGeoMode(geoMode, year);
+  if (!(yearIndex?.byId instanceof Map)) {
+    return [];
+  }
+
+  const matchingIds = [];
+  for (const [id, record] of yearIndex.byId.entries()) {
+    const estimate = computeRecordMetricStats(metric, record)?.estimate;
+    const recordBucketIndex = getBucketIndexForValue(estimate, breaks);
+    if (recordBucketIndex === normalizedBucketIndex) {
+      matchingIds.push(id);
+    }
+  }
+
+  return matchingIds;
+}
+
 function App() {
   const [geoMode, setGeoMode] = useState(GEO_MODES.HEX);
   const [hoverIdByGeo, setHoverIdByGeo] = useState({
@@ -220,11 +277,14 @@ function App() {
   const [metrics, setMetrics] = useState([]);
   const [isSharedDataLoading, setIsSharedDataLoading] = useState(true);
   const [isMapDataLoading, setIsMapDataLoading] = useState(false);
+  const [legendFilter, setLegendFilter] = useState(null);
   const chooseDataCacheRef = useRef({
     [GEO_MODES.HEX]: new Map(),
     [GEO_MODES.TRACT]: new Map(),
     tractsGeojson: null,
   });
+  const legendFilterPreviousSelectionRef = useRef(null);
+  const legendFilterRequestIdRef = useRef(0);
 
   useEffect(() => {
     try {
@@ -341,7 +401,43 @@ function App() {
     });
   }
 
-  function handleSelectedIdsChange(mode, nextSelectedIds) {
+  const clearLegendFilter = useCallback(
+    ({ restorePreviousSelection = true } = {}) => {
+      if (!legendFilter) {
+        return false;
+      }
+
+      legendFilterRequestIdRef.current += 1;
+      const previousSelection = legendFilterPreviousSelectionRef.current;
+
+      if (restorePreviousSelection && previousSelection?.geoMode) {
+        const mode = previousSelection.geoMode;
+        const restoreIds = normalizeIdList(previousSelection.ids);
+        setSelectedIdsByGeo((previous) => {
+          const previousIds = previous[mode] ?? [];
+          const hasSameLength = previousIds.length === restoreIds.length;
+          const hasSameValues =
+            hasSameLength && previousIds.every((value, index) => value === restoreIds[index]);
+
+          if (hasSameValues) {
+            return previous;
+          }
+
+          return {
+            ...previous,
+            [mode]: restoreIds,
+          };
+        });
+      }
+
+      legendFilterPreviousSelectionRef.current = null;
+      setLegendFilter(null);
+      return true;
+    },
+    [legendFilter],
+  );
+
+  const applySelectedIdsByGeoMode = useCallback((mode, nextSelectedIds) => {
     if (mode !== GEO_MODES.HEX && mode !== GEO_MODES.TRACT) {
       return;
     }
@@ -364,6 +460,14 @@ function App() {
         [mode]: normalizedSelectedIds,
       };
     });
+  }, []);
+
+  function handleSelectedIdsChange(mode, nextSelectedIds) {
+    if (legendFilter?.geoMode === mode) {
+      clearLegendFilter({ restorePreviousSelection: false });
+    }
+
+    applySelectedIdsByGeoMode(mode, nextSelectedIds);
   }
 
   const handleVisibleIdsChange = useCallback((mode, nextVisibleIds) => {
@@ -530,6 +634,10 @@ function App() {
         });
       }
 
+      if (legendFilter?.geoMode === geoMode) {
+        clearLegendFilter({ restorePreviousSelection: false });
+      }
+
       setSelectionMode('single');
       setSelectedIdsByGeo((previous) => ({
         ...previous,
@@ -550,7 +658,15 @@ function App() {
     } catch (error) {
       console.error('Choose for me failed:', error);
     }
-  }, [activeMetric, geoMode, loadChooseDataContext, metadata, year]);
+  }, [
+    activeMetric,
+    clearLegendFilter,
+    geoMode,
+    legendFilter,
+    loadChooseDataContext,
+    metadata,
+    year,
+  ]);
 
   useEffect(() => {
     if (!chooseForMeCallout) {
@@ -570,6 +686,22 @@ function App() {
     setChooseForMeCallout(null);
   }, [activeMetricId, geoMode, year]);
 
+  useEffect(() => {
+    if (!legendFilter) {
+      return;
+    }
+
+    const yearKey = String(year ?? '');
+    const isStillValid =
+      legendFilter.geoMode === geoMode &&
+      legendFilter.metricId === activeMetricId &&
+      legendFilter.year === yearKey;
+
+    if (!isStillValid) {
+      clearLegendFilter({ restorePreviousSelection: true });
+    }
+  }, [activeMetricId, clearLegendFilter, geoMode, legendFilter, year]);
+
   const quantileBreaks = useMemo(() => {
     if (!activeMetricId) {
       return [];
@@ -582,6 +714,94 @@ function App() {
     const format = activeMetric?.format ?? 'number';
     return buildLegendBins(quantileBreaks, (value) => formatLegendTick(value, format));
   }, [activeMetric, quantileBreaks]);
+
+  const isLegendFilterActive = useMemo(() => {
+    if (!legendFilter) {
+      return false;
+    }
+
+    const yearKey = String(year ?? '');
+    return (
+      legendFilter.geoMode === geoMode &&
+      legendFilter.metricId === activeMetricId &&
+      legendFilter.year === yearKey
+    );
+  }, [activeMetricId, geoMode, legendFilter, year]);
+
+  const activeLegendBucketIndex = isLegendFilterActive ? legendFilter.bucketIndex : null;
+
+  const handleLegendBucketClick = useCallback(
+    async (bucketIndex) => {
+      if (!activeMetric || !year) {
+        return;
+      }
+
+      const normalizedBucketIndex = Number(bucketIndex);
+      if (!Number.isInteger(normalizedBucketIndex) || normalizedBucketIndex < 0) {
+        return;
+      }
+
+      const yearKey = String(year);
+      const isSameFilterContext =
+        legendFilter?.geoMode === geoMode &&
+        legendFilter?.metricId === activeMetric.id &&
+        legendFilter?.year === yearKey;
+
+      const isSameBucket =
+        isSameFilterContext && legendFilter?.bucketIndex === normalizedBucketIndex;
+      if (isSameBucket) {
+        clearLegendFilter({ restorePreviousSelection: true });
+        return;
+      }
+
+      if (!isSameFilterContext) {
+        legendFilterPreviousSelectionRef.current = {
+          geoMode,
+          ids: normalizeIdList(selectedIdsByGeo[geoMode] ?? []),
+        };
+      }
+
+      const requestId = legendFilterRequestIdRef.current + 1;
+      legendFilterRequestIdRef.current = requestId;
+
+      try {
+        const ids = await computeLegendBucketSelection({
+          geoMode,
+          year,
+          metric: activeMetric,
+          quantileBreaks,
+          bucketIndex: normalizedBucketIndex,
+        });
+
+        if (legendFilterRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        applySelectedIdsByGeoMode(geoMode, ids);
+        setLegendFilter({
+          geoMode,
+          metricId: activeMetric.id,
+          year: yearKey,
+          bucketIndex: normalizedBucketIndex,
+        });
+      } catch (error) {
+        if (legendFilterRequestIdRef.current !== requestId) {
+          return;
+        }
+        console.error('Legend bucket filter failed:', error);
+      }
+    },
+    [
+      activeMetric,
+      applySelectedIdsByGeoMode,
+      clearLegendFilter,
+      geoMode,
+      legendFilter,
+      quantileBreaks,
+      selectedIdsByGeo,
+      year,
+    ],
+  );
 
   const geoLabel = useMemo(() => getGeoLabel(geoMode), [geoMode]);
   const isLoading = isSharedDataLoading || isMapDataLoading;
@@ -630,6 +850,8 @@ function App() {
             hoverId={hoverIdByGeo[geoMode]}
             selectionMode={selectionMode}
             selectedIds={selectedIdsByGeo[geoMode] ?? []}
+            legendFilterActive={isLegendFilterActive}
+            legendFilterHighlightIds={isLegendFilterActive ? (selectedIdsByGeo[geoMode] ?? []) : []}
             flyToTarget={flyToTarget}
             defaultViewState={defaultViewState}
             onDataLoadingChange={setIsMapDataLoading}
@@ -676,6 +898,9 @@ function App() {
                 activeMetricLabel={activeMetric?.label ?? 'No available metric'}
                 legendSubtext={`Showing ${geoLabel.toLowerCase()} for the active metric and year.`}
                 quantileBins={legendBins}
+                activeBucketIndex={activeLegendBucketIndex}
+                onBucketClick={handleLegendBucketClick}
+                onClearBucketFilter={() => clearLegendFilter({ restorePreviousSelection: true })}
                 isLoading={isLoading}
               />
             </div>
@@ -700,6 +925,7 @@ function App() {
                 geoMode={geoMode}
                 selectedIds={selectedIdsByGeo[geoMode] ?? []}
                 visibleIds={visibleIdsByGeo[geoMode] ?? []}
+                metadata={metadata}
                 isLoading={isLoading}
               />
             </div>

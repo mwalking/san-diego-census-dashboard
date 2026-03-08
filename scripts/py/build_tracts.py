@@ -14,11 +14,17 @@ from config import (
     region_default_view,
     state_fips,
     tract_simplify_tolerance,
+    tract_water_erase_area_threshold,
     tracts_dir,
     years,
 )
 from utils_acs import REQUIRED_VALUE_KEYS, fetch_county_reference_values, fetch_tract_acs
-from utils_geo import load_tract_geometry, tracts_to_feature_collection
+from utils_geo import (
+    WATER_TRACTCE_MAX,
+    WATER_TRACTCE_MIN,
+    load_tract_geometry,
+    tracts_to_feature_collection,
+)
 from utils_io import ensure_dir, read_json, write_json
 
 GEOID_RE = re.compile(r'^\d{11}$')
@@ -213,21 +219,51 @@ def _build_metadata(
     }
 
 
+def _is_water_tract_code(value: Any) -> bool:
+    numeric = _to_number_or_none(value)
+    if numeric is None:
+        return False
+    return WATER_TRACTCE_MIN <= int(numeric) <= WATER_TRACTCE_MAX
+
+
 def _validate_outputs(
+    tract_geometry_gdf,
     tracts_geojson: dict[str, object],
     tract_values_by_year: dict[int, dict[str, dict[str, float | int | None]]],
 ) -> None:
+    if tract_geometry_gdf.empty:
+        raise AssertionError('Tract geometry GeoDataFrame is empty after cleanup.')
+
+    if tract_geometry_gdf['geometry'].isna().any() or tract_geometry_gdf.geometry.is_empty.any():
+        raise AssertionError('Tract geometry contains empty geometries after cleanup.')
+
+    if tract_geometry_gdf['GEOID'].isna().any():
+        raise AssertionError('Tract geometry contains missing GEOIDs after cleanup.')
+
+    if tract_geometry_gdf['GEOID'].duplicated().any():
+        raise AssertionError('Tract geometry contains duplicate GEOIDs after cleanup.')
+
+    if (tract_geometry_gdf['ALAND'] <= 0).any():
+        raise AssertionError('Tract geometry contains ALAND <= 0 after cleanup.')
+
+    if tract_geometry_gdf['TRACTCE'].map(_is_water_tract_code).any():
+        raise AssertionError('Tract geometry still contains special water-only tract codes.')
+
     features = tracts_geojson.get('features') if isinstance(tracts_geojson, dict) else None
     if not isinstance(features, list) or not features:
         raise AssertionError('tracts.geojson must contain at least one feature.')
 
-    geometry_geoids: set[str] = set()
+    geometry_geoids = set(tract_geometry_gdf['GEOID'].astype(str).tolist())
+    geojson_geoids: set[str] = set()
     for feature in features:
         properties = feature.get('properties', {}) if isinstance(feature, dict) else {}
         geoid = str(properties.get('GEOID', ''))
         if GEOID_RE.match(geoid) is None:
             raise AssertionError(f'Invalid GEOID in tracts.geojson: {geoid!r}')
-        geometry_geoids.add(geoid)
+        geojson_geoids.add(geoid)
+
+    if geojson_geoids != geometry_geoids:
+        raise AssertionError('tracts.geojson GEOIDs do not match cleaned tract geometry GEOIDs.')
 
     if not tract_values_by_year:
         raise AssertionError('No tract year values were generated.')
@@ -249,6 +285,12 @@ def _validate_outputs(
             if missing_keys:
                 raise AssertionError(f'Missing keys for GEOID {geoid}: {missing_keys}')
 
+        value_geoids = set(tract_values.keys())
+        if value_geoids != geometry_geoids:
+            raise AssertionError(
+                f'tracts/{year_value}.json GEOIDs do not match cleaned tract geometry GEOIDs.'
+            )
+
 
 def main() -> None:
     ensure_dir(tracts_dir)
@@ -261,9 +303,11 @@ def main() -> None:
         counties=counties,
         cache_dir=cache_dir,
         simplify_tolerance=tract_simplify_tolerance,
+        water_area_threshold=tract_water_erase_area_threshold,
     )
     tracts_geojson = tracts_to_feature_collection(tract_geometry_gdf)
     write_json(tracts_dir / 'tracts.geojson', tracts_geojson)
+    geometry_geoids = set(tract_geometry_gdf['GEOID'].astype(str).tolist())
 
     tract_values_by_year: dict[int, dict[str, dict[str, float | int | None]]] = {}
     yearly_averages: dict[str, dict[str, float | int | None]] = {}
@@ -276,6 +320,7 @@ def main() -> None:
             counties=counties,
             moe_level=90,
         )
+        tract_df = tract_df[tract_df['GEOID'].astype(str).isin(geometry_geoids)].copy()
         tract_payload = _build_tract_year_payload(tract_df)
         tract_values_by_year[year_value] = tract_payload
         write_json(tracts_dir / f'{year_value}.json', tract_payload)
@@ -310,7 +355,7 @@ def main() -> None:
     )
     write_json(data_dir / 'metadata.json', metadata_payload)
 
-    _validate_outputs(tracts_geojson, tract_values_by_year)
+    _validate_outputs(tract_geometry_gdf, tracts_geojson, tract_values_by_year)
     print('Tract pipeline build complete.')
 
 

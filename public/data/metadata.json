@@ -45,7 +45,10 @@
     "tract_geometry": {
       "tiger_year": 2023,
       "source_url": "https://www2.census.gov/geo/tiger/TIGER2023/TRACT/tl_2023_06_tract.zip",
-      "zip_path": "/home/mwalker/san-diego-census-dashboard/scripts/py/.cache/tl_2023_06_tract.zip"
+      "zip_path": "/home/mwalker/san-diego-census-dashboard/scripts/py/.cache/tl_2023_06_tract.zip",
+      "water_erase_area_threshold": 0.75,
+      "feature_count_before_cleanup": 737,
+      "feature_count_after_cleanup": 736
     },
     "acs_survey": "acs5",
     "acs_moe_level": 90,

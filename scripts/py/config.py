@@ -13,6 +13,7 @@ counties = ['06073']
 years = [2023]
 
 tract_simplify_tolerance = 0.0003
+tract_water_erase_area_threshold = 0.75
 
 region_default_view = {
     'longitude': -117.1611,

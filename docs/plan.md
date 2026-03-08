@@ -296,6 +296,84 @@ Implement “Choose for me” to select a high/low extreme feature and fly to it
 
 ---
 
+## UI-1 — Consolidated summary strip
+
+### Objective
+Replace separate **In view** and **Selected area** summary cards with one consolidated strip showing
+Selected, In view, and All summaries for the active metric.
+
+### Tasks
+- [x] Replace top sidebar summary card with a 3-column strip:
+  - [x] Selected
+  - [x] In view
+  - [x] All
+- [x] Each column shows:
+  - [x] label
+  - [x] estimate
+  - [x] `± MOE` (or `± —`)
+- [x] Keep summary strip in the same location as the previous In view box.
+- [x] Data behavior:
+  - [x] Selected uses `selectedIds` and existing aggregation rules.
+  - [x] In view uses `visibleIds` and existing aggregation rules.
+  - [x] All uses all records in loaded dataset for current `(geoMode, year)`.
+  - [x] For `aggregation === "median"` in All, use metadata region average fallback when available.
+- [x] Sidebar loads/indexes year data once and reuses that index for selected/in-view/all record sets.
+- [x] Do not change map interaction behavior.
+
+### Acceptance checkpoint
+- [x] Sidebar shows one consolidated summary strip with three columns.
+- [x] Selected and In view summary behavior remains correct for zero/single/multi selections.
+- [x] All summary computes from all records (with metadata fallback for median metrics).
+
+### Validation commands
+- [x] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run dev` starts without runtime startup errors
+
+---
+
+## UI-2 — Clickable legend buckets
+
+### Objective
+When a user clicks a legend bucket, select all features in that bucket so map highlights and sidebar
+stats update through the existing selection path.
+
+### Tasks
+- [x] Legend bucket click behavior:
+  - [x] legend buckets are clickable buttons in `LegendCard.jsx`
+  - [x] clicking a bucket applies a legend filter
+  - [x] clicking the same active bucket clears filter and restores previous selection
+  - [x] filter auto-clears on metric/geo/year changes
+  - [x] filter auto-clears on normal map selection actions (click/brush)
+- [x] Filter application:
+  - [x] compute bucket-member IDs for current `(geoMode, year, metric, quantileBreaks, bucketIndex)`
+  - [x] apply IDs to `selectedIdsByGeo[geoMode]`
+  - [x] do not force-change `selectionMode`
+- [x] Bucket consistency:
+  - [x] use shared `getBucketIndexForValue(value, quantileBreaks)`
+  - [x] ensure fill-color bucket mapping and legend bucket mapping are 1:1
+- [x] Map highlighting:
+  - [x] selected outline layers highlight all bucket members
+  - [x] non-matching features are dimmed while legend filter is active
+- [x] Legend affordance:
+  - [x] active bucket visual state
+  - [x] clear button shown when filter is active
+
+### Acceptance checkpoint
+- [x] Clicking a legend bucket highlights many matching features and updates sidebar selected stats.
+- [x] Toggling off the same bucket restores prior selection state.
+- [x] Bucket membership matches choropleth bucket colors.
+
+### Validation commands
+- [x] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run dev` starts without runtime startup errors
+- [ ] Manual smoke check:
+  - click legend bucket -> selected count increases and sidebar stats update
+  - click same bucket/Clear -> previous selection returns
+
+---
+
 ## Milestone F1 — Real Tract Pipeline (San Diego County)
 
 ### Objective
@@ -336,6 +414,40 @@ Generate real tract-level ACS + TIGER outputs for San Diego County using a uv-ma
 ### Acceptance checkpoint
 - [x] Running the script produces files that the web app can load
 - [x] At least one year fully works end-to-end
+
+### Validation commands
+- [x] `uv sync`
+- [x] `uv run --env-file .env -- python scripts/py/build_tracts.py`
+- [x] `npm run verify`
+
+---
+
+## Milestone F1.1 — Remove / Erase Water From Tract Geometries
+
+### Objective
+Clean San Diego County tract geometries in the Python pipeline so offshore and water-only tracts do
+not appear as land in the app.
+
+### Tasks
+- [x] Keep detailed TIGER/Line tract geometry as the source before cleanup.
+- [x] Add pygris water erasing in the tract geometry build path.
+- [x] Make water erase area threshold configurable in `scripts/py/config.py`.
+- [x] Add defensive post-erase tract filtering:
+  - [x] drop `ALAND <= 0`
+  - [x] drop `TRACTCE` in `990000`-`990099`
+  - [x] drop empty / invalid geometries
+  - [x] recompute representative-point centroids after final cleanup
+- [x] Keep tract value outputs aligned to remaining geometry GEOIDs.
+- [x] Add pipeline validation for:
+  - [x] no empty geometries
+  - [x] all remaining features have GEOID
+  - [x] no remaining `TRACTCE` in `990000`-`990099`
+  - [x] `ALAND > 0` for all remaining features
+
+### Acceptance checkpoint
+- [x] `public/data/tracts/tracts.geojson` regenerated from cleaned geometries.
+- [x] `public/data/tracts/2023.json` remains aligned to the cleaned GEOID set.
+- [x] No frontend/schema changes were required.
 
 ### Validation commands
 - [x] `uv sync`

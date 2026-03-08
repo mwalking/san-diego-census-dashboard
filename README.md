@@ -24,7 +24,9 @@ npm run build
 ## Python Data Pipeline (uv)
 
 The tract data pipeline uses `uv` for dependency and environment management. `uv` keeps the project
-environment synced, creates `.venv/`, and maintains `uv.lock`.
+environment synced, creates `.venv/`, and maintains `uv.lock`. The Python tract geometry build uses
+detailed TIGER/Line tracts and erases proximate water areas before writing
+`public/data/tracts/tracts.geojson`.
 
 ```bash
 uv sync

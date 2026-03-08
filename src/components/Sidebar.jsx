@@ -8,6 +8,57 @@ import { GEO_MODES, indexYearData } from '../data/geography.js';
 import { loadHexYear, loadTractYear } from '../data/loadData.js';
 import { COPY } from '../ui/microcopy.js';
 
+function toFiniteNumber(value) {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function resolveMetadataAverage(metadata, year, metricId, geoMode) {
+  const yearKey = String(year ?? '');
+  if (!yearKey || !metricId) {
+    return { estimate: null, moe: null };
+  }
+
+  const estimate =
+    toFiniteNumber(metadata?.averages?.[yearKey]?.[metricId]) ??
+    toFiniteNumber(metadata?.averages?.[geoMode]?.[yearKey]?.[metricId]);
+
+  const moe =
+    toFiniteNumber(metadata?.averages_moe?.[yearKey]?.[metricId]) ??
+    toFiniteNumber(metadata?.averages_moe?.[geoMode]?.[yearKey]?.[metricId]);
+
+  return { estimate, moe };
+}
+
+function computeAllSummaryStats(activeMetric, allRecords, metadata, year, geoMode) {
+  if (!activeMetric) {
+    return { estimate: null, moe: null };
+  }
+
+  if (activeMetric.aggregation === 'median') {
+    return resolveMetadataAverage(metadata, year, activeMetric.id, geoMode);
+  }
+
+  return computeAggregateMetricStats(activeMetric, allRecords);
+}
+
+function getSummaryLabels(activeMetric, stats, forceEmpty = false) {
+  if (forceEmpty || stats?.note) {
+    return {
+      estimateLabel: '—',
+      moeLabel: '± —',
+    };
+  }
+
+  return {
+    estimateLabel: formatMetricEstimate(activeMetric, stats?.estimate),
+    moeLabel: `± ${formatMetricMoe(activeMetric, stats?.moe)}`,
+  };
+}
+
 function Sidebar({
   years = [],
   year,
@@ -20,6 +71,7 @@ function Sidebar({
   geoMode,
   selectedIds = [],
   visibleIds = [],
+  metadata = null,
   isLoading,
 }) {
   const [yearDataIndex, setYearDataIndex] = useState({ byId: new globalThis.Map(), records: [] });
@@ -106,6 +158,14 @@ function Sidebar({
       .filter((record) => record && typeof record === 'object');
   }, [visibleIds, yearDataIndex]);
 
+  const allRecords = useMemo(
+    () =>
+      Array.isArray(yearDataIndex?.records)
+        ? yearDataIndex.records.filter((record) => record && typeof record === 'object')
+        : [],
+    [yearDataIndex],
+  );
+
   const inViewStats = useMemo(
     () => computeAggregateMetricStats(activeMetric, visibleRecords),
     [activeMetric, visibleRecords],
@@ -114,6 +174,11 @@ function Sidebar({
   const selectedStats = useMemo(
     () => computeAggregateMetricStats(activeMetric, selectedRecords),
     [activeMetric, selectedRecords],
+  );
+
+  const allStats = useMemo(
+    () => computeAllSummaryStats(activeMetric, allRecords, metadata, year, geoMode),
+    [activeMetric, allRecords, geoMode, metadata, year],
   );
 
   const selectedStatsByMetricId = useMemo(() => {
@@ -139,10 +204,18 @@ function Sidebar({
   }, [metricDefinitionsById, metricGroups, selectedRecords]);
 
   const isSummaryLoading = isLoading || isMetricStatsLoading;
-  const inViewEstimateLabel = formatMetricEstimate(activeMetric, inViewStats?.estimate);
-  const inViewMoeLabel = formatMetricMoe(activeMetric, inViewStats?.moe);
-  const selectedEstimateLabel = formatMetricEstimate(activeMetric, selectedStats?.estimate);
-  const selectedMoeLabel = formatMetricMoe(activeMetric, selectedStats?.moe);
+  const selectedSummary = useMemo(
+    () => getSummaryLabels(activeMetric, selectedStats, selectedRecords.length === 0),
+    [activeMetric, selectedRecords.length, selectedStats],
+  );
+  const inViewSummary = useMemo(
+    () => getSummaryLabels(activeMetric, inViewStats, visibleRecords.length === 0),
+    [activeMetric, inViewStats, visibleRecords.length],
+  );
+  const allSummary = useMemo(
+    () => getSummaryLabels(activeMetric, allStats, allRecords.length === 0),
+    [activeMetric, allRecords.length, allStats],
+  );
 
   function getMetricRowSummary(metricRow) {
     if (!selectedIds.length) {
@@ -211,13 +284,36 @@ function Sidebar({
       {isSummaryLoading ? <p className="mt-3 text-xs text-emerald-300">Loading…</p> : null}
 
       <section className="mt-4 rounded-lg bg-slate-800/70 p-3">
-        <h3 className="text-xs uppercase tracking-wide text-slate-400">In view</h3>
         <p className="mt-1 text-xs text-slate-400">{activeMetric?.label ?? 'No active metric'}</p>
-        <p className="mt-2 text-lg font-semibold text-slate-100">{inViewEstimateLabel}</p>
-        <p className="mt-1 text-xs text-slate-300">± {inViewMoeLabel}</p>
-        {inViewStats?.note ? (
-          <p className="mt-1 text-xs text-slate-400">Not available for aggregated medians.</p>
-        ) : null}
+        <div className="mt-3 grid grid-cols-3 divide-x divide-slate-700/70">
+          <div className="min-w-0 pr-2">
+            <p className="truncate text-[10px] uppercase tracking-wide text-slate-400">
+              Selected ({selectedRecords.length})
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-100">
+              {selectedSummary.estimateLabel}
+            </p>
+            <p className="mt-1 truncate text-[10px] text-slate-300">{selectedSummary.moeLabel}</p>
+          </div>
+          <div className="min-w-0 px-2">
+            <p className="truncate text-[10px] uppercase tracking-wide text-slate-400">
+              In view ({visibleRecords.length})
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-100">
+              {inViewSummary.estimateLabel}
+            </p>
+            <p className="mt-1 truncate text-[10px] text-slate-300">{inViewSummary.moeLabel}</p>
+          </div>
+          <div className="min-w-0 pl-2">
+            <p className="truncate text-[10px] uppercase tracking-wide text-slate-400">
+              All ({allRecords.length})
+            </p>
+            <p className="mt-1 truncate text-sm font-semibold text-slate-100">
+              {allSummary.estimateLabel}
+            </p>
+            <p className="mt-1 truncate text-[10px] text-slate-300">{allSummary.moeLabel}</p>
+          </div>
+        </div>
       </section>
 
       <div className="mt-4 space-y-4">
@@ -269,25 +365,6 @@ function Sidebar({
           </section>
         ))}
       </div>
-      <section className="mt-5 rounded-lg bg-slate-800/70 p-3">
-        <h3 className="text-xs uppercase tracking-wide text-slate-400">
-          {COPY.sidebar.selectedAreaTitle}
-        </h3>
-        {selectedIds.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-300">{COPY.sidebar.noAreaSelected}</p>
-        ) : (
-          <>
-            <p className="mt-1 text-xs text-slate-400">
-              {activeMetric?.label ?? 'No active metric'}
-            </p>
-            <p className="mt-2 text-lg font-semibold text-slate-100">{selectedEstimateLabel}</p>
-            <p className="mt-1 text-xs text-slate-300">± {selectedMoeLabel}</p>
-            {selectedStats?.note ? (
-              <p className="mt-1 text-xs text-slate-400">Not available for aggregated medians.</p>
-            ) : null}
-          </>
-        )}
-      </section>
     </aside>
   );
 }

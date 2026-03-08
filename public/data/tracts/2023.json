@@ -5886,13 +5886,5 @@
     "poverty_below_moe": 331,
     "poverty_universe": 7322,
     "poverty_universe_moe": 1003
-  },
-  "06073990100": {
-    "home_value_median": null,
-    "home_value_median_moe": null,
-    "poverty_below": 0,
-    "poverty_below_moe": 14,
-    "poverty_universe": 0,
-    "poverty_universe_moe": 14
   }
 }

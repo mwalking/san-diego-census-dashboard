@@ -71,6 +71,15 @@ function toFiniteNumber(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function dimFillColor(color) {
+  if (!Array.isArray(color)) {
+    return color;
+  }
+
+  const [r = 17, g = 24, b = 39, a = 220] = color;
+  return [r, g, b, Math.max(24, Math.round(a * 0.22))];
+}
+
 function resolveMetricType(metric) {
   const explicitType = metric?.type ?? metric?.compute?.type;
   if (explicitType) {
@@ -145,6 +154,8 @@ function MapShell({
   hoverId,
   selectionMode,
   selectedIds = [],
+  legendFilterActive = false,
+  legendFilterHighlightIds = [],
   flyToTarget = null,
   defaultViewState = INITIAL_VIEW_STATE,
   onDataLoadingChange,
@@ -170,6 +181,10 @@ function MapShell({
   const [brushStart, setBrushStart] = useState(null);
   const [brushEnd, setBrushEnd] = useState(null);
   const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const legendHighlightIdSet = useMemo(
+    () => new Set(legendFilterHighlightIds),
+    [legendFilterHighlightIds],
+  );
   const brushBounds = useMemo(() => getBrushBounds(brushStart, brushEnd), [brushStart, brushEnd]);
 
   useEffect(() => {
@@ -279,10 +294,30 @@ function MapShell({
           stroked: false,
           extruded: false,
           getHexagon: (record) => record.h3,
-          getFillColor: (record) =>
-            getFillColorForValue(computeMetricValue(activeMetric, record), quantileBreaks),
+          getFillColor: (record) => {
+            const baseColor = getFillColorForValue(
+              computeMetricValue(activeMetric, record),
+              quantileBreaks,
+            );
+
+            if (!legendFilterActive || legendHighlightIdSet.size === 0) {
+              return baseColor;
+            }
+
+            const recordId = getFeatureId(GEO_MODES.HEX, record);
+            if (recordId && legendHighlightIdSet.has(recordId)) {
+              return baseColor;
+            }
+
+            return dimFillColor(baseColor);
+          },
           updateTriggers: {
-            getFillColor: [activeMetric?.id, quantileBreaks],
+            getFillColor: [
+              activeMetric?.id,
+              quantileBreaks,
+              legendFilterActive,
+              legendFilterHighlightIds,
+            ],
           },
         }),
       ];
@@ -345,11 +380,29 @@ function MapShell({
           getLineColor: TRACT_LINE_COLOR,
           getFillColor: (feature) => {
             const record = getRecordFromLayerObject(GEO_MODES.TRACT, feature, tractYearIndex);
-            const value = computeMetricValue(activeMetric, record);
-            return getFillColorForValue(value, quantileBreaks);
+            const baseColor = getFillColorForValue(
+              computeMetricValue(activeMetric, record),
+              quantileBreaks,
+            );
+
+            if (!legendFilterActive || legendHighlightIdSet.size === 0) {
+              return baseColor;
+            }
+
+            const featureId = getFeatureId(GEO_MODES.TRACT, feature);
+            if (featureId && legendHighlightIdSet.has(featureId)) {
+              return baseColor;
+            }
+
+            return dimFillColor(baseColor);
           },
           updateTriggers: {
-            getFillColor: [activeMetric?.id, quantileBreaks],
+            getFillColor: [
+              activeMetric?.id,
+              quantileBreaks,
+              legendFilterActive,
+              legendFilterHighlightIds,
+            ],
           },
         }),
       ];
@@ -404,6 +457,9 @@ function MapShell({
     geoMode,
     hexYearIndex,
     hoverId,
+    legendFilterActive,
+    legendFilterHighlightIds,
+    legendHighlightIdSet,
     quantileBreaks,
     selectedIdSet,
     tractYearIndex,
