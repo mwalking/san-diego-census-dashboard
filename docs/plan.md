@@ -466,16 +466,69 @@ Generate real hex-level data outputs from tract/census inputs and wire them into
 - `metadata.quantiles.hex.*` and `metadata.averages.hex.*` from real pipeline output
 
 ### Tasks
-- [ ] Add hex generation script/module (compatible with F1 config and uv workflow)
-- [ ] Interpolate/aggregate tract estimates onto configured H3 resolution
-- [ ] Carry through required estimate + MOE fields for active metrics
-- [ ] Write `public/data/hexes/<YEAR>.json` for configured years
-- [ ] Recompute `metadata.quantiles.hex` for enabled metrics
-- [ ] Validate file contract and map render compatibility
+- [x] Add hex generation script/module (compatible with F1 config and uv workflow)
+- [x] Interpolate/aggregate tract estimates onto configured H3 resolution
+- [x] Carry through required estimate + MOE fields for active metrics
+- [x] Write `public/data/hexes/<YEAR>.json` for configured years
+- [x] Recompute `metadata.quantiles.hex` for enabled metrics
+- [x] Validate file contract and map render compatibility
 
 ### Acceptance checkpoint
-- [ ] Hex files are generated and load in app without schema changes
-- [ ] Hex quantiles/averages are real pipeline outputs (not mock)
+- [x] Hex files are generated and load in app without schema changes
+- [x] Hex quantiles/averages are real pipeline outputs (not mock)
+
+### Validation commands
+- [x] `uv sync`
+- [x] `uv run -- python scripts/py/build_hexes.py`
+- [x] `npm run verify`
+
+---
+
+## Milestone F3.5 — Expand Tract Variables With ACS Map + Recodes
+
+### Objective
+Expand tract pipeline variables using uploaded ACS variable map + recode definitions while preserving the
+existing frontend schema and interaction behavior.
+
+### Tasks
+- [x] Add durable ACS config files:
+  - [x] `scripts/py/config/census_variables.json`
+  - [x] `scripts/py/config/census_recodes.json`
+- [x] Implement two-layer tract pipeline flow:
+  - [x] fetch layer loads raw ACS map and fetches mapped internal columns by GEOID
+  - [x] recode layer collapses dashboard variables from mapped columns
+- [x] Add split fetch planning:
+  - [x] detailed `B...` variables via `acs5` endpoint
+  - [x] subject `S...` variables via `acs5/subject` endpoint
+  - [x] batching by table prefix and variable limit
+- [x] Add centralized recode helper (`collapse_census_data`) with tests.
+- [x] Preserve frontend-compatible tract output schema:
+  - [x] include existing required frontend fields
+  - [x] normalize `_m` recode outputs to `*_moe` in public JSON
+- [x] Update `public/data/variables.json` with conservative catalog grouping for expanded variables.
+- [x] Keep scope strict to tract-variable expansion only (no new frontend interactions, no OC expansion,
+  no hex methodology changes).
+
+### Acceptance checkpoint
+- [x] Expanded tract data is generated from ACS map + recodes and written to `public/data/tracts/<YEAR>.json`.
+- [x] Frontend-compatible tract keys remain present for current UI metrics.
+- [x] Validation passes for recode source fields, GEOID presence, and non-empty recoded output.
+
+### Validation commands
+- [x] `uv run -- python scripts/py/test_recode_utils.py`
+- [x] `uv run --env-file .env -- python scripts/py/build_tracts.py`
+- [x] `npm run verify`
+
+---
+
+## Milestone F4 — Hex Methodology Improvements / County Expansion
+
+### Objective
+Improve the hex interpolation methodology and/or expand the pipeline design to support Orange County.
+
+### Acceptance checkpoint
+- [ ] Hex methodology improvements are documented and validated (median + MOE approach).
+- [ ] Or county expansion path is implemented with no runtime Census API calls in the web app.
 
 ---
 

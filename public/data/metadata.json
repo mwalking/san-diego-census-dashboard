@@ -15,11 +15,11 @@
   },
   "quantiles": {
     "hex": {
-      "home_value_median": [361936, 555179, 809660, 1041986, 1178538],
-      "poverty_rate": [0.0569, 0.1388, 0.1995, 0.2464, 0.305]
+      "home_value_median": [316100, 422300, 462400, 666700, 966590],
+      "poverty_rate": [0.035779, 0.060428, 0.076944, 0.107818, 0.18727]
     },
     "tract": {
-      "home_value_median": [522580, 628230, 747100, 894500, 1259480],
+      "home_value_median": [484150, 618900, 735300, 882700, 1243600],
       "poverty_rate": [0.027059, 0.054699, 0.081843, 0.118712, 0.215335]
     }
   },
@@ -30,8 +30,8 @@
     },
     "hex": {
       "2023": {
-        "home_value_median": 791431,
-        "poverty_rate": 0.1941
+        "home_value_median": 462400,
+        "poverty_rate": 0.103573
       }
     },
     "tract": {
@@ -52,6 +52,14 @@
     },
     "acs_survey": "acs5",
     "acs_moe_level": 90,
-    "quantile_year": 2023
+    "quantile_year": 2023,
+    "acs_variable_map": "scripts/py/config/census_variables.json",
+    "acs_recode_map": "scripts/py/config/census_recodes.json",
+    "acs_fetch_strategy": {
+      "detailed_endpoint": "acs/acs5",
+      "subject_endpoint": "acs/acs5/subject",
+      "batch_size": 45,
+      "grouping": "product + table_prefix"
+    }
   }
 }

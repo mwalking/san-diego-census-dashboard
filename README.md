@@ -28,9 +28,19 @@ environment synced, creates `.venv/`, and maintains `uv.lock`. The Python tract 
 detailed TIGER/Line tracts and erases proximate water areas before writing
 `public/data/tracts/tracts.geojson`.
 
+Tract ACS expansion is configured in two JSON layers:
+
+- raw fetch map: `scripts/py/config/census_variables.json`
+- recode/collapse map: `scripts/py/config/census_recodes.json`
+
+`build_tracts.py` fetches ACS variables in batches (split across detailed `B...` tables and subject
+`S...` tables), recodes collapsed variables, and normalizes public MOE naming to the frontend
+convention (`*_moe`).
+
 ```bash
 uv sync
 uv run --env-file .env -- python scripts/py/build_tracts.py
+uv run -- python scripts/py/build_hexes.py
 ```
 
 If you prefer exporting the key manually:
@@ -38,4 +48,5 @@ If you prefer exporting the key manually:
 ```bash
 export CENSUS_API_KEY=...
 uv run -- python scripts/py/build_tracts.py
+uv run -- python scripts/py/build_hexes.py
 ```

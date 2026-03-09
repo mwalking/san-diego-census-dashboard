@@ -1,0 +1,374 @@
+{
+  "pop_total_population_e": "pop_total_population_e",
+  "pop_total_population_m": "pop_total_population_m",
+  "age_total_pop_base_e": "age_total_pop_base_e",
+  "age_total_pop_base_m": "age_total_pop_base_m",
+  "age_under_20_e": ["age_under_5_e", "age_05_09_e", "age_10_14_e", "age_15_19_e"],
+  "age_under_20_m": ["age_under_5_m", "age_05_09_m", "age_10_14_m", "age_15_19_m"],
+  "age_20_29_e": ["age_20_24_e", "age_25_29_e"],
+  "age_20_29_m": ["age_20_24_m", "age_25_29_m"],
+  "age_30_49_e": ["age_30_34_e", "age_35_39_e", "age_40_44_e", "age_45_49_e"],
+  "age_30_49_m": ["age_30_34_m", "age_35_39_m", "age_40_44_m", "age_45_49_m"],
+  "age_50_64_e": ["age_50_54_e", "age_55_59_e", "age_60_64_e"],
+  "age_50_64_m": ["age_50_54_m", "age_55_59_m", "age_60_64_m"],
+  "age_65_plus_e": [
+    "age_65_69_e",
+    "age_70_74_e",
+    "age_75_79_e",
+    "age_80_84_e",
+    "age_85_and_over_e"
+  ],
+  "age_65_plus_m": [
+    "age_65_69_m",
+    "age_70_74_m",
+    "age_75_79_m",
+    "age_80_84_m",
+    "age_85_and_over_m"
+  ],
+  "race_total_pop_base_e": "race_total_pop_base_e",
+  "race_total_pop_base_m": "race_total_pop_base_m",
+  "race_white_e": "race_white_not_hisp_e",
+  "race_white_m": "race_white_not_hisp_m",
+  "race_black_e": "race_black_not_hisp_e",
+  "race_black_m": "race_black_not_hisp_m",
+  "race_hispanic_e": "race_hispanic_e",
+  "race_hispanic_m": "race_hispanic_m",
+  "race_asian_e": "race_asian_amer_not_hisp_e",
+  "race_asian_m": "race_asian_amer_not_hisp_m",
+  "race_native_e": "race_native_amer_not_hisp_e",
+  "race_native_m": "race_native_amer_not_hisp_m",
+  "race_other_combined_e": [
+    "race_pacific_islander_not_hisp_e",
+    "race_other_not_hisp_e",
+    "race_two_or_more_not_hisp_e"
+  ],
+  "race_other_combined_m": [
+    "race_pacific_islander_not_hisp_m",
+    "race_other_not_hisp_m",
+    "race_two_or_more_not_hisp_m"
+  ],
+
+  "transport_total_base_e": "transport_total_base_e",
+  "transport_total_base_m": "transport_total_base_m",
+  "transport_public_transit_e": "transport_public_transit_e",
+  "transport_public_transit_m": "transport_public_transit_m",
+  "transport_work_from_home_e": "transport_work_from_home_e",
+  "transport_work_from_home_m": "transport_work_from_home_m",
+
+  "disability_total_pop_base_e": "disability_total_pop_base_e",
+  "disability_total_pop_base_m": "disability_total_pop_base_m",
+  "disability_with_disability_e": "disability_with_disability_e",
+  "disability_with_disability_m": "disability_with_disability_m",
+  "disability_no_disability_e": "disability_no_disability_e",
+  "disability_no_disability_m": "disability_no_disability_m",
+
+  "poverty_total_pop_base_e": "poverty_total_pop_base_e",
+  "poverty_total_pop_base_m": "poverty_total_pop_base_m",
+  "poverty_below_poverty_level_e": "poverty_below_poverty_level_e",
+  "poverty_below_poverty_level_m": "poverty_below_poverty_level_m",
+
+  "internet_total_hh_base_e": "internet_total_hh_base_e",
+  "internet_total_hh_base_m": "internet_total_hh_base_m",
+  "internet_with_subscription_e": "internet_with_subscription_e",
+  "internet_with_subscription_m": "internet_with_subscription_m",
+  "internet_no_internet_access_e": "internet_no_internet_access_e",
+  "internet_no_internet_access_m": "internet_no_internet_access_m",
+  "edu_total_pop_25+_base_e": "edu_total_pop_25+_base_e",
+  "edu_total_pop_25+_base_m": "edu_total_pop_25+_base_m",
+  "edu_hs_or_less_e": ["edu_high_school_less_e", "edu_high_school_grad_e"],
+  "edu_hs_or_less_m": ["edu_high_school_less_m", "edu_high_school_grad_m"],
+  "edu_some_college_e": "edu_some_college_e",
+  "edu_some_college_m": "edu_some_college_m",
+  "edu_bachelors_plus_e": ["edu_bachelors_degree_e", "edu_graduate_degree_e"],
+  "edu_bachelors_plus_m": ["edu_bachelors_degree_m", "edu_graduate_degree_m"],
+  "hh_income_base_e": "hh_income_base_e",
+  "hh_income_base_m": "hh_income_base_m",
+  "hh_income_less_30K_e": [
+    "hh_income_less_10k_e",
+    "hh_income_10k_15K_e",
+    "hh_income_15k_20K_e",
+    "hh_income_20k_25K_e",
+    "hh_income_25k_30K_e"
+  ],
+  "hh_income_less_30K_m": [
+    "hh_income_less_10k_m",
+    "hh_income_10k_15K_m",
+    "hh_income_15k_20K_m",
+    "hh_income_20k_25K_m",
+    "hh_income_25k_30K_m"
+  ],
+  "hh_income_30K_74K_e": [
+    "hh_income_30k_35K_e",
+    "hh_income_35k_40K_e",
+    "hh_income_40k_45K_e",
+    "hh_income_45k_50K_e",
+    "hh_income_50k_60K_e",
+    "hh_income_60k_75K_e"
+  ],
+  "hh_income_30K_74K_m": [
+    "hh_income_30k_35K_m",
+    "hh_income_35k_40K_m",
+    "hh_income_40k_45K_m",
+    "hh_income_45k_50K_m",
+    "hh_income_50k_60K_m",
+    "hh_income_60k_75K_m"
+  ],
+  "hh_income_75K_99K_e": "hh_income_75k_100K_e",
+  "hh_income_75K_99K_m": "hh_income_75k_100K_m",
+  "hh_income_100K_149K_e": ["hh_income_100k_125K_e", "hh_income_125k_150K_e"],
+  "hh_income_100K_149K_m": ["hh_income_100k_125K_m", "hh_income_125k_150K_m"],
+  "hh_income_150K_199K_e": "hh_income_150k_200K_e",
+  "hh_income_150K_199K_m": "hh_income_150k_200K_m",
+  "hh_income_200K_plus_e": "hh_income_more_200K_e",
+  "hh_income_200K_plus_m": "hh_income_more_200K_m",
+  "lang_speak_base_e": "lang_speak_base_e",
+  "lang_speak_base_m": "lang_speak_base_m",
+  "lang_speak_english_only_e": "lang_speak_only_eng_e",
+  "lang_speak_english_only_m": "lang_speak_only_eng_m",
+  "lang_speak_spanish_e": "lang_speak_spanish_e",
+  "lang_speak_spanish_m": "lang_speak_spanish_m",
+  "lang_speak_spanish_low_english_e": "lang_speak_spanish_low_english_e",
+  "lang_speak_spanish_low_english_m": "lang_speak_spanish_low_english_m",
+  "commute_base_e": "commute_base_e",
+  "commute_base_m": "commute_base_m",
+  "commute_under_10min_e": ["commute_less_than_5_minutes_e", "commute_5_9_minutes_e"],
+  "commute_under_10min_m": ["commute_less_than_5_minutes_m", "commute_5_9_minutes_m"],
+  "commute_10_29min_e": [
+    "commute_10_14_minutes_e",
+    "commute_15_19_minutes_e",
+    "commute_20_24_minutes_e",
+    "commute_25_29_minutes_e"
+  ],
+  "commute_10_29min_m": [
+    "commute_10_14_minutes_m",
+    "commute_15_19_minutes_m",
+    "commute_20_24_minutes_m",
+    "commute_25_29_minutes_m"
+  ],
+  "commute_30_59min_e": [
+    "commute_30_34_minutes_e",
+    "commute_35_39_minutes_e",
+    "commute_40_44_minutes_e",
+    "commute_45_59_minutes_e"
+  ],
+  "commute_30_59min_m": [
+    "commute_30_34_minutes_m",
+    "commute_35_39_minutes_m",
+    "commute_40_44_minutes_m",
+    "commute_45_59_minutes_m"
+  ],
+  "commute_60_plus_e": ["commute_60_89_minutes_e", "commute_90_or_more_minutes_e"],
+  "commute_60_plus_m": ["commute_60_89_minutes_m", "commute_90_or_more_minutes_m"],
+  "housing_year_built_total_e": "housing_year_built_total_e",
+  "housing_year_built_total_m": "housing_year_built_total_m",
+  "housing_year_built_very_new_2010_plus_e": [
+    "housing_year_built_built_2020_or_later_e",
+    "housing_year_built_built_2010_to_2019_e"
+  ],
+  "housing_year_built_very_new_2010_plus_m": [
+    "housing_year_built_built_2020_or_later_m",
+    "housing_year_built_built_2010_to_2019_m"
+  ],
+  "housing_year_built_new_2000_2009_e": "housing_year_built_built_2000_to_2009_e",
+  "housing_year_built_new_2000_2009_m": "housing_year_built_built_2000_to_2009_m",
+  "housing_year_built_1980_1999_e": [
+    "housing_year_built_built_1990_to_1999_e",
+    "housing_year_built_built_1980_to_1989_e"
+  ],
+  "housing_year_built_1980_1999_m": [
+    "housing_year_built_built_1990_to_1999_m",
+    "housing_year_built_built_1980_to_1989_m"
+  ],
+  "housing_year_built_1960_1979_e": [
+    "housing_year_built_built_1970_to_1979_e",
+    "housing_year_built_built_1960_to_1969_e"
+  ],
+  "housing_year_built_1960_1979_m": [
+    "housing_year_built_built_1970_to_1979_m",
+    "housing_year_built_built_1960_to_1969_m"
+  ],
+  "housing_year_built_old_pre_1960_e": [
+    "housing_year_built_built_1950_to_1959_e",
+    "housing_year_built_built_1940_to_1949_e",
+    "housing_year_built_built_1939_or_earlier_e"
+  ],
+  "housing_year_built_old_pre_1960_m": [
+    "housing_year_built_built_1950_to_1959_m",
+    "housing_year_built_built_1940_to_1949_m",
+    "housing_year_built_built_1939_or_earlier_m"
+  ],
+  "housing_occupancy_total_base_e": "housing_occupancy_total_base_e",
+  "housing_occupancy_total_base_m": "housing_occupancy_total_base_m",
+  "housing_occupancy_occupied_e": "housing_occupancy_occupied_e",
+  "housing_occupancy_occupied_m": "housing_occupancy_occupied_m",
+  "housing_occupancy_vacant_e": "housing_occupancy_vacant_e",
+  "housing_occupancy_vacant_m": "housing_occupancy_vacant_m",
+  "housing_tenure_total_base_e": "housing_tenure_total_base_e",
+  "housing_tenure_total_base_m": "housing_tenure_total_base_m",
+  "housing_tenure_owner_occupied_e": "housing_tenure_owner_occupied_e",
+  "housing_tenure_owner_occupied_m": "housing_tenure_owner_occupied_m",
+  "housing_tenure_renter_occupied_e": "housing_tenure_renter_occupied_e",
+  "housing_tenure_renter_occupied_m": "housing_tenure_renter_occupied_m",
+  "housing_units_structure_total_base_e": "housing_units_structure_total_base_e",
+  "housing_units_structure_total_base_m": "housing_units_structure_total_base_m",
+  "housing_units_structure_single_family_e": [
+    "housing_units_structure_1_detached_e",
+    "housing_units_structure_1_attached_e"
+  ],
+  "housing_units_structure_single_family_m": [
+    "housing_units_structure_1_detached_m",
+    "housing_units_structure_1_attached_m"
+  ],
+  "housing_units_structure_small_multi_2_to_9_e": [
+    "housing_units_structure_2_e",
+    "housing_units_structure_3_or_4_e",
+    "housing_units_structure_5_to_9_e"
+  ],
+  "housing_units_structure_small_multi_2_to_9_m": [
+    "housing_units_structure_2_m",
+    "housing_units_structure_3_or_4_m",
+    "housing_units_structure_5_to_9_m"
+  ],
+  "housing_units_structure_large_multi_10_plus_e": [
+    "housing_units_structure_10_to_19_e",
+    "housing_units_structure_20_to_49_e",
+    "housing_units_structure_50_or_more_e"
+  ],
+  "housing_units_structure_large_multi_10_plus_m": [
+    "housing_units_structure_10_to_19_m",
+    "housing_units_structure_20_to_49_m",
+    "housing_units_structure_50_or_more_m"
+  ],
+  "housing_units_structure_mobile_home_e": "housing_units_structure_mobile_home_e",
+  "housing_units_structure_mobile_home_m": "housing_units_structure_mobile_home_m",
+  "housing_units_structure_other_e": "housing_units_structure_boat_rv_van_etc_e",
+  "housing_units_structure_other_m": "housing_units_structure_boat_rv_van_etc_m",
+  "tenure_vehicles_total_base_e": "tenure_vehicles_total_base_e",
+  "tenure_vehicles_total_base_m": "tenure_vehicles_total_base_m",
+  "tenure_vehicles_owner_occupied_base_e": "tenure_vehicles_owner_occupied_base_e",
+  "tenure_vehicles_owner_occupied_base_m": "tenure_vehicles_owner_occupied_base_m",
+  "tenure_vehicles_renter_occupied_base_e": "tenure_vehicles_renter_occupied_base_e",
+  "tenure_vehicles_renter_occupied_base_m": "tenure_vehicles_renter_occupied_base_m",
+  "tenure_vehicles_owner_no_vehicle_e": "tenure_vehicles_owner_no_vehicle_e",
+  "tenure_vehicles_owner_no_vehicle_m": "tenure_vehicles_owner_no_vehicle_m",
+  "tenure_vehicles_owner_1_vehicle_e": "tenure_vehicles_owner_1_vehicle_e",
+  "tenure_vehicles_owner_1_vehicle_m": "tenure_vehicles_owner_1_vehicle_m",
+  "tenure_vehicles_owner_2_vehicles_e": "tenure_vehicles_owner_2_vehicles_e",
+  "tenure_vehicles_owner_2_vehicles_m": "tenure_vehicles_owner_2_vehicles_m",
+  "tenure_vehicles_owner_3_plus_vehicles_e": [
+    "tenure_vehicles_owner_3_vehicles_e",
+    "tenure_vehicles_owner_4_vehicles_e",
+    "tenure_vehicles_owner_5_plus_vehicles_e"
+  ],
+  "tenure_vehicles_owner_3_plus_vehicles_m": [
+    "tenure_vehicles_owner_3_vehicles_m",
+    "tenure_vehicles_owner_4_vehicles_m",
+    "tenure_vehicles_owner_5_plus_vehicles_m"
+  ],
+  "tenure_vehicles_renter_no_vehicle_e": "tenure_vehicles_renter_no_vehicle_e",
+  "tenure_vehicles_renter_no_vehicle_m": "tenure_vehicles_renter_no_vehicle_m",
+  "tenure_vehicles_renter_1_vehicle_e": "tenure_vehicles_renter_1_vehicle_e",
+  "tenure_vehicles_renter_1_vehicle_m": "tenure_vehicles_renter_1_vehicle_m",
+  "tenure_vehicles_renter_2_vehicles_e": "tenure_vehicles_renter_2_vehicles_e",
+  "tenure_vehicles_renter_2_vehicles_m": "tenure_vehicles_renter_2_vehicles_m",
+  "tenure_vehicles_renter_3_plus_vehicles_e": [
+    "tenure_vehicles_renter_3_vehicles_e",
+    "tenure_vehicles_renter_4_vehicles_e",
+    "tenure_vehicles_renter_5_plus_vehicles_e"
+  ],
+  "tenure_vehicles_renter_3_plus_vehicles_m": [
+    "tenure_vehicles_renter_3_vehicles_m",
+    "tenure_vehicles_renter_4_vehicles_m",
+    "tenure_vehicles_renter_5_plus_vehicles_m"
+  ],
+  "rent_burden_total_base_e": "rent_burden_total_base_e",
+  "rent_burden_total_base_m": "rent_burden_total_base_m",
+  "rent_burden_affordable_under_30_percent_e": [
+    "rent_burden_less_10_percent_e",
+    "rent_burden_10_to_14_percent_e",
+    "rent_burden_15_to_19_percent_e",
+    "rent_burden_20_to_24_percent_e",
+    "rent_burden_25_to_29_percent_e"
+  ],
+  "rent_burden_affordable_under_30_percent_m": [
+    "rent_burden_less_10_percent_m",
+    "rent_burden_10_to_14_percent_m",
+    "rent_burden_15_to_19_percent_m",
+    "rent_burden_20_to_24_percent_m",
+    "rent_burden_25_to_29_percent_m"
+  ],
+  "rent_burden_moderate_30_to_49_percent_e": [
+    "rent_burden_30_to_34_percent_e",
+    "rent_burden_35_to_39_percent_e",
+    "rent_burden_40_to_49_percent_e"
+  ],
+  "rent_burden_moderate_30_to_49_percent_m": [
+    "rent_burden_30_to_34_percent_m",
+    "rent_burden_35_to_39_percent_m",
+    "rent_burden_40_to_49_percent_m"
+  ],
+  "rent_burden_severe_50_percent_plus_e": "rent_burden_50_percent_or_more_e",
+  "rent_burden_severe_50_percent_plus_m": "rent_burden_50_percent_or_more_m",
+  "rent_burden_not_computed_e": "rent_burden_not_computed_e",
+  "rent_burden_not_computed_m": "rent_burden_not_computed_m",
+  "home_value_total_base_e": "home_value_total_base_e",
+  "home_value_total_base_m": "home_value_total_base_m",
+  "home_value_low_under_200k_e": [
+    "home_value_less_10k_e",
+    "home_value_10k_15k_e",
+    "home_value_15k_20k_e",
+    "home_value_20k_25k_e",
+    "home_value_25k_30k_e",
+    "home_value_30k_35k_e",
+    "home_value_35k_40k_e",
+    "home_value_40k_50k_e",
+    "home_value_50k_60k_e",
+    "home_value_60k_70k_e",
+    "home_value_70k_80k_e",
+    "home_value_80k_90k_e",
+    "home_value_90k_100k_e",
+    "home_value_100k_125k_e",
+    "home_value_125k_150k_e",
+    "home_value_150k_175k_e",
+    "home_value_175k_200k_e"
+  ],
+  "home_value_low_under_200k_m": [
+    "home_value_less_10k_m",
+    "home_value_10k_15k_m",
+    "home_value_15k_20k_m",
+    "home_value_20k_25k_m",
+    "home_value_25k_30k_m",
+    "home_value_30k_35k_m",
+    "home_value_35k_40k_m",
+    "home_value_40k_50k_m",
+    "home_value_50k_60k_m",
+    "home_value_60k_70k_m",
+    "home_value_70k_80k_m",
+    "home_value_80k_90k_m",
+    "home_value_90k_100k_m",
+    "home_value_100k_125k_m",
+    "home_value_125k_150k_m",
+    "home_value_150k_175k_m",
+    "home_value_175k_200k_m"
+  ],
+  "home_value_moderate_200k_500k_e": [
+    "home_value_200k_250k_e",
+    "home_value_250k_300k_e",
+    "home_value_300k_400k_e",
+    "home_value_400k_500k_e"
+  ],
+  "home_value_moderate_200k_500k_m": [
+    "home_value_200k_250k_m",
+    "home_value_250k_300k_m",
+    "home_value_300k_400k_m",
+    "home_value_400k_500k_m"
+  ],
+  "home_value_high_500k_1m_e": ["home_value_500k_750k_e", "home_value_750k_1m_e"],
+  "home_value_high_500k_1m_m": ["home_value_500k_750k_m", "home_value_750k_1m_m"],
+  "home_value_luxury_1m_1_5m_e": "home_value_1m_1_5m_e",
+  "home_value_luxury_1m_1_5m_m": "home_value_1m_1_5m_m",
+  "home_value_ultra_luxury_1_5m_2m_e": "home_value_1_5m_2m_e",
+  "home_value_ultra_luxury_1_5m_2m_m": "home_value_1_5m_2m_m",
+  "home_value_super_luxury_2m_plus_e": "home_value_2_million_or_more_e",
+  "home_value_super_luxury_2m_plus_m": "home_value_2_million_or_more_m"
+}
