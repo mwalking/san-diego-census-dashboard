@@ -13,7 +13,7 @@ census_recodes_path = pipeline_config_dir / 'census_recodes.json'
 
 state_fips = '06'
 counties = ['06073']
-years = [2023]
+years = [2022, 2023, 2024]
 default_h3_resolution = 8
 acs_batch_size = 45
 acs_request_timeout_seconds = 120

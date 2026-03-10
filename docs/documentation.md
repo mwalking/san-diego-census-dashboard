@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** F5 — preserve Explore sidebar + add Profile tab (completed)
-- **Next milestone:** Milestone F4 — improve hex methodology and/or expand to Orange County
+- **Active milestone:** F4B — block-group-backed hex methodology
+- **Next milestone:** F4C — multi-year metadata + app wiring
 
 ## Repository overview
 
@@ -920,6 +920,116 @@ npm run build
 - Added an optional collapsed `More details` list to support advanced inspection without cluttering the
   default Profile presentation.
 - Next milestone remains Milestone F4 (hex methodology improvements and/or Orange County expansion).
+
+## Planning update — March 10, 2026
+
+### What changed
+
+- Updated `docs/plan.md` to replace broad milestones with executable sub-milestones:
+  - `F4A` — Multi-Year Tract Outputs (`2022`, `2023`, `2024`)
+  - `F4B` — Block-Group-Backed Hex Methodology
+  - `F4C` — Multi-Year Metadata + App Wiring
+  - `H1` — Data Packaging for GitHub Pages
+  - `H2` — GitHub Pages Deploy Workflow
+  - `UI-3` — Curated Sidebar Expansion + Small Tweaks
+- Updated this file's **Current status** section to:
+  - active milestone `F4A`
+  - next milestone `F4B`
+- Added explicit contract notes in plan milestones for:
+  - `public/data/years.json` must include `[2022, 2023, 2024]`
+  - `public/data/tracts/<YEAR>.json` and `public/data/hexes/<YEAR>.json` required for all three years
+  - metadata quantiles becoming year-aware
+  - compressed sidecars being additive with plain-file compatibility retained
+
+### Commands run and results
+
+- `nl -ba docs/plan.md | sed -n '520,820p'`: reviewed existing broad F4/G/H blocks before replacement.
+- `nl -ba docs/documentation.md | sed -n '1,140p'`: reviewed current status section before update.
+- `nl -ba docs/documentation.md | sed -n '900,1220p'`: reviewed tail section for insertion point.
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking warnings remained during build:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+### Decisions made
+
+- Multi-year scope is locked to `2022`, `2023`, `2024` for both tract and hex modes.
+- ACS year labels are explicitly interpreted as 5-year periods:
+  - `2022` = ACS 2018-2022
+  - `2023` = ACS 2019-2023
+  - `2024` = ACS 2020-2024
+- Hex methodology direction is locked to block groups as an intermediate source for hex interpolation; tract
+  mode remains unchanged.
+- Data delivery strategy for GitHub Pages is gzip sidecars first with plain JSON/GeoJSON fallback support.
+- Deploy defaults are locked to:
+  - project URL first (`/san-diego-census-dashboard/`)
+  - automatic deploy on `main`
+  - deploy from committed `public/data` outputs
+- Quantile policy default remains per-year breaks.
+- Orange County expansion remains out of scope until the F4A/F4B/F4C/H1/H2/UI-3 sequence is complete.
+
+### Next milestone sequence
+
+- Planned progression: `F4A` -> `F4B` -> `F4C` -> `H1` -> `H2` -> `UI-3`
+- Logging convention: after each completed sub-milestone, append a `Next milestone:` line pointing to the
+  immediate next step in that sequence.
+
+## Milestone F4A changes
+
+- Updated Python pipeline year configuration in `scripts/py/config.py`:
+  - `years = [2022, 2023, 2024]`
+- Regenerated tract outputs for all configured years:
+  - `public/data/tracts/2022.json`
+  - `public/data/tracts/2023.json`
+  - `public/data/tracts/2024.json`
+- Regenerated stable tract geometry and tract metadata outputs:
+  - `public/data/tracts/tracts.geojson`
+  - `public/data/metadata.json`
+  - `public/data/years.json`
+- Added pipeline cache directory ignore:
+  - `.gitignore` now includes `scripts/py/.cache/` to avoid accidental commits of downloaded TIGER
+    archives.
+- Confirmed GEOID alignment across all tract year files:
+  - `2022`: 736 records
+  - `2023`: 736 records
+  - `2024`: 736 records
+  - set diffs across years: zero mismatches
+- Documented ACS period semantics for milestone scope:
+  - `2022` = ACS 2018-2022
+  - `2023` = ACS 2019-2023
+  - `2024` = ACS 2020-2024
+
+## Commands run and results (Milestone F4A)
+
+- `uv run --env-file .env -- python scripts/py/build_tracts.py`: passed.
+  - processed ACS tract values for `2022`, `2023`, and `2024`.
+  - wrote years/variables/metadata and tract outputs successfully.
+- Validation spot-check command (Node script) to compare tract GEOID sets across years: passed.
+  - all three years have `736` records and matching GEOID sets.
+- `npm run verify`:
+  - first run failed on Prettier check for regenerated files:
+    - `public/data/metadata.json`
+    - `public/data/tracts/tracts.geojson`
+    - `public/data/years.json`
+  - `npx prettier --write public/data/metadata.json public/data/tracts/tracts.geojson public/data/years.json`
+    applied formatting fixes.
+  - rerun `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (Milestone F4A)
+
+- Kept one stable tract geometry file for all configured years, with yearly value files aligned to the same
+  GEOID set.
+- Accepted pipeline behavior that builds tract geometry from the latest configured year (`2024`) while
+  preserving cross-year GEOID consistency.
+- Scoped F4A strictly to tract multi-year outputs and validation; no hex methodology or app metadata-schema
+  changes were included yet.
+- Temporary Git workflow decision:
+  - defer committing regenerated `public/data/*` artifacts to GitHub until H1 gzip packaging is implemented
+  - plan to commit plain + compressed (`.gz`) data artifacts together in a single coordinated snapshot
+- Next milestone: `F4B` — block-group-backed hex methodology.
 
 ## Known issues / follow-ups
 

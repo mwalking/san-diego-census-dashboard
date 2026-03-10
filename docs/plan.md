@@ -569,37 +569,162 @@ detail without changing map interactions.
 
 ---
 
-## Milestone F4 — Hex Methodology Improvements / County Expansion
+## Milestone F4A — Multi-Year Tract Outputs (2022, 2023, 2024)
 
 ### Objective
-Improve the hex interpolation methodology and/or expand the pipeline design to support Orange County.
-
-### Acceptance checkpoint
-- [ ] Hex methodology improvements are documented and validated (median + MOE approach).
-- [ ] Or county expansion path is implemented with no runtime Census API calls in the web app.
-
----
-
-## Milestone G — Switch app from mock to real data + loading states
-
-### Objective
-Load real generated data, cache efficiently, and show minimal loading UI.
-
-### Acceptance checkpoint
-- [ ] Both geo modes render SD County with real data
-- [ ] Toggle remains responsive after first load (geometry cached)
-
----
-
-## Milestone H — GitHub Pages deploy
-
-### Objective
-Add a deployment workflow for static hosting.
+Expand the tract pipeline to generate aligned tract outputs for `2022`, `2023`, and `2024`.
 
 ### Tasks
-- [ ] Vite base path configured
-- [ ] GitHub Actions deploy workflow
-- [ ] Confirm `public/data/*` is served correctly
+- [x] Update Python pipeline year configuration to include:
+  - [x] `2022`
+  - [x] `2023`
+  - [x] `2024`
+- [x] Regenerate tract files for each year:
+  - [x] `public/data/tracts/2022.json`
+  - [x] `public/data/tracts/2023.json`
+  - [x] `public/data/tracts/2024.json`
+- [x] Keep stable tract geometry and align value outputs to geometry GEOIDs.
+- [x] Update `public/data/years.json` to include `[2022, 2023, 2024]`.
+- [x] Document ACS period semantics:
+  - [x] `2022` -> ACS 2018-2022
+  - [x] `2023` -> ACS 2019-2023
+  - [x] `2024` -> ACS 2020-2024
 
 ### Acceptance checkpoint
-- [ ] Live site loads and functions under GitHub Pages
+- [x] Tract pipeline emits all three years with matching GEOID sets.
+- [x] `public/data/years.json` and tract outputs are app-loadable without runtime Census API calls.
+
+### Validation commands
+- [x] `uv run --env-file .env -- python scripts/py/build_tracts.py`
+- [x] `npm run verify`
+
+### Temporary repo policy
+- [ ] Defer committing regenerated multi-year tract data artifacts to GitHub until H1 gzip packaging is
+  implemented.
+- [ ] When H1 is complete, commit the data snapshot together (plain + `.gz` sidecars) in one coordinated
+  commit.
+
+---
+
+## Milestone F4B — Block-Group-Backed Hex Methodology
+
+### Objective
+Improve hex methodology by using ACS block groups as the interpolation source while keeping tract mode
+unchanged in the app.
+
+### Tasks
+- [ ] Add block-group source geometry + value extraction in the Python pipeline.
+- [ ] Use block groups as the intermediate source for hex interpolation and MOE propagation.
+- [ ] Keep tract outputs and tract-mode app behavior unchanged.
+- [ ] Regenerate hex files for all configured years:
+  - [ ] `public/data/hexes/2022.json`
+  - [ ] `public/data/hexes/2023.json`
+  - [ ] `public/data/hexes/2024.json`
+- [ ] Add/expand pipeline assertions for:
+  - [ ] required output keys
+  - [ ] non-empty outputs
+  - [ ] parity/sanity checks for aggregate counts and ratios
+
+### Acceptance checkpoint
+- [ ] Hex files are generated from a block-group-backed method for all years.
+- [ ] Hex methodology and MOE handling are documented and validated.
+
+### Validation commands
+- [ ] `uv run -- python scripts/py/build_hexes.py`
+- [ ] `npm run verify`
+
+---
+
+## Milestone F4C — Multi-Year Metadata + App Wiring
+
+### Objective
+Wire multi-year data through the app (`2022`, `2023`, `2024`) and make metadata quantiles year-aware.
+
+### Tasks
+- [ ] Update metadata schema and app readers to support per-year quantiles.
+- [ ] Ensure year slider and lazy-loading work for all three years in both geographies.
+- [ ] Keep geography toggle, selection state, legend behavior, and choose-for-me working across years.
+- [ ] Set default legend policy to per-year breaks.
+
+### Acceptance checkpoint
+- [ ] Year slider supports `2022`/`2023`/`2024` in both hex and tract modes.
+- [ ] Legend and map coloring use the active year metadata without regressions.
+
+### Validation commands
+- [ ] `npm run verify`
+- [ ] Manual smoke in browser:
+  - [ ] year toggle in both geographies
+  - [ ] legend update per year
+  - [ ] choose-for-me in both geographies
+
+---
+
+## Milestone H1 — Data Packaging for GitHub Pages
+
+### Objective
+Ship compressed sidecars for large static data files while preserving plain JSON/GeoJSON compatibility.
+
+### Tasks
+- [ ] Generate compressed data sidecars:
+  - [ ] `.json.gz`
+  - [ ] `.geojson.gz`
+- [ ] Keep plain JSON/GeoJSON files in place as additive fallback assets.
+- [ ] Finalize deferred data commit:
+  - [ ] include regenerated multi-year tract outputs
+  - [ ] include compressed sidecars
+  - [ ] commit plain + compressed assets together
+- [ ] Update app data loaders to attempt compressed files first, then plain fallback.
+- [ ] Document a repeatable size-check command and expected output shape.
+
+### Acceptance checkpoint
+- [ ] Compressed sidecars are generated for large data assets and app loading still works with fallback.
+
+### Validation commands
+- [ ] Size check command (documented in `docs/documentation.md`)
+- [ ] `npm run verify`
+- [ ] Manual loader smoke test (compressed path + fallback path)
+
+---
+
+## Milestone H2 — GitHub Pages Deploy Workflow
+
+### Objective
+Deploy the static app to GitHub Pages project URL with automatic deploys on `main`.
+
+### Tasks
+- [ ] Add GitHub Actions Pages deploy workflow.
+- [ ] Configure Vite base path for project Pages deploy:
+  - [ ] `/san-diego-census-dashboard/`
+- [ ] Deploy from committed `public/data` assets (no runtime Census API calls and no deploy-time Census
+  fetch).
+- [ ] Validate that `public/data/*` assets are served correctly from the Pages path prefix.
+
+### Acceptance checkpoint
+- [ ] Live site loads and functions under GitHub Pages project URL.
+
+### Validation commands
+- [ ] GitHub Actions deploy workflow run (push to `main`)
+- [ ] Live Pages sanity check (map load + data fetch + interactions)
+
+---
+
+## Milestone UI-3 — Curated Sidebar Expansion + Small Tweaks
+
+### Objective
+Expand Explore sidebar metrics in a curated way and apply small UI polish without exposing the full catalog.
+
+### Tasks
+- [ ] Add curated metric expansion to Explore groups while keeping current interaction model.
+- [ ] Keep full catalog hidden from default Explore to avoid overwhelming UI.
+- [ ] Add small UI tweaks:
+  - [ ] sidebar readability/polish
+  - [ ] minor spacing/label consistency improvements
+- [ ] Preserve Profile tab behavior and existing map interactions.
+
+### Acceptance checkpoint
+- [ ] Explore shows curated expanded metrics with stable performance and readability.
+- [ ] Profile and map interaction behaviors remain intact.
+
+### Validation commands
+- [ ] `npm run verify`
+- [ ] Manual sidebar/profile smoke in browser
