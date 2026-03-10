@@ -6,6 +6,7 @@ import MapShell from '../components/MapShell.jsx';
 import SelectionModeCard from '../components/SelectionModeCard.jsx';
 import Sidebar from '../components/Sidebar.jsx';
 import WelcomeModal from '../components/WelcomeModal.jsx';
+import { curateExploreMetrics } from '../config/exploreCatalog.js';
 import {
   buildLegendBins,
   getBucketIndexForValue,
@@ -100,16 +101,45 @@ function normalizeIdList(values) {
 }
 
 function normalizeMetricList(payload) {
-  const source = Array.isArray(payload?.metrics) ? payload.metrics : [];
-  return source
-    .filter((metric) => metric && typeof metric === 'object' && metric.id)
-    .map((metric) => ({
+  const normalizedMetrics = [];
+  const seenMetricIds = new Set();
+
+  function appendMetric(metric, fallbackGroup) {
+    if (!metric || typeof metric !== 'object' || !metric.id) {
+      return;
+    }
+
+    const metricId = String(metric.id);
+    if (!metricId || seenMetricIds.has(metricId)) {
+      return;
+    }
+
+    seenMetricIds.add(metricId);
+    normalizedMetrics.push({
       ...metric,
-      id: String(metric.id),
-      label: metric.label ? String(metric.label) : String(metric.id),
-      group: metric.group ? String(metric.group) : 'Other',
+      id: metricId,
+      label: metric.label ? String(metric.label) : metricId,
+      group: metric.group ? String(metric.group) : fallbackGroup || 'Other',
       format: metric.format ? String(metric.format) : 'number',
-    }));
+    });
+  }
+
+  const primaryMetrics = Array.isArray(payload?.metrics) ? payload.metrics : [];
+  for (const metric of primaryMetrics) {
+    appendMetric(metric, null);
+  }
+
+  const catalogGroups = Array.isArray(payload?.catalog?.groups) ? payload.catalog.groups : [];
+  for (const group of catalogGroups) {
+    const fallbackGroup =
+      (group?.label && String(group.label)) || (group?.id && String(group.id)) || 'Other';
+    const catalogMetrics = Array.isArray(group?.metrics) ? group.metrics : [];
+    for (const metric of catalogMetrics) {
+      appendMetric(metric, fallbackGroup);
+    }
+  }
+
+  return curateExploreMetrics(normalizedMetrics);
 }
 
 function getQuantilesForGeoYear(metadata, geoMode, year) {

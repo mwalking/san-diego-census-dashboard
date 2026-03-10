@@ -13,7 +13,7 @@ function Modal({ isOpen, title, onClose, children }) {
         className="absolute inset-0 bg-slate-950/80"
         onClick={onClose}
       />
-      <section className="relative z-10 w-full max-w-lg rounded-xl border border-slate-200/10 bg-slate-900 p-5 shadow-2xl">
+      <section className="relative z-10 max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-xl border border-slate-200/10 bg-slate-900 p-5 shadow-2xl">
         <header className="flex items-center justify-between gap-3">
           <h2 className="text-lg font-semibold text-slate-100">{title}</h2>
           <button
@@ -24,7 +24,9 @@ function Modal({ isOpen, title, onClose, children }) {
             {COPY.modal.close}
           </button>
         </header>
-        <div className="mt-3 text-sm text-slate-300">{children}</div>
+        <div className="mt-3 max-h-[68vh] overflow-y-auto pr-1 text-sm text-slate-300">
+          {children}
+        </div>
       </section>
     </div>
   );

@@ -432,6 +432,47 @@ function Sidebar({
     [activeMetric, allRecords.length, allStats],
   );
 
+  const exploreGroupsForDisplay = useMemo(() => {
+    return metricGroups
+      .map((group) => {
+        const normalizedMetrics = Array.isArray(group.metrics) ? [...group.metrics] : [];
+        normalizedMetrics.sort((left, right) => {
+          const availabilityDelta = Number(left.isDisabled) - Number(right.isDisabled);
+          if (availabilityDelta !== 0) {
+            return availabilityDelta;
+          }
+          return String(left.label).localeCompare(String(right.label));
+        });
+
+        const availableCount = normalizedMetrics.reduce(
+          (count, metric) => count + (metric.isDisabled ? 0 : 1),
+          0,
+        );
+
+        return {
+          ...group,
+          metrics: normalizedMetrics,
+          availableCount,
+          totalCount: normalizedMetrics.length,
+        };
+      })
+      .filter((group) => group.totalCount > 0);
+  }, [metricGroups]);
+
+  const exploreMetricTotals = useMemo(() => {
+    let total = 0;
+    let available = 0;
+    for (const group of exploreGroupsForDisplay) {
+      total += group.totalCount;
+      available += group.availableCount;
+    }
+    return {
+      total,
+      available,
+      unavailable: Math.max(0, total - available),
+    };
+  }, [exploreGroupsForDisplay]);
+
   function getMetricRowSummary(metricRow) {
     if (!selectedIds.length) {
       return {
@@ -514,11 +555,34 @@ function Sidebar({
           </div>
         </section>
 
-        <div className="mt-4 space-y-4">
-          {metricGroups.map((group) => (
-            <section key={group.id}>
-              <h3 className="text-xs uppercase tracking-wide text-slate-400">{group.label}</h3>
-              <div className="mt-2 space-y-1">
+        <section className="mt-4 rounded-lg border border-slate-700/70 bg-slate-900/40 px-3 py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-[11px] uppercase tracking-wide text-slate-300">Explore catalog</p>
+            <p className="text-[11px] text-slate-400">
+              {exploreMetricTotals.available}/{exploreMetricTotals.total} available
+            </p>
+          </div>
+          {exploreMetricTotals.unavailable > 0 ? (
+            <p className="mt-1 text-[10px] text-slate-500">
+              {exploreMetricTotals.unavailable} metrics are currently unavailable for this
+              geography/year.
+            </p>
+          ) : null}
+        </section>
+
+        <div className="mt-4 space-y-3">
+          {exploreGroupsForDisplay.map((group) => (
+            <section
+              key={group.id}
+              className="rounded-lg border border-slate-700/70 bg-slate-900/30 p-2"
+            >
+              <div className="flex items-center justify-between gap-2 px-1">
+                <h3 className="text-xs uppercase tracking-wide text-slate-300">{group.label}</h3>
+                <p className="text-[10px] text-slate-500">
+                  {group.availableCount}/{group.totalCount}
+                </p>
+              </div>
+              <div className="mt-2 space-y-1.5">
                 {group.metrics.map((metric) => {
                   const isActive = metric.id === activeMetricId;
                   const isDisabled = metric.isDisabled;
@@ -528,12 +592,12 @@ function Sidebar({
                       key={metric.id}
                       type="button"
                       disabled={isDisabled}
-                      className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition ${
+                      className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm transition ${
                         isActive
-                          ? 'bg-emerald-400/20 text-emerald-200'
+                          ? 'border-emerald-300/40 bg-emerald-400/20 text-emerald-100'
                           : isDisabled
-                            ? 'cursor-not-allowed bg-slate-800/40 text-slate-500'
-                            : 'bg-slate-800/70 text-slate-200 hover:bg-slate-700'
+                            ? 'cursor-not-allowed border-slate-700/50 bg-slate-900/40 text-slate-500'
+                            : 'border-transparent bg-slate-800/80 text-slate-200 hover:bg-slate-700/80'
                       }`}
                       onClick={() => {
                         if (isDisabled) {
@@ -542,7 +606,14 @@ function Sidebar({
                         onActiveMetricChange(metric.id);
                       }}
                     >
-                      <span>{metric.label}</span>
+                      <span className="pr-3">
+                        <span className="block leading-tight">{metric.label}</span>
+                        {isDisabled ? (
+                          <span className="mt-0.5 block text-[10px] uppercase tracking-wide text-slate-500">
+                            Unavailable
+                          </span>
+                        ) : null}
+                      </span>
                       <span className="text-right">
                         <span className="block text-xs text-slate-300">
                           {rowSummary.estimateLabel}

@@ -1,52 +1,132 @@
 # San Diego Mosaic
 
-Static census dashboard project for San Diego County with a map UI that will support hex (H3) and census tract geographies.
+San Diego Mosaic is a static, map-first census dashboard for exploring neighborhood-level patterns in
+San Diego County, CA.
 
-## How to run
+Live site: https://mwalking.github.io/san-diego-census-dashboard/
+
+## What the app does
+
+- Renders two geography modes:
+  - H3 hex bins
+  - Census tracts
+- Supports three years:
+  - `2022` (ACS 2018-2022)
+  - `2023` (ACS 2019-2023)
+  - `2024` (ACS 2020-2024)
+- Lets users:
+  - switch year + metric
+  - switch geography
+  - hover, click select, and brush select
+  - inspect selected/in-view/all summaries with estimate and MOE where supported
+  - use "Choose for me" to jump to high/low outliers
+
+## Tech stack
+
+- Vite + React + Tailwind
+- MapLibre basemap + deck.gl overlays
+- Python data pipeline managed with `uv`
+- Static hosting on GitHub Pages
+
+## Data model and contract
+
+The web app uses precomputed static data only. No runtime Census API calls are made from the browser.
+
+Required files:
+
+- `public/data/years.json`
+- `public/data/variables.json`
+- `public/data/metadata.json`
+- `public/data/hexes/<YEAR>.json`
+- `public/data/tracts/tracts.geojson`
+- `public/data/tracts/<YEAR>.json`
+
+Compressed sidecars are additive:
+
+- `.json.gz`
+- `.geojson.gz`
+
+Loader behavior:
+
+- Try compressed sidecar first (`.gz`) when supported
+- Fall back to plain JSON/GeoJSON for compatibility
+
+## Local development
+
+Install JS dependencies:
 
 ```bash
 npm install
+```
+
+Run dev server:
+
+```bash
 npm run dev
 ```
 
-## How to verify
+Run full verification:
 
 ```bash
 npm run verify
 ```
 
-## How to build
+Build production bundle:
 
 ```bash
 npm run build
 ```
 
-## Python Data Pipeline (uv)
+## Python pipeline (uv)
 
-The tract data pipeline uses `uv` for dependency and environment management. `uv` keeps the project
-environment synced, creates `.venv/`, and maintains `uv.lock`. The Python tract geometry build uses
-detailed TIGER/Line tracts and erases proximate water areas before writing
-`public/data/tracts/tracts.geojson`.
-
-Tract ACS expansion is configured in two JSON layers:
-
-- raw fetch map: `scripts/py/config/census_variables.json`
-- recode/collapse map: `scripts/py/config/census_recodes.json`
-
-`build_tracts.py` fetches ACS variables in batches (split across detailed `B...` tables and subject
-`S...` tables), recodes collapsed variables, converts ACS MOEs from 90% to 95% confidence level
-(`1.96 / 1.645` scaling), and normalizes public MOE naming to the frontend convention (`*_moe`).
+Sync Python environment:
 
 ```bash
 uv sync
-uv run --env-file .env -- python scripts/py/build_tracts.py
-uv run -- python scripts/py/build_hexes.py
 ```
 
-If you prefer exporting the key manually:
+Run tract + metadata build:
+
+```bash
+uv run --env-file .env -- python scripts/py/build_tracts.py
+```
+
+Run hex build:
+
+```bash
+uv run --env-file .env -- python scripts/py/build_hexes.py
+```
+
+Generate gzip sidecars:
+
+```bash
+uv run -- python scripts/py/build_compressed_data.py
+```
+
+Manual environment alternative:
 
 ```bash
 export CENSUS_API_KEY=...
 uv run -- python scripts/py/build_tracts.py
 uv run -- python scripts/py/build_hexes.py
 ```
+
+## Deployment
+
+GitHub Actions deploys the app to GitHub Pages from `main` using `.github/workflows/pages.yml`.
+
+Important deployment assumptions:
+
+- Pages uses GitHub Actions as the publishing source.
+- Vite production base path is `/san-diego-census-dashboard/`.
+- Deploy reads committed static assets from `public/data`.
+- No deploy-time Census fetch is performed.
+
+## Repo orientation
+
+- `src/app/`: app state + orchestration
+- `src/components/`: UI and map components
+- `src/data/`: loading, geography adapters, stats, MOE helpers
+- `src/ui/`: copy and UX text
+- `scripts/py/`: ACS/TIGER ingestion and data build scripts
+- `docs/`: source-of-truth spec, execution plan, and running project log

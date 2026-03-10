@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** H2 — GitHub Pages deploy workflow
-- **Next milestone:** UI-3 — curated sidebar expansion + small tweaks (after H2 live validation)
+- **Active milestone:** UI-3 — curated sidebar expansion + small tweaks
+- **Next milestone:** UI-3 follow-up — curated Explore metric expansion and sidebar polish
 
 ## Repository overview
 
@@ -1237,10 +1237,157 @@ npm run build
   introduce deploy-time Census fetches.
 - Used production-only Vite base override so local `npm run dev` stays simple while Pages build paths are
   correct.
-- H2 pending close-out validations:
-  - run the Pages workflow on `main`
-  - perform live URL sanity check (map/data fetch/interactions under project path prefix)
+- H2 close-out validations completed:
+  - Pages workflow ran successfully from `main`
+  - live GitHub Pages URL was confirmed loading in-browser
 - Next milestone after H2 close-out: `UI-3` — curated sidebar expansion + small tweaks.
+
+## UI-3 changes (documentation + modal content pass)
+
+- Expanded `README.md` from baseline run instructions to a full project guide:
+  - app scope and feature overview
+  - year coverage and ACS period semantics
+  - data contract and gzip sidecar strategy
+  - local dev, verify, build, and Python pipeline commands
+  - deployment assumptions for GitHub Pages
+- Replaced short placeholder copy in modal content with detailed structured documentation:
+  - `About` modal now covers mission, usage flow, year semantics, methods, and constraints
+  - `Data Sources` modal now documents ACS/TIGER sources, pipeline steps, uncertainty handling, and data
+    delivery contract
+- Updated modal rendering to support sectioned docs content:
+  - optional section headings
+  - paragraphs and bullet lists
+  - fallback to legacy `body` arrays for compatibility
+- Updated modal layout for readability with longer content:
+  - increased modal max width
+  - added bounded scroll region for long documentation content
+- Updated `docs/plan.md` UI-3 checklist to explicitly track README + modal documentation work.
+
+## Commands run and results (UI-3 documentation + modal pass)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 documentation + modal pass)
+
+- Kept detailed in-app documentation inside existing About/Data Sources modals instead of adding new navigation
+  surfaces.
+- Kept content source centralized in `src/ui/microcopy.js` and made modal components render structured copy so
+  future docs edits do not require JSX rewrites.
+- Treated this pass as UI-3 groundwork; curated Explore metric expansion and sidebar polish remain next.
+- Next milestone: `UI-3` follow-up — curated Explore metric expansion and sidebar readability tweaks.
+
+## UI-3 follow-up changes (Explore variable exposure)
+
+- Updated metric normalization in `src/app/App.jsx` to expose expanded variable definitions in Explore:
+  - still loads primary `variables.metrics`
+  - now also ingests `variables.catalog.groups[*].metrics`
+  - deduplicates by metric ID to avoid duplicate rows (for example `home_value_median`)
+- Resulting Explore source set now includes:
+  - `89` unique metrics
+  - `17` groups
+  - base `metrics` entries plus expanded catalog groups
+- Updated `docs/plan.md` UI-3 task tracking to note that catalog metrics are now exposed in Explore.
+
+## Commands run and results (UI-3 follow-up variable exposure)
+
+- Metric-shape spot check (Node): passed.
+  - confirmed `89` normalized metrics and `17` groups after merge/dedup.
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up variable exposure)
+
+- Chose to expose the expanded catalog immediately so Explore reflects available dataset breadth.
+- Kept dedup precedence with `variables.metrics` first, then catalog entries, to preserve current metric
+  definitions where duplicates exist.
+- Kept curation/polish tasks open as a subsequent step:
+  - pruning/curating Explore for readability
+  - additional sidebar UX polish for the larger metric set.
+- Next milestone: `UI-3` follow-up — curation and sidebar readability polish.
+
+## UI-3 follow-up changes (Explore curation pass)
+
+- Added curated Explore catalog configuration in `src/config/exploreCatalog.js`:
+  - explicit priority group order
+  - curated metric allowlist with cleaned labels for readability
+- Updated `src/app/App.jsx` metric normalization path to apply curation after merge/dedup:
+  - merge source remains `variables.metrics + variables.catalog.groups[*].metrics`
+  - curated output now limits default Explore display to prioritized metrics only
+- Curation outcome:
+  - merged source set: `89` unique metrics across `17` groups
+  - curated Explore set: `37` metrics across `10` groups
+  - full raw catalog remains in `variables.json` but is hidden from default Explore rendering
+
+## Commands run and results (UI-3 follow-up curation pass)
+
+- Curation shape check (Node): passed.
+  - confirmed `merged_metrics=89`
+  - confirmed `curated_metrics=37`
+  - confirmed `curated_groups=10`
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up curation pass)
+
+- Chose explicit allowlist-driven curation over heuristic filtering so Explore order and vocabulary are stable
+  and intentional.
+- Preserved merge/dedup behavior upstream so future catalog additions can be included deliberately through one
+  config update (`src/config/exploreCatalog.js`).
+- Marked curation complete while leaving final sidebar visual polish/readability refinements as remaining UI-3
+  follow-up work.
+- Next milestone: `UI-3` follow-up — sidebar readability and spacing polish.
+
+## UI-3 follow-up changes (Population priority + sidebar polish)
+
+- Updated curated Explore configuration (`src/config/exploreCatalog.js`):
+  - added a new `Population` group at the top of Explore
+  - removed the `Vehicle access` group and its four no-vehicle/one-vehicle rows
+  - rebalanced age rows so population summary context appears first
+- Applied sidebar Explore polish in `src/components/Sidebar.jsx`:
+  - group cards now show available/total counts
+  - metrics are ordered with enabled rows first in each group
+  - added catalog summary strip (`available / total`) above grouped metrics
+  - improved row hierarchy and disabled-state readability (`Unavailable` tag + stronger active/disabled
+    visuals)
+
+## Commands run and results (UI-3 follow-up Population + polish)
+
+- Updated curation shape check (Node): passed.
+  - `curated_metrics=37`
+  - groups:
+    - `Population`
+    - `Income & Property`
+    - `Age`
+    - `Race / ethnicity`
+    - `Education`
+    - `Housing occupancy / tenure`
+    - `Home value bands`
+    - `Rent burden`
+    - `Transportation`
+    - `Internet & Language`
+- `npm run verify`:
+  - first run failed on Prettier formatting in `src/components/Sidebar.jsx`.
+  - after formatting (`npx prettier --write src/components/Sidebar.jsx`), rerun passed
+    (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up Population + polish)
+
+- Prioritized a dedicated Population section at the top to make the Explore list easier to scan and interpret
+  from first glance.
+- Removed Vehicle access rows from default Explore to reduce visual noise and keep focus on high-signal
+  categories.
+- Kept this polish pass within existing interaction behavior (no new tabs/modes; no Profile behavior changes).
+- Next milestone: `UI-3` close-out — final sidebar spacing/label polish + manual sidebar/profile smoke.
 
 ## Known issues / follow-ups
 

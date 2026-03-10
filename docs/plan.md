@@ -700,12 +700,12 @@ Deploy the static app to GitHub Pages project URL with automatic deploys on `mai
 - [x] Validate that `public/data/*` assets are served correctly from the Pages path prefix.
 
 ### Acceptance checkpoint
-- [ ] Live site loads and functions under GitHub Pages project URL.
+- [x] Live site loads and functions under GitHub Pages project URL.
 
 ### Validation commands
 - [x] Local build prefix check (`dist/index.html` asset paths include `/san-diego-census-dashboard/`)
-- [ ] GitHub Actions deploy workflow run (push to `main`)
-- [ ] Live Pages sanity check (map load + data fetch + interactions)
+- [x] GitHub Actions deploy workflow run (push to `main`)
+- [x] Live Pages sanity check (map load + data fetch + interactions)
 
 ---
 
@@ -715,9 +715,14 @@ Deploy the static app to GitHub Pages project URL with automatic deploys on `mai
 Expand Explore sidebar metrics in a curated way and apply small UI polish without exposing the full catalog.
 
 ### Tasks
-- [ ] Add curated metric expansion to Explore groups while keeping current interaction model.
-- [ ] Keep full catalog hidden from default Explore to avoid overwhelming UI.
+- [x] Add curated metric expansion to Explore groups while keeping current interaction model.
+  - [x] expose `variables.catalog.groups[*].metrics` in Explore (deduped with base `metrics` list)
+  - [x] apply curated Explore allowlist + priority ordering (37 metrics / 10 groups)
+  - [x] move Population group to top and remove Vehicle access group
+- [x] Keep full catalog hidden from default Explore to avoid overwhelming UI.
 - [ ] Add small UI tweaks:
+  - [x] replace placeholder About/Data Sources modal copy with detailed project documentation
+  - [x] expand `README.md` with detailed run/data/deploy guidance
   - [ ] sidebar readability/polish
   - [ ] minor spacing/label consistency improvements
 - [ ] Preserve Profile tab behavior and existing map interactions.
@@ -727,5 +732,5 @@ Expand Explore sidebar metrics in a curated way and apply small UI polish withou
 - [ ] Profile and map interaction behaviors remain intact.
 
 ### Validation commands
-- [ ] `npm run verify`
+- [x] `npm run verify`
 - [ ] Manual sidebar/profile smoke in browser

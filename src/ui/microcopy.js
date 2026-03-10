@@ -109,16 +109,101 @@ export const COPY = {
   },
   aboutModal: {
     title: 'About',
-    body: [
-      'San Diego Mosaic is a static census dashboard for exploring neighborhood-level trends.',
-      'This shell milestone focuses on layout and interaction wiring before map/data integration.',
+    sections: [
+      {
+        id: 'mission',
+        heading: 'What San Diego Mosaic is',
+        paragraphs: [
+          'San Diego Mosaic is a static, map-first census dashboard for exploring neighborhood patterns across San Diego County.',
+          'The app is designed for fast interaction: users switch year, geography, and metric in-place without any backend service.',
+        ],
+      },
+      {
+        id: 'map-workflow',
+        heading: 'How to use the map',
+        bullets: [
+          'Choose a year, then pick a metric from the sidebar to recolor the map.',
+          'Switch geography between H3 hex bins and Census tracts from the legend card.',
+          'Hover to inspect features, click to select one, or brush-select multiple areas.',
+          'Use "Choose for me" to jump to a high/low extreme for the active metric and year.',
+        ],
+      },
+      {
+        id: 'years',
+        heading: 'Year coverage',
+        bullets: ['2022 (ACS 2018-2022)', '2023 (ACS 2019-2023)', '2024 (ACS 2020-2024)'],
+      },
+      {
+        id: 'methods',
+        heading: 'Geography and metric methods',
+        bullets: [
+          'Tract mode uses stable tract geometry with yearly values keyed by GEOID.',
+          'Hex mode uses block-group-backed interpolation onto H3 resolution 8 cells.',
+          'Map colors use per-year quantile breaks to keep within-year comparisons clear.',
+        ],
+      },
+      {
+        id: 'constraints',
+        heading: 'Scope and constraints',
+        bullets: [
+          'No runtime Census API calls are made from the browser.',
+          'Data are precomputed in Python and shipped as static files under public/data.',
+          'This project currently targets San Diego County only.',
+        ],
+      },
     ],
   },
   dataSourcesModal: {
     title: 'Data sources',
-    body: [
-      'Census and ACS values are precomputed and shipped as static files in this repository.',
-      'Runtime browser requests to Census APIs are out of scope for this project.',
+    sections: [
+      {
+        id: 'acs',
+        heading: 'American Community Survey (ACS)',
+        paragraphs: [
+          'Primary demographic and socioeconomic metrics are sourced from Census ACS 5-year products.',
+        ],
+        bullets: [
+          'Detailed tables (B/C series) and subject tables (S series) are fetched in the Python pipeline.',
+          'Metric recodes are defined in scripts/py/config/census_variables.json and scripts/py/config/census_recodes.json.',
+        ],
+      },
+      {
+        id: 'geometry',
+        heading: 'Geographic boundaries',
+        bullets: [
+          'Tract and block-group boundaries are sourced from TIGER/Line products.',
+          'Geometry cleanup includes water erasure and defensive filtering before export.',
+          'Tract geometry is written once (stable) and reused for all years.',
+        ],
+      },
+      {
+        id: 'pipeline',
+        heading: 'Precompute pipeline',
+        bullets: [
+          'scripts/py/build_tracts.py builds tract yearly values, geometry outputs, and metadata.',
+          'scripts/py/build_hexes.py builds hex yearly values from block-group-backed interpolation.',
+          'scripts/py/build_compressed_data.py emits deterministic .json.gz/.geojson.gz sidecars.',
+        ],
+      },
+      {
+        id: 'uncertainty',
+        heading: 'Uncertainty and aggregation rules',
+        bullets: [
+          'Public MOEs are normalized to 95% confidence level in the pipeline.',
+          'Aggregated sums use root-sum-square MOE handling.',
+          'Derived ratio/proportion metrics use ACS-style propagation formulas.',
+          'Multi-record medians are intentionally shown as N/A until distribution-based aggregation is implemented.',
+        ],
+      },
+      {
+        id: 'delivery',
+        heading: 'Data delivery contract',
+        bullets: [
+          'Required files include years.json, variables.json, metadata.json, tracts/tracts.geojson, tracts/<YEAR>.json, and hexes/<YEAR>.json.',
+          'Gzip sidecars are generated as additive assets and loaded first when supported.',
+          'Plain JSON/GeoJSON files remain the compatibility fallback path.',
+        ],
+      },
     ],
   },
 };
