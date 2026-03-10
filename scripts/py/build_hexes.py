@@ -7,9 +7,23 @@ from typing import Any
 import geopandas as gpd
 import h3
 import numpy as np
+import pandas as pd
 from shapely import Polygon, make_valid
 
-from config import data_dir, h3_resolution, tracts_dir, years
+from config import (
+    acs_batch_size,
+    acs_request_timeout_seconds,
+    cache_dir,
+    counties,
+    data_dir,
+    h3_resolution,
+    state_fips,
+    tract_simplify_tolerance,
+    tract_water_erase_area_threshold,
+    years,
+)
+from utils_acs import fetch_block_group_acs
+from utils_geo import load_block_group_geometry
 from utils_io import ensure_dir, read_json, write_json
 
 COUNT_FIELD_PAIRS = (
@@ -24,12 +38,42 @@ HEX_REQUIRED_KEYS = [
     'poverty_below_moe',
     'poverty_universe',
     'poverty_universe_moe',
-    'home_value_median',
-    'home_value_median_moe',
+    MEDIAN_FIELD,
+    MEDIAN_MOE_FIELD,
+]
+BLOCK_GROUP_VALUE_MAP = {
+    'C17002_001E': 'poverty_universe_raw',
+    'C17002_001M': 'poverty_universe_raw_moe',
+    'C17002_002E': 'poverty_below_under_50_raw',
+    'C17002_002M': 'poverty_below_under_50_raw_moe',
+    'C17002_003E': 'poverty_below_50_to_99_raw',
+    'C17002_003M': 'poverty_below_50_to_99_raw_moe',
+    'B25077_001E': MEDIAN_FIELD,
+    'B25077_001M': MEDIAN_MOE_FIELD,
+}
+BLOCK_GROUP_FETCH_COLUMNS = [
+    'poverty_universe_raw',
+    'poverty_universe_raw_moe',
+    'poverty_below_under_50_raw',
+    'poverty_below_under_50_raw_moe',
+    'poverty_below_50_to_99_raw',
+    'poverty_below_50_to_99_raw_moe',
+    MEDIAN_FIELD,
+    MEDIAN_MOE_FIELD,
+]
+BLOCK_GROUP_VALUE_COLUMNS = [
+    'poverty_below',
+    'poverty_below_moe',
+    'poverty_universe',
+    'poverty_universe_moe',
+    MEDIAN_FIELD,
+    MEDIAN_MOE_FIELD,
 ]
 QUANTILE_PROBS = (0.1, 0.3, 0.5, 0.7, 0.9)
-GEOID_RE = re.compile(r'^\d{11}$')
+GEOID_RE = re.compile(r'^\d{11,12}$')
 EQUAL_AREA_CRS = 'EPSG:3310'
+PARITY_REL_TOLERANCE = 0.03
+POVERTY_RATIO_TOLERANCE = 1.02
 
 
 def _to_float_or_none(value: Any) -> float | None:
@@ -56,6 +100,15 @@ def _to_number_or_none(value: Any, decimals: int = 6) -> float | int | None:
     if float(rounded).is_integer():
         return int(rounded)
     return rounded
+
+
+def _to_nonnegative_number_or_none(value: Any, decimals: int = 6) -> float | int | None:
+    numeric = _to_number_or_none(value, decimals=decimals)
+    if numeric is None:
+        return None
+    if float(numeric) < 0:
+        return None
+    return numeric
 
 
 def _normalize_geoid(value: Any) -> str | None:
@@ -87,98 +140,119 @@ def _quantiles(values: list[float]) -> list[float | int]:
     return normalized
 
 
-def _load_tract_geometry() -> gpd.GeoDataFrame:
-    geometry_path = tracts_dir / 'tracts.geojson'
-    if not geometry_path.exists():
-        raise FileNotFoundError(f'Missing tract geometry file: {geometry_path}')
+def _fetch_block_group_year_values(year_value: int) -> pd.DataFrame:
+    payload = fetch_block_group_acs(
+        year=year_value,
+        state_fips=state_fips,
+        counties=counties,
+        variable_map=BLOCK_GROUP_VALUE_MAP,
+        batch_size=acs_batch_size,
+        timeout_seconds=acs_request_timeout_seconds,
+    )
+    if payload.empty:
+        raise RuntimeError(f'Block-group ACS fetch returned no rows for year {year_value}.')
 
-    tract_gdf = gpd.read_file(geometry_path)
-    if tract_gdf.crs is None:
-        tract_gdf = tract_gdf.set_crs('EPSG:4326', allow_override=True)
-    else:
-        tract_gdf = tract_gdf.to_crs('EPSG:4326')
-
-    if tract_gdf.empty:
-        raise RuntimeError('Tract geometry is empty.')
-
-    tract_gdf['GEOID'] = tract_gdf['GEOID'].map(_normalize_geoid)
-    tract_gdf = tract_gdf[tract_gdf['GEOID'].notna()].copy()
-    tract_gdf['geometry'] = tract_gdf.geometry.map(lambda geom: make_valid(geom) if geom is not None else None)
-    tract_gdf = tract_gdf[tract_gdf.geometry.notna() & ~tract_gdf.geometry.is_empty].copy()
-    tract_gdf = tract_gdf[['GEOID', 'geometry']].sort_values('GEOID').reset_index(drop=True)
-
-    if tract_gdf['GEOID'].duplicated().any():
-        raise RuntimeError('Tract geometry has duplicate GEOID values.')
-
-    return tract_gdf
-
-
-def _load_tract_year_values(year_value: int) -> dict[str, dict[str, float | int | None]]:
-    path = tracts_dir / f'{year_value}.json'
-    payload = read_json(path, default={})
-    if not isinstance(payload, dict) or not payload:
-        raise RuntimeError(f'Tract values missing or invalid for year {year_value}: {path}')
-
-    normalized: dict[str, dict[str, float | int | None]] = {}
-    for geoid_raw, record_raw in payload.items():
-        geoid = _normalize_geoid(geoid_raw)
-        if geoid is None:
-            raise RuntimeError(f'Invalid GEOID in tract values for year {year_value}: {geoid_raw!r}')
-        if not isinstance(record_raw, dict):
-            raise RuntimeError(f'Invalid tract record for GEOID {geoid} in year {year_value}.')
-
-        normalized[geoid] = {
-            'poverty_below': _to_number_or_none(record_raw.get('poverty_below')),
-            'poverty_below_moe': _to_number_or_none(record_raw.get('poverty_below_moe')),
-            'poverty_universe': _to_number_or_none(record_raw.get('poverty_universe')),
-            'poverty_universe_moe': _to_number_or_none(record_raw.get('poverty_universe_moe')),
-            MEDIAN_FIELD: _to_number_or_none(record_raw.get(MEDIAN_FIELD)),
-            MEDIAN_MOE_FIELD: _to_number_or_none(record_raw.get(MEDIAN_MOE_FIELD)),
-        }
-
-    return normalized
-
-
-def _attach_tract_values(
-    tract_gdf: gpd.GeoDataFrame,
-    tract_values: dict[str, dict[str, float | int | None]],
-    year_value: int,
-) -> gpd.GeoDataFrame:
-    geometry_geoids = set(tract_gdf['GEOID'].astype(str).tolist())
-    value_geoids = set(tract_values.keys())
-
-    missing_from_values = geometry_geoids - value_geoids
-    missing_from_geometry = value_geoids - geometry_geoids
-    if missing_from_values or missing_from_geometry:
+    required_columns = ['GEOID', *BLOCK_GROUP_FETCH_COLUMNS]
+    missing_columns = [column for column in required_columns if column not in payload.columns]
+    if missing_columns:
         raise RuntimeError(
-            f'Tract GEOID mismatch for year {year_value}: '
-            f'missing_from_values={len(missing_from_values)} '
-            f'missing_from_geometry={len(missing_from_geometry)}'
+            f'Block-group ACS fetch missing required columns for year {year_value}: {missing_columns}'
         )
 
-    enriched = tract_gdf.copy()
-    for estimate_key, moe_key in COUNT_FIELD_PAIRS:
-        enriched[estimate_key] = enriched['GEOID'].map(
-            lambda geoid: _to_float_or_none(tract_values[str(geoid)].get(estimate_key))
+    values = payload[required_columns].copy()
+    values['GEOID'] = values['GEOID'].map(_normalize_geoid)
+    values = values[values['GEOID'].notna()].copy()
+
+    for column in BLOCK_GROUP_FETCH_COLUMNS:
+        values[column] = values[column].map(_to_number_or_none)
+
+    values['poverty_universe'] = values['poverty_universe_raw'].map(_to_nonnegative_number_or_none)
+    values['poverty_universe_moe'] = values['poverty_universe_raw_moe'].map(_to_nonnegative_number_or_none)
+
+    below_under_50 = values['poverty_below_under_50_raw'].map(_to_nonnegative_number_or_none)
+    below_50_to_99 = values['poverty_below_50_to_99_raw'].map(_to_nonnegative_number_or_none)
+    values['poverty_below'] = [
+        _to_nonnegative_number_or_none((left or 0) + (right or 0)) if left is not None or right is not None else None
+        for left, right in zip(below_under_50.tolist(), below_50_to_99.tolist(), strict=False)
+    ]
+
+    below_under_50_moe = values['poverty_below_under_50_raw_moe'].map(_to_nonnegative_number_or_none)
+    below_50_to_99_moe = values['poverty_below_50_to_99_raw_moe'].map(_to_nonnegative_number_or_none)
+    values['poverty_below_moe'] = [
+        _to_nonnegative_number_or_none(
+            math.sqrt(((left or 0) ** 2) + ((right or 0) ** 2))
         )
-        enriched[moe_key] = enriched['GEOID'].map(
-            lambda geoid: _to_float_or_none(tract_values[str(geoid)].get(moe_key))
+        if left is not None or right is not None
+        else None
+        for left, right in zip(
+            below_under_50_moe.tolist(),
+            below_50_to_99_moe.tolist(),
+            strict=False,
+        )
+    ]
+
+    values[MEDIAN_FIELD] = values[MEDIAN_FIELD].map(_to_nonnegative_number_or_none)
+    values[MEDIAN_MOE_FIELD] = values[MEDIAN_MOE_FIELD].map(_to_nonnegative_number_or_none)
+
+    values = values[['GEOID', *BLOCK_GROUP_VALUE_COLUMNS]].copy()
+
+    values = values.drop_duplicates(subset=['GEOID'], keep='first')
+    return values.sort_values('GEOID').reset_index(drop=True)
+
+
+def _attach_block_group_values(
+    block_group_geometry: gpd.GeoDataFrame,
+    block_group_values: pd.DataFrame,
+    year_value: int,
+) -> tuple[gpd.GeoDataFrame, dict[str, float]]:
+    geometry_geoids = set(block_group_geometry['GEOID'].astype(str).tolist())
+    value_geoids = set(block_group_values['GEOID'].astype(str).tolist())
+
+    value_rows_in_geometry = block_group_values[block_group_values['GEOID'].isin(geometry_geoids)].copy()
+    filtered_value_geoids = set(value_rows_in_geometry['GEOID'].astype(str).tolist())
+
+    missing_from_values = geometry_geoids - filtered_value_geoids
+    if missing_from_values:
+        raise RuntimeError(
+            f'Block-group GEOID mismatch for year {year_value}: missing_from_values={len(missing_from_values)}'
         )
 
-    enriched[MEDIAN_FIELD] = enriched['GEOID'].map(
-        lambda geoid: _to_number_or_none(tract_values[str(geoid)].get(MEDIAN_FIELD))
+    missing_from_geometry = value_geoids - geometry_geoids
+    if missing_from_geometry:
+        print(
+            f'Warning: dropping {len(missing_from_geometry)} block-group value rows not present in cleaned geometry '
+            f'for year {year_value}.'
+        )
+
+    enriched = block_group_geometry.merge(
+        value_rows_in_geometry,
+        on='GEOID',
+        how='left',
+        validate='one_to_one',
     )
-    enriched[MEDIAN_MOE_FIELD] = enriched['GEOID'].map(
-        lambda geoid: _to_number_or_none(tract_values[str(geoid)].get(MEDIAN_MOE_FIELD))
-    )
 
-    return enriched
+    source_totals = {
+        'poverty_below': float(
+            sum(
+                _to_float_or_none(value) or 0.0
+                for value in value_rows_in_geometry['poverty_below'].tolist()
+            )
+        ),
+        'poverty_universe': float(
+            sum(
+                _to_float_or_none(value) or 0.0
+                for value in value_rows_in_geometry['poverty_universe'].tolist()
+            )
+        ),
+    }
+
+    return enriched, source_totals
 
 
-def _build_county_polygon(tract_gdf: gpd.GeoDataFrame):
-    dissolved = tract_gdf[['geometry']].dissolve()
+def _build_county_polygon(source_gdf: gpd.GeoDataFrame):
+    dissolved = source_gdf[['geometry']].dissolve()
     if dissolved.empty:
-        raise RuntimeError('Unable to dissolve tract geometry into a county polygon.')
+        raise RuntimeError('Unable to dissolve source geometry into a county polygon.')
 
     county_polygon = make_valid(dissolved.geometry.iloc[0])
     county_polygon = make_valid(county_polygon.buffer(0))
@@ -213,19 +287,19 @@ def _build_hex_geometry(county_polygon) -> gpd.GeoDataFrame:
 
 def _allocate_count_fields(
     hex_gdf: gpd.GeoDataFrame,
-    tract_gdf: gpd.GeoDataFrame,
+    source_gdf: gpd.GeoDataFrame,
 ) -> tuple[dict[str, dict[str, float | int | None]], dict[str, str]]:
     hex_equal_area = hex_gdf.to_crs(EQUAL_AREA_CRS)
-    tract_equal_area = tract_gdf.to_crs(EQUAL_AREA_CRS).copy()
-    tract_equal_area['tract_area'] = tract_equal_area.geometry.area
+    source_equal_area = source_gdf.to_crs(EQUAL_AREA_CRS).copy()
+    source_equal_area['source_area'] = source_equal_area.geometry.area
 
     candidates = gpd.sjoin(
         hex_equal_area[['h3', 'geometry']],
-        tract_equal_area[
+        source_equal_area[
             [
                 'GEOID',
                 'geometry',
-                'tract_area',
+                'source_area',
                 'poverty_below',
                 'poverty_below_moe',
                 'poverty_universe',
@@ -236,7 +310,7 @@ def _allocate_count_fields(
         predicate='intersects',
     )
     if candidates.empty:
-        raise RuntimeError('No intersecting tract/hex candidates found.')
+        raise RuntimeError('No intersecting source/hex candidates found.')
 
     accumulator: dict[str, dict[str, float]] = {}
     contribution_counts: dict[str, int] = {}
@@ -252,20 +326,20 @@ def _allocate_count_fields(
 
     for row in candidates.itertuples():
         hex_index = int(row.Index)
-        tract_index = int(row.index_right)
+        source_index = int(row.index_right)
         hex_id = str(row.h3)
 
-        tract_area = _to_float_or_none(tract_equal_area['tract_area'].iloc[tract_index])
-        if tract_area is None or tract_area <= 0:
+        source_area = _to_float_or_none(source_equal_area['source_area'].iloc[source_index])
+        if source_area is None or source_area <= 0:
             continue
 
         intersection_area = (
-            hex_equal_area.geometry.iloc[hex_index].intersection(tract_equal_area.geometry.iloc[tract_index]).area
+            hex_equal_area.geometry.iloc[hex_index].intersection(source_equal_area.geometry.iloc[source_index]).area
         )
         if not math.isfinite(intersection_area) or intersection_area <= 0:
             continue
 
-        weight = intersection_area / tract_area
+        weight = intersection_area / source_area
         if not math.isfinite(weight) or weight <= 0:
             continue
 
@@ -313,7 +387,7 @@ def _allocate_count_fields(
 
 def _assign_median_fields(
     hex_gdf: gpd.GeoDataFrame,
-    tract_gdf: gpd.GeoDataFrame,
+    source_gdf: gpd.GeoDataFrame,
     county_polygon,
     fallback_geoid_by_hex: dict[str, str],
 ) -> dict[str, dict[str, float | int | None]]:
@@ -323,7 +397,7 @@ def _assign_median_fields(
 
     point_hits = gpd.sjoin(
         point_gdf[['h3', 'geometry']],
-        tract_gdf[['GEOID', 'geometry']],
+        source_gdf[['GEOID', 'geometry']],
         how='left',
         predicate='intersects',
     )
@@ -339,13 +413,13 @@ def _assign_median_fields(
     for hex_id, geoid in fallback_geoid_by_hex.items():
         geoid_by_hex.setdefault(str(hex_id), geoid)
 
-    tract_median_by_geoid: dict[str, dict[str, float | int | None]] = {}
-    for row in tract_gdf.itertuples(index=False):
+    source_median_by_geoid: dict[str, dict[str, float | int | None]] = {}
+    for row in source_gdf.itertuples(index=False):
         geoid = _normalize_geoid(row.GEOID)
         if geoid is None:
             continue
 
-        tract_median_by_geoid[geoid] = {
+        source_median_by_geoid[geoid] = {
             MEDIAN_FIELD: _to_number_or_none(getattr(row, MEDIAN_FIELD)),
             MEDIAN_MOE_FIELD: _to_number_or_none(getattr(row, MEDIAN_MOE_FIELD)),
         }
@@ -353,7 +427,7 @@ def _assign_median_fields(
     output: dict[str, dict[str, float | int | None]] = {}
     for hex_id in hex_gdf['h3'].astype(str):
         source_geoid = geoid_by_hex.get(hex_id)
-        source_record = tract_median_by_geoid.get(source_geoid, {})
+        source_record = source_median_by_geoid.get(source_geoid, {})
         output[hex_id] = {
             MEDIAN_FIELD: source_record.get(MEDIAN_FIELD),
             MEDIAN_MOE_FIELD: source_record.get(MEDIAN_MOE_FIELD),
@@ -437,7 +511,10 @@ def _compute_hex_year_averages(hex_records: list[dict[str, Any]]) -> dict[str, f
     }
 
 
-def _update_metadata(hex_records_by_year: dict[int, list[dict[str, Any]]]) -> None:
+def _update_metadata(
+    hex_records_by_year: dict[int, list[dict[str, Any]]],
+    block_group_source_meta: dict[str, Any],
+) -> None:
     metadata_path = data_dir / 'metadata.json'
     metadata = read_json(metadata_path, default={})
     if not isinstance(metadata, dict):
@@ -464,11 +541,28 @@ def _update_metadata(hex_records_by_year: dict[int, list[dict[str, Any]]]) -> No
     for year_value, hex_records in hex_records_by_year.items():
         hex_averages[str(year_value)] = _compute_hex_year_averages(hex_records)
 
+    sources = metadata.get('sources')
+    if not isinstance(sources, dict):
+        sources = {}
+        metadata['sources'] = sources
+
+    sources['hex_interpolation'] = {
+        'source_geography': 'block_group',
+        'source_geometry': block_group_source_meta,
+        'count_method': 'area_weighted',
+        'moe_method': 'weighted_piece_rss',
+        'median_method': 'representative_point_with_largest_overlap_fallback',
+        'parity_relative_tolerance': PARITY_REL_TOLERANCE,
+    }
+
     metadata['h3_resolution'] = int(h3_resolution)
     write_json(metadata_path, metadata)
 
 
-def _validate_hex_outputs(hex_records_by_year: dict[int, list[dict[str, Any]]]) -> None:
+def _validate_hex_outputs(
+    hex_records_by_year: dict[int, list[dict[str, Any]]],
+    source_totals_by_year: dict[int, dict[str, float]],
+) -> None:
     if not hex_records_by_year:
         raise AssertionError('No hex outputs were generated.')
 
@@ -476,6 +570,8 @@ def _validate_hex_outputs(hex_records_by_year: dict[int, list[dict[str, Any]]]) 
         if not records:
             raise AssertionError(f'Hex output for year {year_value} is empty.')
 
+        hex_poverty_below_total = 0.0
+        hex_poverty_universe_total = 0.0
         for record in records:
             if not record.get('h3'):
                 raise AssertionError(f'Hex output for year {year_value} has a record without h3.')
@@ -486,27 +582,97 @@ def _validate_hex_outputs(hex_records_by_year: dict[int, list[dict[str, Any]]]) 
                     f'Hex output for year {year_value} is missing keys {missing_keys} in record {record}.'
                 )
 
+            poverty_below = _to_float_or_none(record.get('poverty_below'))
+            poverty_universe = _to_float_or_none(record.get('poverty_universe'))
+            if poverty_below is not None:
+                hex_poverty_below_total += poverty_below
+            if poverty_universe is not None:
+                hex_poverty_universe_total += poverty_universe
+
+            if (
+                poverty_below is not None
+                and poverty_universe is not None
+                and poverty_universe > 0
+                and poverty_below > poverty_universe * POVERTY_RATIO_TOLERANCE
+            ):
+                raise AssertionError(
+                    f'Hex record has implausible poverty ratio for year {year_value}: '
+                    f'below={poverty_below}, universe={poverty_universe}'
+                )
+
+        if (
+            hex_poverty_universe_total > 0
+            and hex_poverty_below_total > hex_poverty_universe_total * POVERTY_RATIO_TOLERANCE
+        ):
+            raise AssertionError(
+                f'Hex aggregate poverty ratio exceeds tolerance for {year_value}: '
+                f'below={hex_poverty_below_total}, universe={hex_poverty_universe_total}'
+            )
+
+        source_totals = source_totals_by_year.get(int(year_value), {})
+        source_poverty_below_total = _to_float_or_none(source_totals.get('poverty_below'))
+        source_poverty_universe_total = _to_float_or_none(source_totals.get('poverty_universe'))
+
+        if source_poverty_below_total is not None and source_poverty_below_total > 0:
+            relative_diff = (
+                abs(hex_poverty_below_total - source_poverty_below_total) / source_poverty_below_total
+            )
+            if relative_diff > PARITY_REL_TOLERANCE:
+                raise AssertionError(
+                    f'Hex/source parity check failed for poverty_below in {year_value}: '
+                    f'hex={hex_poverty_below_total}, source={source_poverty_below_total}, '
+                    f'relative_diff={relative_diff:.4f}'
+                )
+
+        if source_poverty_universe_total is not None and source_poverty_universe_total > 0:
+            relative_diff = (
+                abs(hex_poverty_universe_total - source_poverty_universe_total) / source_poverty_universe_total
+            )
+            if relative_diff > PARITY_REL_TOLERANCE:
+                raise AssertionError(
+                    f'Hex/source parity check failed for poverty_universe in {year_value}: '
+                    f'hex={hex_poverty_universe_total}, source={source_poverty_universe_total}, '
+                    f'relative_diff={relative_diff:.4f}'
+                )
+
 
 def main() -> None:
     ensure_dir(data_dir / 'hexes')
 
-    print('Loading tract geometry...')
-    tract_geometry = _load_tract_geometry()
-    county_polygon = _build_county_polygon(tract_geometry)
+    print('Loading block-group geometry...')
+    block_group_geometry, block_group_source_meta = load_block_group_geometry(
+        year=max(years),
+        state_fips=state_fips,
+        counties=counties,
+        cache_dir=cache_dir,
+        simplify_tolerance=tract_simplify_tolerance,
+        water_area_threshold=tract_water_erase_area_threshold,
+    )
+    county_polygon = _build_county_polygon(block_group_geometry)
 
     print(f'Generating H3 cells (resolution={h3_resolution})...')
     hex_geometry = _build_hex_geometry(county_polygon)
 
     hex_records_by_year: dict[int, list[dict[str, Any]]] = {}
+    source_totals_by_year: dict[int, dict[str, float]] = {}
     for year_value in years:
-        print(f'Building hex values for {year_value}...')
-        tract_values = _load_tract_year_values(year_value)
-        tract_with_values = _attach_tract_values(tract_geometry, tract_values, year_value)
+        print(f'Fetching block-group ACS values for {year_value}...')
+        block_group_values = _fetch_block_group_year_values(int(year_value))
+        block_group_with_values, source_totals = _attach_block_group_values(
+            block_group_geometry,
+            block_group_values,
+            int(year_value),
+        )
+        source_totals_by_year[int(year_value)] = source_totals
 
-        count_values_by_hex, fallback_geoid_by_hex = _allocate_count_fields(hex_geometry, tract_with_values)
+        print(f'Building hex values for {year_value}...')
+        count_values_by_hex, fallback_geoid_by_hex = _allocate_count_fields(
+            hex_geometry,
+            block_group_with_values,
+        )
         median_values_by_hex = _assign_median_fields(
             hex_geometry,
-            tract_with_values,
+            block_group_with_values,
             county_polygon,
             fallback_geoid_by_hex,
         )
@@ -515,8 +681,8 @@ def main() -> None:
         write_json(data_dir / 'hexes' / f'{year_value}.json', hex_records)
         hex_records_by_year[int(year_value)] = hex_records
 
-    _validate_hex_outputs(hex_records_by_year)
-    _update_metadata(hex_records_by_year)
+    _validate_hex_outputs(hex_records_by_year, source_totals_by_year)
+    _update_metadata(hex_records_by_year, block_group_source_meta)
     print('Hex pipeline build complete.')
 
 

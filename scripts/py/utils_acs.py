@@ -35,11 +35,11 @@ def _api_key() -> str:
 
 def _acs_survey_path_for_variable(variable_code: str) -> str:
     normalized = str(variable_code).strip().upper()
-    if normalized.startswith('B'):
+    if normalized.startswith('B') or normalized.startswith('C'):
         return ACS_DETAILED_SURVEY_PATH
     if normalized.startswith('S'):
         return ACS_SUBJECT_SURVEY_PATH
-    raise ValueError(f'Unsupported ACS variable code prefix for {variable_code!r}. Expected B* or S*.')
+    raise ValueError(f'Unsupported ACS variable code prefix for {variable_code!r}. Expected B*, C*, or S*.')
 
 
 def _table_prefix(variable_code: str) -> str:
@@ -133,6 +133,55 @@ def _fetch_tract_batch_for_county(
     return batch_df[output_columns].copy()
 
 
+def _fetch_block_group_batch_for_county(
+    year: int,
+    state_fips: str,
+    county_fips3: str,
+    batch: FetchBatch,
+    timeout_seconds: int,
+) -> pd.DataFrame:
+    url = _census_url(year, batch.survey_path)
+    get_fields = ','.join(('NAME', *batch.variables))
+    params = [
+        ('get', get_fields),
+        ('for', 'block group:*'),
+        ('in', f'state:{state_fips}'),
+        ('in', f'county:{county_fips3}'),
+        ('in', 'tract:*'),
+        ('key', _api_key()),
+    ]
+
+    payload = _fetch_census_rows(url, params=params, timeout_seconds=timeout_seconds)
+    headers = payload[0]
+    rows = payload[1:]
+    batch_df = pd.DataFrame(rows, columns=headers)
+
+    required_geo_columns = ['state', 'county', 'tract', 'block group']
+    missing_geo = [column for column in required_geo_columns if column not in batch_df.columns]
+    if missing_geo:
+        raise RuntimeError(
+            f'Census API block-group response missing expected geography columns {missing_geo} '
+            f'for {batch.survey_path} {batch.table_prefix}.'
+        )
+
+    missing_variables = [variable for variable in batch.variables if variable not in batch_df.columns]
+    if missing_variables:
+        raise RuntimeError(
+            f'Census API block-group response missing requested variables {missing_variables} '
+            f'for {batch.survey_path} {batch.table_prefix}.'
+        )
+
+    batch_df['GEOID'] = (
+        batch_df['state'].astype(str).str.zfill(2)
+        + batch_df['county'].astype(str).str.zfill(3)
+        + batch_df['tract'].astype(str).str.zfill(6)
+        + batch_df['block group'].astype(str).str.zfill(1)
+    )
+
+    output_columns = ['GEOID', *batch.variables]
+    return batch_df[output_columns].copy()
+
+
 def _fetch_tract_batch(
     year: int,
     state_fips: str,
@@ -144,6 +193,32 @@ def _fetch_tract_batch(
     for county_value in counties:
         county_code = _county_fips3(county_value)
         county_df = _fetch_tract_batch_for_county(
+            year=year,
+            state_fips=state_fips,
+            county_fips3=county_code,
+            batch=batch,
+            timeout_seconds=timeout_seconds,
+        )
+        county_frames.append(county_df)
+
+    if not county_frames:
+        return pd.DataFrame(columns=['GEOID', *batch.variables])
+
+    combined = pd.concat(county_frames, ignore_index=True)
+    return combined.drop_duplicates(subset=['GEOID'], keep='first')
+
+
+def _fetch_block_group_batch(
+    year: int,
+    state_fips: str,
+    counties: list[str],
+    batch: FetchBatch,
+    timeout_seconds: int,
+) -> pd.DataFrame:
+    county_frames: list[pd.DataFrame] = []
+    for county_value in counties:
+        county_code = _county_fips3(county_value)
+        county_df = _fetch_block_group_batch_for_county(
             year=year,
             state_fips=state_fips,
             county_fips3=county_code,
@@ -203,6 +278,64 @@ def fetch_tract_acs(
 
     if merged_df is None:
         raise RuntimeError('Failed to fetch tract ACS data.')
+
+    missing_raw_columns = [column for column in raw_variables if column not in merged_df.columns]
+    if missing_raw_columns:
+        raise RuntimeError(f'Failed to fetch ACS columns: {missing_raw_columns}')
+
+    rename_map = {str(key).strip().upper(): str(value).strip() for key, value in variable_map.items()}
+    merged_df = merged_df.rename(columns=rename_map)
+
+    output_columns = ['GEOID', *target_columns]
+    output_df = merged_df[output_columns].copy()
+    output_df = output_df.dropna(subset=['GEOID']).drop_duplicates(subset=['GEOID'], keep='first')
+    return output_df.sort_values('GEOID').reset_index(drop=True)
+
+
+def fetch_block_group_acs(
+    year: int,
+    state_fips: str,
+    counties: list[str],
+    variable_map: dict[str, str],
+    batch_size: int = 45,
+    timeout_seconds: int = 120,
+) -> pd.DataFrame:
+    if not variable_map:
+        raise ValueError('variable_map cannot be empty when fetching block-group ACS data.')
+
+    raw_variables = sorted({str(key).strip().upper() for key in variable_map.keys() if str(key).strip()})
+    if not raw_variables:
+        raise ValueError('variable_map did not contain valid ACS variable codes.')
+
+    target_columns = [str(value).strip() for value in variable_map.values() if str(value).strip()]
+    if len(set(target_columns)) != len(target_columns):
+        raise ValueError('variable_map target field names must be unique.')
+
+    batches = plan_tract_fetch_batches(raw_variables, batch_size=batch_size)
+    if not batches:
+        raise RuntimeError('No ACS fetch batches were planned.')
+
+    merged_df: pd.DataFrame | None = None
+    for batch in batches:
+        batch_df = _fetch_block_group_batch(
+            year=year,
+            state_fips=state_fips,
+            counties=counties,
+            batch=batch,
+            timeout_seconds=timeout_seconds,
+        )
+
+        numeric_columns = [column for column in batch_df.columns if column != 'GEOID']
+        for column in numeric_columns:
+            batch_df[column] = pd.to_numeric(batch_df[column], errors='coerce')
+
+        if merged_df is None:
+            merged_df = batch_df
+        else:
+            merged_df = merged_df.merge(batch_df, on='GEOID', how='outer', validate='one_to_one')
+
+    if merged_df is None:
+        raise RuntimeError('Failed to fetch block-group ACS data.')
 
     missing_raw_columns = [column for column in raw_variables if column not in merged_df.columns]
     if missing_raw_columns:

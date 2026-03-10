@@ -11,6 +11,9 @@ from shapely import make_valid
 from utils_io import download_with_cache
 
 TIGER_TRACT_URL_TEMPLATE = 'https://www2.census.gov/geo/tiger/TIGER{year}/TRACT/tl_{year}_{state_fips}_tract.zip'
+TIGER_BLOCK_GROUP_URL_TEMPLATE = (
+    'https://www2.census.gov/geo/tiger/TIGER{year}/BG/tl_{year}_{state_fips}_bg.zip'
+)
 WATER_TRACTCE_MIN = 990000
 WATER_TRACTCE_MAX = 990099
 
@@ -54,12 +57,62 @@ def _download_tiger_tract_zip(
     raise RuntimeError(message)
 
 
+def _download_tiger_block_group_zip(
+    year: int,
+    state_fips: str,
+    cache_dir: Path,
+    min_year: int = 2018,
+) -> tuple[Path, int, str]:
+    year_candidates = list(range(int(year), min_year - 1, -1))
+    last_error: Exception | None = None
+
+    for tiger_year in year_candidates:
+        url = TIGER_BLOCK_GROUP_URL_TEMPLATE.format(year=tiger_year, state_fips=state_fips)
+        destination = cache_dir / f'tl_{tiger_year}_{state_fips}_bg.zip'
+
+        try:
+            zip_path = download_with_cache(url, destination)
+            return zip_path, tiger_year, url
+        except requests.HTTPError as error:
+            status_code = error.response.status_code if error.response is not None else None
+            if status_code == 404:
+                last_error = error
+                continue
+            raise
+        except requests.RequestException as error:
+            last_error = error
+            continue
+
+    message = f'Unable to download TIGER block-group geometry for state {state_fips} (target year {year}).'
+    if last_error is not None:
+        raise RuntimeError(message) from last_error
+    raise RuntimeError(message)
+
+
 def _normalize_tract_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
     normalized = gdf.copy()
     normalized['GEOID'] = normalized['GEOID'].astype(str).str.replace('.0', '', regex=False).str.zfill(11)
     normalized['TRACTCE'] = (
         normalized['TRACTCE'].astype(str).str.replace('.0', '', regex=False).str.zfill(6)
     )
+    normalized['ALAND'] = pd.to_numeric(normalized['ALAND'], errors='coerce')
+    return normalized
+
+
+def _normalize_block_group_columns(gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
+    normalized = gdf.copy()
+    normalized['GEOID'] = normalized['GEOID'].astype(str).str.replace('.0', '', regex=False).str.zfill(12)
+    normalized['TRACTCE'] = (
+        normalized['TRACTCE'].astype(str).str.replace('.0', '', regex=False).str.zfill(6)
+    )
+    if 'BLKGRPCE' in normalized.columns:
+        normalized['BLKGRPCE'] = (
+            normalized['BLKGRPCE'].astype(str).str.replace('.0', '', regex=False).str.zfill(1)
+        )
+    elif 'BLKGRP' in normalized.columns:
+        normalized['BLKGRPCE'] = normalized['BLKGRP'].astype(str).str.replace('.0', '', regex=False).str.zfill(1)
+    else:
+        normalized['BLKGRPCE'] = normalized['GEOID'].astype(str).str[-1:].str.zfill(1)
     normalized['ALAND'] = pd.to_numeric(normalized['ALAND'], errors='coerce')
     return normalized
 
@@ -142,6 +195,85 @@ def load_tract_geometry(
     filtered['centroid_lat'] = representative_points.y.astype(float)
 
     filtered = filtered[['GEOID', 'TRACTCE', 'ALAND', 'centroid_lon', 'centroid_lat', 'geometry']]
+    filtered = filtered.sort_values('GEOID').reset_index(drop=True)
+
+    source_meta = {
+        'tiger_year': tiger_year,
+        'source_url': source_url,
+        'zip_path': str(zip_path),
+        'water_erase_area_threshold': water_area_threshold,
+        'feature_count_before_cleanup': feature_count_before_cleanup,
+        'feature_count_after_cleanup': int(len(filtered)),
+    }
+
+    return filtered, source_meta
+
+
+def load_block_group_geometry(
+    year: int,
+    state_fips: str,
+    counties: list[str],
+    cache_dir: Path,
+    simplify_tolerance: float,
+    water_area_threshold: float,
+) -> tuple[gpd.GeoDataFrame, dict[str, object]]:
+    if water_area_threshold < 0 or water_area_threshold > 1:
+        raise ValueError('water_area_threshold must be between 0 and 1.')
+
+    zip_path, tiger_year, source_url = _download_tiger_block_group_zip(year, state_fips, cache_dir)
+
+    gdf = gpd.read_file(f'zip://{zip_path}')
+    if gdf.crs is None:
+        gdf = gdf.set_crs('EPSG:4269', allow_override=True)
+    gdf = gdf.to_crs('EPSG:4326')
+
+    county_set = {county_fips3(value) for value in counties}
+    filtered = gdf[
+        (gdf['STATEFP'].astype(str) == state_fips)
+        & (gdf['COUNTYFP'].astype(str).isin(county_set))
+    ].copy()
+
+    if filtered.empty:
+        raise RuntimeError('No block-group geometry rows found for configured counties.')
+
+    keep_columns = ['GEOID', 'TRACTCE', 'ALAND', 'geometry']
+    if 'BLKGRPCE' in filtered.columns:
+        keep_columns.insert(2, 'BLKGRPCE')
+    elif 'BLKGRP' in filtered.columns:
+        keep_columns.insert(2, 'BLKGRP')
+
+    filtered = _normalize_block_group_columns(filtered[keep_columns])
+
+    feature_count_before_cleanup = int(len(filtered))
+    filtered = erase_water(
+        filtered,
+        area_threshold=water_area_threshold,
+        year=tiger_year,
+        cache=False,
+    )
+    filtered = _normalize_block_group_columns(filtered)
+    filtered = _cleanup_geometry(filtered)
+
+    if filtered['GEOID'].duplicated().any():
+        filtered = filtered.dissolve(by='GEOID', as_index=False, aggfunc='first')
+        filtered = _normalize_block_group_columns(filtered)
+        filtered = _cleanup_geometry(filtered)
+
+    filtered = filtered[filtered['ALAND'].notna() & (filtered['ALAND'] > 0)].copy()
+    filtered = filtered[~_is_water_tract(filtered['TRACTCE'])].copy()
+    filtered = _cleanup_geometry(filtered)
+
+    if filtered.empty:
+        raise RuntimeError('No block-group geometries remained after water cleanup.')
+
+    if simplify_tolerance > 0:
+        filtered['geometry'] = filtered.geometry.simplify(
+            simplify_tolerance,
+            preserve_topology=True,
+        )
+        filtered = _cleanup_geometry(filtered)
+
+    filtered = filtered[['GEOID', 'TRACTCE', 'ALAND', 'geometry']]
     filtered = filtered.sort_values('GEOID').reset_index(drop=True)
 
     source_meta = {

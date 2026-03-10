@@ -613,25 +613,25 @@ Improve hex methodology by using ACS block groups as the interpolation source wh
 unchanged in the app.
 
 ### Tasks
-- [ ] Add block-group source geometry + value extraction in the Python pipeline.
-- [ ] Use block groups as the intermediate source for hex interpolation and MOE propagation.
-- [ ] Keep tract outputs and tract-mode app behavior unchanged.
-- [ ] Regenerate hex files for all configured years:
-  - [ ] `public/data/hexes/2022.json`
-  - [ ] `public/data/hexes/2023.json`
-  - [ ] `public/data/hexes/2024.json`
-- [ ] Add/expand pipeline assertions for:
-  - [ ] required output keys
-  - [ ] non-empty outputs
-  - [ ] parity/sanity checks for aggregate counts and ratios
+- [x] Add block-group source geometry + value extraction in the Python pipeline.
+- [x] Use block groups as the intermediate source for hex interpolation and MOE propagation.
+- [x] Keep tract outputs and tract-mode app behavior unchanged.
+- [x] Regenerate hex files for all configured years:
+  - [x] `public/data/hexes/2022.json`
+  - [x] `public/data/hexes/2023.json`
+  - [x] `public/data/hexes/2024.json`
+- [x] Add/expand pipeline assertions for:
+  - [x] required output keys
+  - [x] non-empty outputs
+  - [x] parity/sanity checks for aggregate counts and ratios
 
 ### Acceptance checkpoint
-- [ ] Hex files are generated from a block-group-backed method for all years.
-- [ ] Hex methodology and MOE handling are documented and validated.
+- [x] Hex files are generated from a block-group-backed method for all years.
+- [x] Hex methodology and MOE handling are documented and validated.
 
 ### Validation commands
-- [ ] `uv run -- python scripts/py/build_hexes.py`
-- [ ] `npm run verify`
+- [x] `uv run --env-file .env -- python scripts/py/build_hexes.py`
+- [x] `npm run verify`
 
 ---
 
