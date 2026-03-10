@@ -1196,6 +1196,8 @@ npm run build
   - `.github/workflows/pages.yml`
   - triggers on push to `main` and manual `workflow_dispatch`
   - uses `actions/configure-pages`, uploads `dist`, and deploys with `actions/deploy-pages`
+  - includes optional auto-enable mode when `PAGES_ENABLEMENT_TOKEN` is set; otherwise uses standard
+    configure path
 - Added deployment guardrails in workflow to enforce committed static data artifacts:
   - asserts required plain files in `public/data/*`
   - asserts required gzip sidecars (`.json.gz` / `.geojson.gz`)
@@ -1225,6 +1227,9 @@ npm run build
 
 - Chose dedicated `pages.yml` workflow (separate from CI verify workflow) to keep deployment concerns isolated
   from general lint/build checks.
+- Added a dual configure step to handle first-run repositories:
+  - with `PAGES_ENABLEMENT_TOKEN`: enables Pages automatically (`enablement: true`)
+  - without token: expects Pages to already be enabled in repository settings
 - Kept deploy job based only on committed repository artifacts (`public/data` + built app assets) and did not
   introduce deploy-time Census fetches.
 - Used production-only Vite base override so local `npm run dev` stays simple while Pages build paths are
