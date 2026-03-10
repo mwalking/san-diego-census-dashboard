@@ -7,6 +7,11 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+CONFIDENCE_Z_SCORES = {
+    90: 1.645,
+    95: 1.96,
+}
+
 
 def load_census_variable_map(path: Path) -> dict[str, str]:
     with path.open('r', encoding='utf-8') as handle:
@@ -135,6 +140,53 @@ def normalize_public_output_columns(
 
     normalized = df.rename(columns=rename_map).copy()
     return normalized
+
+
+def moe_scale_factor(
+    source_confidence_level: int,
+    target_confidence_level: int,
+) -> float:
+    source_level = int(source_confidence_level)
+    target_level = int(target_confidence_level)
+
+    if source_level == target_level:
+        return 1.0
+
+    source_z = CONFIDENCE_Z_SCORES.get(source_level)
+    target_z = CONFIDENCE_Z_SCORES.get(target_level)
+    if source_z is None or target_z is None:
+        raise ValueError(
+            f'Unsupported MOE confidence levels: {source_level} -> {target_level}. '
+            f'Supported levels: {sorted(CONFIDENCE_Z_SCORES.keys())}'
+        )
+
+    return target_z / source_z
+
+
+def scale_moe_columns(
+    df: pd.DataFrame,
+    source_confidence_level: int,
+    target_confidence_level: int,
+    geoid_column: str = 'GEOID',
+) -> pd.DataFrame:
+    factor = moe_scale_factor(
+        source_confidence_level=source_confidence_level,
+        target_confidence_level=target_confidence_level,
+    )
+    if factor == 1.0:
+        return df.copy()
+
+    output = df.copy()
+    moe_columns = [
+        column
+        for column in output.columns
+        if column != geoid_column and str(column).endswith('_m')
+    ]
+    for column in moe_columns:
+        numeric_values = pd.to_numeric(output[column], errors='coerce')
+        output[column] = numeric_values * factor
+
+    return output
 
 
 def flatten_public_field_names(recodes_dict: dict[str, str | list[str]]) -> list[str]:

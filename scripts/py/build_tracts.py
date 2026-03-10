@@ -9,7 +9,9 @@ import pandas as pd
 
 from config import (
     acs_batch_size,
+    acs_moe_level,
     acs_request_timeout_seconds,
+    acs_source_moe_level,
     cache_dir,
     census_recodes_path,
     census_variables_path,
@@ -43,6 +45,7 @@ from utils_recode import (
     load_census_recodes,
     load_census_variable_map,
     normalize_public_output_columns,
+    scale_moe_columns,
 )
 
 GEOID_RE = re.compile(r'^\d{11}$')
@@ -327,7 +330,7 @@ def _build_variables_payload(public_field_names: list[str]) -> dict[str, object]
                     'dataset': 'ACS 5-year',
                     'table': 'B25077',
                     'variable': 'B25077_001',
-                    'moe_level': 90,
+                    'moe_level': acs_moe_level,
                 },
             },
             {
@@ -348,7 +351,7 @@ def _build_variables_payload(public_field_names: list[str]) -> dict[str, object]
                     'table': 'B17001',
                     'numerator': 'B17001_002',
                     'denominator': 'B17001_001',
-                    'moe_level': 90,
+                    'moe_level': acs_moe_level,
                 },
             },
         ],
@@ -397,7 +400,8 @@ def _build_metadata(
         'sources': {
             'tract_geometry': tiger_source,
             'acs_survey': 'acs5',
-            'acs_moe_level': 90,
+            'acs_source_moe_level': acs_source_moe_level,
+            'acs_moe_level': acs_moe_level,
             'quantile_year': tract_year,
             'acs_variable_map': variable_map_rel,
             'acs_recode_map': recode_map_rel,
@@ -565,6 +569,11 @@ def main() -> None:
 
         print(f'Applying recodes for {year_value}...')
         recoded_df = collapse_census_data(fetched_df, recode_map)
+        recoded_df = scale_moe_columns(
+            recoded_df,
+            source_confidence_level=acs_source_moe_level,
+            target_confidence_level=acs_moe_level,
+        )
         public_df = normalize_public_output_columns(recoded_df)
         public_df = _apply_frontend_aliases(public_df)
         _validate_recode_outputs(fetched_df, recoded_df, public_df, recode_map)

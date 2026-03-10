@@ -14,7 +14,7 @@
         "dataset": "ACS 5-year",
         "table": "B25077",
         "variable": "B25077_001",
-        "moe_level": 90
+        "moe_level": 95
       }
     },
     {
@@ -35,7 +35,7 @@
         "table": "B17001",
         "numerator": "B17001_002",
         "denominator": "B17001_001",
-        "moe_level": 90
+        "moe_level": 95
       }
     }
   ],

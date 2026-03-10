@@ -17,7 +17,8 @@ years = [2023]
 default_h3_resolution = 8
 acs_batch_size = 45
 acs_request_timeout_seconds = 120
-acs_moe_level = 90
+acs_source_moe_level = 90
+acs_moe_level = 95
 
 tract_simplify_tolerance = 0.0003
 tract_water_erase_area_threshold = 0.75

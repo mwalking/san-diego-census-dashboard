@@ -521,6 +521,54 @@ existing frontend schema and interaction behavior.
 
 ---
 
+## Milestone F5 — Sidebar Explore/Profile Tabs
+
+### Objective
+Keep the existing sidebar as the default Explore workflow and add a Profile tab for richer single-feature
+detail without changing map interactions.
+
+### Tasks
+- [x] Preserve current Explore structure/behavior as default:
+  - [x] consolidated Selected / In view / All summary strip
+  - [x] grouped metric list + click-to-recolor behavior
+  - [x] per-row estimate ± MOE output
+  - [x] existing legend bucket integration compatibility
+- [x] Add top tab control in sidebar:
+  - [x] Explore tab
+  - [x] Profile tab
+  - [x] default tab remains Explore
+- [x] Add Profile layout config for curated sections and ordered blocks:
+  - [x] `src/config/profileLayout.js`
+  - [x] section/block metadata for `comparisonRows`, `metricRows`, `stackedBar`
+- [x] Implement Profile rendering for selected feature:
+  - [x] empty state when nothing is selected
+  - [x] single-selection detail card with active metric estimate ± MOE and all-area comparison
+  - [x] curated sections in order: People, Economic conditions, Housing, Mobility
+  - [x] compact comparison rows and stacked distribution bars
+  - [x] defensive missing-data hiding for unavailable rows/blocks
+- [x] Add optional collapsed `More details` block listing additional available variables.
+- [x] Keep scope strict:
+  - [x] no map selection logic changes
+  - [x] no pipeline changes
+  - [x] no legend filter behavior changes (except compatibility with tabbed sidebar wrapper)
+
+### Acceptance checkpoint
+- [x] Explore tab remains the default and retains existing UI behavior.
+- [x] Profile tab shows a richer single-feature profile and a clear empty state with no selection.
+- [x] Sidebar width and internal scrolling remain consistent with prior layout.
+
+### Validation commands
+- [x] `npm run build`
+- [x] `npm run verify`
+- [x] `npm run dev -- --host 127.0.0.1 --port 4173` starts successfully (after sandbox elevation)
+- [ ] Manual visual smoke in browser:
+  - Explore tab unchanged
+  - Profile tab available and populated for single selection
+  - Empty-state messaging for no selection
+  - Legend bucket filtering still behaves as before in Explore
+
+---
+
 ## Milestone F4 — Hex Methodology Improvements / County Expansion
 
 ### Objective

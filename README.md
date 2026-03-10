@@ -34,8 +34,8 @@ Tract ACS expansion is configured in two JSON layers:
 - recode/collapse map: `scripts/py/config/census_recodes.json`
 
 `build_tracts.py` fetches ACS variables in batches (split across detailed `B...` tables and subject
-`S...` tables), recodes collapsed variables, and normalizes public MOE naming to the frontend
-convention (`*_moe`).
+`S...` tables), recodes collapsed variables, converts ACS MOEs from 90% to 95% confidence level
+(`1.96 / 1.645` scaling), and normalizes public MOE naming to the frontend convention (`*_moe`).
 
 ```bash
 uv sync

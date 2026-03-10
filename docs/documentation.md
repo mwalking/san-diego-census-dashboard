@@ -4,7 +4,7 @@
 
 ## Current status
 
-- **Active milestone:** F3.5 — expand tract variables with ACS map + recodes (completed)
+- **Active milestone:** F5 — preserve Explore sidebar + add Profile tab (completed)
 - **Next milestone:** Milestone F4 — improve hex methodology and/or expand to Orange County
 
 ## Repository overview
@@ -813,6 +813,113 @@ npm run build
   - retained required current frontend tract keys through alias mapping so existing D/E UI behavior
     remains stable.
 - Next milestone set to Milestone F4 (hex methodology improvements and/or Orange County expansion).
+
+## Post-milestone patch — MOE confidence level set to 95%
+
+### What changed
+
+- Updated pipeline MOE configuration in `scripts/py/config.py`:
+  - source ACS MOE level: `90`
+  - output/public MOE level: `95`
+- Added MOE scaling helpers in `scripts/py/utils_recode.py`:
+  - `moe_scale_factor(...)`
+  - `scale_moe_columns(...)`
+- Applied MOE scaling in `scripts/py/build_tracts.py` after recode collapse and before public output
+  normalization.
+- Updated tract metadata + variable provenance to reflect the new output MOE level:
+  - `public/data/metadata.json` now records source `90` and output `95`.
+  - `public/data/variables.json` metric provenance now uses `moe_level: 95`.
+- Regenerated:
+  - `public/data/tracts/2023.json`
+  - `public/data/metadata.json`
+  - `public/data/variables.json`
+  - `public/data/years.json`
+  - `public/data/hexes/2023.json` (to keep hex MOE values consistent with updated tract MOEs)
+- Updated `README.md` to note the MOE conversion to 95% confidence level.
+
+### Commands run and results
+
+- `uv run -- python scripts/py/test_recode_utils.py`: passed (added MOE scaling coverage).
+- `uv run --env-file .env -- python scripts/py/build_tracts.py`: passed.
+- `uv run -- python scripts/py/build_hexes.py`: passed.
+- `npm run verify`:
+  - first run failed on formatting for regenerated JSON outputs.
+  - after formatting, rerun passed (`format:check`, `lint`, `build`).
+
+### Decision
+
+- Because ACS API `M` fields are published at 90% confidence, pipeline outputs now explicitly convert MOEs
+  to 95% confidence by scaling MOE values with:
+  - `z_95 / z_90 = 1.96 / 1.645`
+  - this is applied before `_m` -> `*_moe` public naming normalization.
+
+## Milestone F5 changes
+
+- Added new Profile layout/config file:
+  - `src/config/profileLayout.js`
+  - defines curated Profile sections and block ordering with lightweight block types:
+    - `comparisonRows`
+    - `metricRows`
+    - `stackedBar`
+- Updated `src/components/Sidebar.jsx` to support a tabbed sidebar while preserving Explore as default:
+  - added top `Explore` / `Profile` tab control
+  - default tab is `Explore`
+  - sidebar shell width, card style, and scroll behavior remain consistent
+- Preserved Explore behavior and structure:
+  - year control card
+  - consolidated summary strip (`Selected / In view / All`)
+  - grouped metric list with existing click-to-recolor behavior
+  - per-row selected-area estimate ± MOE behavior
+  - existing legend-filter compatibility path
+- Added Profile view behavior:
+  - empty-state message when no feature is selected
+  - single-feature profile card with selected feature id (`Hex` or `Tract`) and active metric estimate ± MOE
+  - all-area comparison shown when available
+  - curated section rendering in required order:
+    - People
+    - Economic conditions
+    - Housing
+    - Mobility
+  - compact inline comparison rows with bar fill + benchmark marker
+  - compact stacked horizontal distribution bars for supported variable blocks
+  - multi-selection guard message to narrow to one selected feature
+- Added optional collapsed `More details` section at the bottom of Profile:
+  - hidden by default
+  - lists additional available numeric fields for the selected feature
+  - excludes profile-used keys and noisy/unavailable values
+- Kept F5 scope strict:
+  - no map interaction changes
+  - no pipeline or data-build changes
+  - no new dependencies
+
+## Commands run and results (Milestone F5)
+
+- `npm run build`: passed.
+  - existing non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run verify`:
+  - first run failed on Prettier formatting for `src/components/Sidebar.jsx`.
+  - after formatting (`npx prettier --write src/components/Sidebar.jsx`), rerun passed.
+  - final verify result: passed (`format:check`, `lint`, `build`).
+- `npm run dev -- --host 127.0.0.1 --port 4173`:
+  - first run in sandbox failed with `EPERM` bind error.
+  - rerun with elevated permissions started successfully (`VITE v7.3.1 ready`).
+- Manual interactive browser checks (tab switching/legend interaction) were not executed inside this CLI
+  session.
+
+## Decisions made (Milestone F5)
+
+- Kept Explore as the unchanged primary map-exploration workflow and added Profile as an additive second
+  view rather than redesigning/replacing existing sidebar interactions.
+- Centralized Profile section/metric ordering in `profileLayout.js` so future variable expansion can be
+  done via config updates instead of large component rewrites.
+- Applied a strict missing-data hiding strategy in Profile:
+  - rows/blocks render only when data is present and finite
+  - unavailable future variables do not render placeholders
+- Added an optional collapsed `More details` list to support advanced inspection without cluttering the
+  default Profile presentation.
+- Next milestone remains Milestone F4 (hex methodology improvements and/or Orange County expansion).
 
 ## Known issues / follow-ups
 

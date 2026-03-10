@@ -15,7 +15,7 @@
   },
   "quantiles": {
     "hex": {
-      "home_value_median": [316100, 422300, 462400, 666700, 966590],
+      "home_value_median": [316100, 377400, 462400, 664200, 942900],
       "poverty_rate": [0.035779, 0.060428, 0.076944, 0.107818, 0.18727]
     },
     "tract": {
@@ -51,7 +51,8 @@
       "feature_count_after_cleanup": 736
     },
     "acs_survey": "acs5",
-    "acs_moe_level": 90,
+    "acs_source_moe_level": 90,
+    "acs_moe_level": 95,
     "quantile_year": 2023,
     "acs_variable_map": "scripts/py/config/census_variables.json",
     "acs_recode_map": "scripts/py/config/census_recodes.json",

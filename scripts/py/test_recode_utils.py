@@ -5,7 +5,12 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from utils_recode import collapse_census_data, normalize_public_output_columns
+from utils_recode import (
+    collapse_census_data,
+    moe_scale_factor,
+    normalize_public_output_columns,
+    scale_moe_columns,
+)
 
 
 class RecodeUtilsTests(unittest.TestCase):
@@ -48,6 +53,27 @@ class RecodeUtilsTests(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             collapse_census_data(input_df, recodes)
+
+    def test_scale_moe_columns_to_95_percent(self) -> None:
+        input_df = pd.DataFrame(
+            {
+                'GEOID': ['06073000100'],
+                'foo_m': [10.0],
+                'bar_e': [5.0],
+            }
+        )
+        scaled = scale_moe_columns(
+            input_df,
+            source_confidence_level=90,
+            target_confidence_level=95,
+        )
+
+        expected_factor = 1.96 / 1.645
+        self.assertAlmostEqual(scaled['foo_m'].iloc[0], 10.0 * expected_factor, places=6)
+        self.assertEqual(scaled['bar_e'].iloc[0], 5.0)
+
+    def test_moe_scale_factor_noop_when_level_matches(self) -> None:
+        self.assertEqual(moe_scale_factor(95, 95), 1.0)
 
 
 if __name__ == '__main__':
