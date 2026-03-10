@@ -1202,6 +1202,9 @@ npm run build
   - asserts required plain files in `public/data/*`
   - asserts required gzip sidecars (`.json.gz` / `.geojson.gz`)
   - no Python pipeline steps run during deploy
+- Fixed workflow expression parsing in `pages.yml`:
+  - moved enablement token secret into job-level env
+  - switched step `if:` checks from `secrets.*` to `env.*` to satisfy Actions expression validation
 - Updated Vite config for project-site deployment path:
   - `vite.config.mjs` now builds with `base: "/san-diego-census-dashboard/"`
   - dev command still uses `/` base for local iteration
