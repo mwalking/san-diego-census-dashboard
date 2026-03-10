@@ -641,17 +641,17 @@ unchanged in the app.
 Wire multi-year data through the app (`2022`, `2023`, `2024`) and make metadata quantiles year-aware.
 
 ### Tasks
-- [ ] Update metadata schema and app readers to support per-year quantiles.
-- [ ] Ensure year slider and lazy-loading work for all three years in both geographies.
-- [ ] Keep geography toggle, selection state, legend behavior, and choose-for-me working across years.
-- [ ] Set default legend policy to per-year breaks.
+- [x] Update metadata schema and app readers to support per-year quantiles.
+- [x] Ensure year slider and lazy-loading work for all three years in both geographies.
+- [x] Keep geography toggle, selection state, legend behavior, and choose-for-me working across years.
+- [x] Set default legend policy to per-year breaks.
 
 ### Acceptance checkpoint
-- [ ] Year slider supports `2022`/`2023`/`2024` in both hex and tract modes.
-- [ ] Legend and map coloring use the active year metadata without regressions.
+- [x] Year slider supports `2022`/`2023`/`2024` in both hex and tract modes.
+- [x] Legend and map coloring use the active year metadata without regressions.
 
 ### Validation commands
-- [ ] `npm run verify`
+- [x] `npm run verify`
 - [ ] Manual smoke in browser:
   - [ ] year toggle in both geographies
   - [ ] legend update per year

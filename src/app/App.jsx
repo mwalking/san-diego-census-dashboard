@@ -112,6 +112,41 @@ function normalizeMetricList(payload) {
     }));
 }
 
+function getQuantilesForGeoYear(metadata, geoMode, year) {
+  const modeQuantiles = metadata?.quantiles?.[geoMode];
+  if (!modeQuantiles || typeof modeQuantiles !== 'object' || Array.isArray(modeQuantiles)) {
+    return {};
+  }
+
+  const yearEntries = Object.entries(modeQuantiles)
+    .filter(
+      ([key, value]) =>
+        /^\d{4}$/.test(String(key)) && value && typeof value === 'object' && !Array.isArray(value),
+    )
+    .sort(([leftYear], [rightYear]) => Number(leftYear) - Number(rightYear));
+
+  if (yearEntries.length > 0) {
+    const yearKey = String(year ?? '');
+    if (yearKey && modeQuantiles[yearKey] && typeof modeQuantiles[yearKey] === 'object') {
+      return modeQuantiles[yearKey];
+    }
+
+    const [, latestYearQuantiles] = yearEntries[yearEntries.length - 1];
+    return latestYearQuantiles;
+  }
+
+  return modeQuantiles;
+}
+
+function getQuantileBreaksForMetric(metadata, geoMode, year, metricId) {
+  if (!metricId) {
+    return [];
+  }
+
+  const quantilesForYear = getQuantilesForGeoYear(metadata, geoMode, year);
+  return normalizeQuantileBreaks(quantilesForYear?.[metricId]);
+}
+
 function formatLegendTick(value, format) {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue)) {
@@ -494,18 +529,19 @@ function App() {
     });
   }, []);
 
-  const quantilesByGeoMode = useMemo(() => metadata?.quantiles ?? {}, [metadata]);
+  const quantilesForCurrentGeoYear = useMemo(
+    () => getQuantilesForGeoYear(metadata, geoMode, year),
+    [geoMode, metadata, year],
+  );
 
   const metricsForCurrentGeoMode = useMemo(() => {
-    const quantilesForMode = quantilesByGeoMode?.[geoMode] ?? {};
-
     return metrics.map((metric) => ({
       ...metric,
       isAvailable:
-        Array.isArray(quantilesForMode?.[metric.id]) &&
-        normalizeQuantileBreaks(quantilesForMode[metric.id]).length > 0,
+        Array.isArray(quantilesForCurrentGeoYear?.[metric.id]) &&
+        normalizeQuantileBreaks(quantilesForCurrentGeoYear[metric.id]).length > 0,
     }));
-  }, [geoMode, metrics, quantilesByGeoMode]);
+  }, [metrics, quantilesForCurrentGeoYear]);
 
   const metricGroups = useMemo(() => {
     const groups = [];
@@ -616,7 +652,7 @@ function App() {
       const selectedCandidate = pickExtremeCandidate(
         candidates,
         pickHigh,
-        metadata?.quantiles?.[geoMode]?.[activeMetric.id],
+        getQuantileBreaksForMetric(metadata, geoMode, year, activeMetric.id),
       );
 
       if (!selectedCandidate?.id) {
@@ -702,13 +738,10 @@ function App() {
     }
   }, [activeMetricId, clearLegendFilter, geoMode, legendFilter, year]);
 
-  const quantileBreaks = useMemo(() => {
-    if (!activeMetricId) {
-      return [];
-    }
-    const breaks = quantilesByGeoMode?.[geoMode]?.[activeMetricId];
-    return normalizeQuantileBreaks(breaks);
-  }, [activeMetricId, geoMode, quantilesByGeoMode]);
+  const quantileBreaks = useMemo(
+    () => getQuantileBreaksForMetric(metadata, geoMode, year, activeMetricId),
+    [activeMetricId, geoMode, metadata, year],
+  );
 
   const legendBins = useMemo(() => {
     const format = activeMetric?.format ?? 'number';

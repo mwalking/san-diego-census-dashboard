@@ -480,6 +480,15 @@ def _compute_hex_quantiles(hex_records: list[dict[str, Any]]) -> dict[str, list[
     }
 
 
+def _compute_hex_quantiles_by_year(
+    hex_records_by_year: dict[int, list[dict[str, Any]]],
+) -> dict[str, dict[str, list[float | int]]]:
+    quantiles_by_year: dict[str, dict[str, list[float | int]]] = {}
+    for year_value in sorted(hex_records_by_year.keys()):
+        quantiles_by_year[str(year_value)] = _compute_hex_quantiles(hex_records_by_year[year_value])
+    return quantiles_by_year
+
+
 def _compute_hex_year_averages(hex_records: list[dict[str, Any]]) -> dict[str, float | int | None]:
     home_value_values: list[float] = []
     poverty_below_total = 0.0
@@ -525,8 +534,7 @@ def _update_metadata(
         quantiles = {}
         metadata['quantiles'] = quantiles
 
-    latest_year = max(hex_records_by_year.keys())
-    quantiles['hex'] = _compute_hex_quantiles(hex_records_by_year[latest_year])
+    quantiles['hex'] = _compute_hex_quantiles_by_year(hex_records_by_year)
 
     averages = metadata.get('averages')
     if not isinstance(averages, dict):
@@ -553,6 +561,7 @@ def _update_metadata(
         'moe_method': 'weighted_piece_rss',
         'median_method': 'representative_point_with_largest_overlap_fallback',
         'parity_relative_tolerance': PARITY_REL_TOLERANCE,
+        'quantile_years': sorted(str(year_value) for year_value in hex_records_by_year.keys()),
     }
 
     metadata['h3_resolution'] = int(h3_resolution)

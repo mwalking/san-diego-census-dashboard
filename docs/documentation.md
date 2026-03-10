@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** F4C — multi-year metadata + app wiring
-- **Next milestone:** H1 — data packaging for GitHub Pages
+- **Active milestone:** H1 — data packaging for GitHub Pages
+- **Next milestone:** H2 — GitHub Pages deploy workflow
 
 ## Repository overview
 
@@ -1085,6 +1085,57 @@ npm run build
   enforcing numeric sanity.
 - Preserved the earlier deferred-data-commit policy; regenerated raw data remains local until H1 packaging.
 - Next milestone: `F4C` — multi-year metadata + app wiring.
+
+## Milestone F4C changes
+
+- Updated metadata schema generation to support per-year quantiles:
+  - `scripts/py/build_tracts.py` now writes `quantiles.tract.<YEAR>.<metricId>`
+  - `scripts/py/build_hexes.py` now writes `quantiles.hex.<YEAR>.<metricId>`
+- Updated app quantile readers in `src/app/App.jsx`:
+  - quantile lookup is now year-aware by active `(geoMode, year, metricId)`
+  - choose-for-me quantile fallback now uses year-specific quantiles
+  - metric availability now derives from active-year quantiles
+  - backward compatibility retained for legacy flat quantile shapes
+- Regenerated data/metadata artifacts for all configured years after schema update:
+  - `public/data/metadata.json`
+  - `public/data/years.json`
+  - `public/data/tracts/tracts.geojson`
+  - `public/data/tracts/2022.json`
+  - `public/data/tracts/2023.json`
+  - `public/data/tracts/2024.json`
+  - `public/data/hexes/2022.json`
+  - `public/data/hexes/2023.json`
+  - `public/data/hexes/2024.json`
+
+## Commands run and results (Milestone F4C)
+
+- `uv run -- python -m py_compile scripts/py/build_tracts.py scripts/py/build_hexes.py scripts/py/utils_acs.py scripts/py/utils_geo.py`:
+  passed.
+- `uv run --env-file .env -- python scripts/py/build_tracts.py`: passed.
+- `uv run --env-file .env -- python scripts/py/build_hexes.py`: passed.
+  - non-fatal warning remained: dropped `1` block-group value row per year not present in cleaned geometry.
+- metadata spot-check command (Node): passed.
+  - `quantiles.hex` contains `2022, 2023, 2024`
+  - `quantiles.tract` contains `2022, 2023, 2024`
+- `npm run verify`:
+  - first run failed on formatting for regenerated files + `src/app/App.jsx`
+  - after Prettier formatting, rerun passed (`format:check`, `lint`, `build`)
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (Milestone F4C)
+
+- Chose year-aware quantiles as the default policy and data contract:
+  - `quantiles.<geoMode>.<year>.<metricId>`.
+- Kept App compatibility fallback for legacy metadata shape to reduce rollout risk while data artifacts catch
+  up.
+- Kept milestone scope focused on metadata + app wiring only:
+  - no change to selection model
+  - no change to geography toggle behavior
+  - no new dependencies
+- Manual browser smoke checks for year toggle/legend/choose-for-me were not executed in this CLI session.
+- Next milestone: `H1` — data packaging for GitHub Pages.
 
 ## Known issues / follow-ups
 

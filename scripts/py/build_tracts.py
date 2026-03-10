@@ -244,6 +244,41 @@ def _compute_tract_quantiles(
     }
 
 
+def _compute_tract_quantiles_by_year(
+    tract_values_by_year: dict[int, dict[str, dict[str, float | int | None]]],
+) -> dict[str, dict[str, list[float | int]]]:
+    quantiles_by_year: dict[str, dict[str, list[float | int]]] = {}
+    for year_value in sorted(tract_values_by_year.keys()):
+        quantiles_by_year[str(year_value)] = _compute_tract_quantiles(tract_values_by_year[year_value])
+    return quantiles_by_year
+
+
+def _normalize_year_quantiles(
+    payload: object,
+    default_year: int,
+) -> dict[str, dict[str, list[float | int]]]:
+    if not isinstance(payload, dict):
+        return {}
+
+    year_like_entries: dict[str, dict[str, list[float | int]]] = {}
+    for key, value in payload.items():
+        if str(key).isdigit() and isinstance(value, dict):
+            year_like_entries[str(key)] = value
+
+    if year_like_entries:
+        return year_like_entries
+
+    metric_like_entries = {
+        str(key): value
+        for key, value in payload.items()
+        if isinstance(value, (list, tuple))
+    }
+    if metric_like_entries:
+        return {str(default_year): metric_like_entries}
+
+    return {}
+
+
 def _slugify(value: str) -> str:
     return value.lower().replace('/', ' ').replace('+', ' plus ').replace('-', ' ').replace('  ', ' ').strip().replace(' ', '_')
 
@@ -363,7 +398,7 @@ def _build_variables_payload(public_field_names: list[str]) -> dict[str, object]
 
 def _build_metadata(
     existing_metadata: dict[str, object],
-    tract_quantiles: dict[str, list[float]],
+    tract_quantiles_by_year: dict[str, dict[str, list[float | int]]],
     yearly_averages: dict[str, dict[str, float | int | None]],
     tract_year: int,
     tiger_source: dict[str, object],
@@ -371,7 +406,8 @@ def _build_metadata(
     existing_quantiles = existing_metadata.get('quantiles', {}) if isinstance(existing_metadata, dict) else {}
     existing_averages = existing_metadata.get('averages', {}) if isinstance(existing_metadata, dict) else {}
 
-    hex_quantiles = existing_quantiles.get('hex', {}) if isinstance(existing_quantiles, dict) else {}
+    raw_hex_quantiles = existing_quantiles.get('hex', {}) if isinstance(existing_quantiles, dict) else {}
+    hex_quantiles = _normalize_year_quantiles(raw_hex_quantiles, default_year=tract_year)
     hex_averages = existing_averages.get('hex', {}) if isinstance(existing_averages, dict) else {}
 
     tract_averages = {year_key: values for year_key, values in yearly_averages.items()}
@@ -394,7 +430,7 @@ def _build_metadata(
         },
         'quantiles': {
             'hex': hex_quantiles,
-            'tract': tract_quantiles,
+            'tract': tract_quantiles_by_year,
         },
         'averages': averages_payload,
         'sources': {
@@ -403,6 +439,7 @@ def _build_metadata(
             'acs_source_moe_level': acs_source_moe_level,
             'acs_moe_level': acs_moe_level,
             'quantile_year': tract_year,
+            'quantile_years': sorted(str(year_value) for year_value in years),
             'acs_variable_map': variable_map_rel,
             'acs_recode_map': recode_map_rel,
             'acs_fetch_strategy': {
@@ -599,7 +636,7 @@ def main() -> None:
         }
 
     latest_year = max(years)
-    tract_quantiles = _compute_tract_quantiles(tract_values_by_year[latest_year])
+    tract_quantiles_by_year = _compute_tract_quantiles_by_year(tract_values_by_year)
 
     print('Writing years, variables, and metadata...')
     write_json(data_dir / 'years.json', years)
@@ -610,7 +647,7 @@ def main() -> None:
     existing_metadata = read_json(data_dir / 'metadata.json', default={})
     metadata_payload = _build_metadata(
         existing_metadata=existing_metadata if isinstance(existing_metadata, dict) else {},
-        tract_quantiles=tract_quantiles,
+        tract_quantiles_by_year=tract_quantiles_by_year,
         yearly_averages=yearly_averages,
         tract_year=latest_year,
         tiger_source=tiger_source,
