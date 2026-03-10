@@ -18,7 +18,75 @@ function dataUrl(path) {
   return `${normalizeBaseUrl()}data/${cleanPath}`;
 }
 
+function supportsGzipJsonDecompression() {
+  return (
+    typeof globalThis.DecompressionStream === 'function' &&
+    typeof globalThis.Response === 'function'
+  );
+}
+
+async function decodeGzipJsonResponse(response, url) {
+  const bodyStream = response.body;
+  if (!bodyStream) {
+    throw new Error(`Failed to decode ${url}: empty response body`);
+  }
+
+  let decompressedStream;
+  try {
+    decompressedStream = bodyStream.pipeThrough(new globalThis.DecompressionStream('gzip'));
+  } catch (error) {
+    throw new Error(
+      `Failed to decode ${url}: unable to initialize gzip stream (${error?.message ?? 'unknown'})`,
+    );
+  }
+
+  let textPayload = '';
+  try {
+    textPayload = await new globalThis.Response(decompressedStream).text();
+  } catch (error) {
+    throw new Error(
+      `Failed to decode ${url}: stream decompression error (${error?.message ?? 'unknown'})`,
+    );
+  }
+
+  try {
+    return JSON.parse(textPayload);
+  } catch (error) {
+    throw new Error(`Failed to decode ${url}: invalid JSON (${error?.message ?? 'unknown'})`);
+  }
+}
+
+async function tryFetchGzipJson(path) {
+  if (!supportsGzipJsonDecompression()) {
+    return { ok: false, data: null };
+  }
+
+  const url = dataUrl(`${path}.gz`);
+  let response;
+  try {
+    response = await globalThis.fetch(url);
+  } catch {
+    return { ok: false, data: null };
+  }
+
+  if (!response.ok) {
+    return { ok: false, data: null };
+  }
+
+  try {
+    const payload = await decodeGzipJsonResponse(response, url);
+    return { ok: true, data: payload };
+  } catch {
+    return { ok: false, data: null };
+  }
+}
+
 async function fetchJson(path) {
+  const gzipResult = await tryFetchGzipJson(path);
+  if (gzipResult.ok) {
+    return gzipResult.data;
+  }
+
   const url = dataUrl(path);
   let response;
 

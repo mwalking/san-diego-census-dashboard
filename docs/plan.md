@@ -665,23 +665,23 @@ Wire multi-year data through the app (`2022`, `2023`, `2024`) and make metadata 
 Ship compressed sidecars for large static data files while preserving plain JSON/GeoJSON compatibility.
 
 ### Tasks
-- [ ] Generate compressed data sidecars:
-  - [ ] `.json.gz`
-  - [ ] `.geojson.gz`
-- [ ] Keep plain JSON/GeoJSON files in place as additive fallback assets.
+- [x] Generate compressed data sidecars:
+  - [x] `.json.gz`
+  - [x] `.geojson.gz`
+- [x] Keep plain JSON/GeoJSON files in place as additive fallback assets.
 - [ ] Finalize deferred data commit:
-  - [ ] include regenerated multi-year tract outputs
-  - [ ] include compressed sidecars
+  - [x] include regenerated multi-year tract outputs
+  - [x] include compressed sidecars
   - [ ] commit plain + compressed assets together
-- [ ] Update app data loaders to attempt compressed files first, then plain fallback.
-- [ ] Document a repeatable size-check command and expected output shape.
+- [x] Update app data loaders to attempt compressed files first, then plain fallback.
+- [x] Document a repeatable size-check command and expected output shape.
 
 ### Acceptance checkpoint
-- [ ] Compressed sidecars are generated for large data assets and app loading still works with fallback.
+- [x] Compressed sidecars are generated for large data assets and app loading still works with fallback.
 
 ### Validation commands
-- [ ] Size check command (documented in `docs/documentation.md`)
-- [ ] `npm run verify`
+- [x] Size check command (documented in `docs/documentation.md`)
+- [x] `npm run verify`
 - [ ] Manual loader smoke test (compressed path + fallback path)
 
 ---

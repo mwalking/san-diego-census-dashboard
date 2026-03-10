@@ -1137,6 +1137,59 @@ npm run build
 - Manual browser smoke checks for year toggle/legend/choose-for-me were not executed in this CLI session.
 - Next milestone: `H1` — data packaging for GitHub Pages.
 
+## Milestone H1 changes
+
+- Added `scripts/py/build_compressed_data.py` to generate deterministic gzip sidecars for all
+  `public/data/**/*.json` and `public/data/**/*.geojson` files.
+- Generated compressed sidecars for all current multi-year artifacts:
+  - `public/data/years.json.gz`
+  - `public/data/variables.json.gz`
+  - `public/data/metadata.json.gz`
+  - `public/data/tracts/tracts.geojson.gz`
+  - `public/data/tracts/2022.json.gz`
+  - `public/data/tracts/2023.json.gz`
+  - `public/data/tracts/2024.json.gz`
+  - `public/data/hexes/2022.json.gz`
+  - `public/data/hexes/2023.json.gz`
+  - `public/data/hexes/2024.json.gz`
+- Updated `src/data/loadData.js` loader behavior:
+  - attempt `.gz` fetch first for JSON/GeoJSON resources
+  - decode gzip payload with `DecompressionStream('gzip')` when supported
+  - fall back to plain JSON/GeoJSON fetch on unsupported/decode/error/non-OK gzip responses
+- Kept plain JSON/GeoJSON files unchanged as additive fallback assets.
+- Documented repeatable size-check command and expected output shape for H1 validation.
+
+## Commands run and results (Milestone H1)
+
+- `uv run -- python scripts/py/build_compressed_data.py`: passed.
+  - `Compressed 10 files in /home/mwalker/san-diego-census-dashboard/public/data`
+  - `Total raw bytes: 28735316`
+  - `Total gz bytes: 3397313`
+  - `Overall ratio: 0.1182`
+- Size-check command:
+  - `find public/data -type f \( -name "*.json" -o -name "*.geojson" \) ! -name "*.gz" -print0 | while IFS= read -r -d "" f; do raw=$(wc -c <"$f"); gz=$(wc -c <"$f.gz"); ratio=$(awk -v r="$raw" -v g="$gz" "BEGIN { if (r==0) print \"0.0000\"; else printf \"%.4f\", g/r }"); printf "%10d %10d %7s  %s\n" "$raw" "$gz" "$ratio" "$f"; done | sort -k4`
+  - expected row shape: `<raw_bytes> <gz_bytes> <ratio> <path>`
+  - observed totals command result:
+    - `TOTAL_RAW=28735316 TOTAL_GZ=3397313 RATIO=0.1182`
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (Milestone H1)
+
+- Adopted gzip sidecars as the default delivery strategy for Pages while preserving plain JSON/GeoJSON
+  compatibility.
+- Kept sidecar generation deterministic (`mtime=0`) to avoid unnecessary diffs across repeated runs.
+- Chose feature-detection (`DecompressionStream`) in the app loader to avoid breaking clients that cannot
+  decode gzip streams in JS.
+- Retained gzip generation even for small files (for a consistent artifact contract), while plain files remain
+  first-class fallback assets.
+- Deferred milestone close-out items:
+  - manual browser smoke test for compressed path + fallback path is still pending
+  - plain + compressed data snapshot should be committed together in a single H1 data commit
+- Next milestone after H1 close-out: `H2` — GitHub Pages deploy workflow.
+
 ## Known issues / follow-ups
 
 - Bundle size warning exists after deck.gl/maplibre additions; optimization can be addressed later if needed.
