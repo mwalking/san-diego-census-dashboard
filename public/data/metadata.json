@@ -1,0 +1,127 @@
+{
+  "years": [2022, 2023, 2024],
+  "h3_resolution": 8,
+  "region": {
+    "name": "San Diego County, CA",
+    "state": "06",
+    "counties": ["06073"],
+    "defaultView": {
+      "longitude": -117.1611,
+      "latitude": 32.7157,
+      "zoom": 9.5,
+      "pitch": 0,
+      "bearing": 0
+    }
+  },
+  "quantiles": {
+    "hex": {
+      "2022": {
+        "home_value_median": [158300, 343300, 472500, 684000, 908000],
+        "poverty_rate": [0.008594, 0.065375, 0.100028, 0.178836, 0.225555]
+      },
+      "2023": {
+        "home_value_median": [361000, 421200, 642000, 778100, 1042800],
+        "poverty_rate": [0.010309, 0.06933, 0.10202, 0.156945, 0.251313]
+      },
+      "2024": {
+        "home_value_median": [161500, 393300, 559200, 780200, 1073400],
+        "poverty_rate": [0.03112, 0.067492, 0.078935, 0.136961, 0.244851]
+      }
+    },
+    "tract": {
+      "2022": {
+        "home_value_median": [450850, 580900, 672350, 825300, 1167250],
+        "poverty_rate": [0.027865, 0.057265, 0.082825, 0.12096, 0.208791]
+      },
+      "2023": {
+        "home_value_median": [484150, 618900, 735300, 882700, 1243600],
+        "poverty_rate": [0.027059, 0.054699, 0.081843, 0.118712, 0.215335]
+      },
+      "2024": {
+        "home_value_median": [521950, 667500, 799500, 949100, 1419550],
+        "poverty_rate": [0.029273, 0.055927, 0.082129, 0.118659, 0.209394]
+      }
+    }
+  },
+  "averages": {
+    "2022": {
+      "home_value_median": 725200,
+      "poverty_rate": 0.1057121681398669
+    },
+    "2023": {
+      "home_value_median": 791600,
+      "poverty_rate": 0.1035269729034036
+    },
+    "2024": {
+      "home_value_median": 854700,
+      "poverty_rate": 0.10279023000544639
+    },
+    "hex": {
+      "2023": {
+        "home_value_median": 642000,
+        "poverty_rate": 0.103392
+      },
+      "2022": {
+        "home_value_median": 472500,
+        "poverty_rate": 0.105608
+      },
+      "2024": {
+        "home_value_median": 559200,
+        "poverty_rate": 0.102503
+      }
+    },
+    "tract": {
+      "2022": {
+        "home_value_median": 725200,
+        "poverty_rate": 0.1057121681398669
+      },
+      "2023": {
+        "home_value_median": 791600,
+        "poverty_rate": 0.1035269729034036
+      },
+      "2024": {
+        "home_value_median": 854700,
+        "poverty_rate": 0.10279023000544639
+      }
+    }
+  },
+  "sources": {
+    "tract_geometry": {
+      "tiger_year": 2024,
+      "source_url": "https://www2.census.gov/geo/tiger/TIGER2024/TRACT/tl_2024_06_tract.zip",
+      "zip_path": "/home/mwalker/san-diego-census-dashboard/scripts/py/.cache/tl_2024_06_tract.zip",
+      "water_erase_area_threshold": 0.75,
+      "feature_count_before_cleanup": 737,
+      "feature_count_after_cleanup": 736
+    },
+    "acs_survey": "acs5",
+    "acs_source_moe_level": 90,
+    "acs_moe_level": 95,
+    "quantile_year": 2024,
+    "quantile_years": ["2022", "2023", "2024"],
+    "acs_variable_map": "scripts/py/config/census_variables.json",
+    "acs_recode_map": "scripts/py/config/census_recodes.json",
+    "acs_fetch_strategy": {
+      "detailed_endpoint": "acs/acs5",
+      "subject_endpoint": "acs/acs5/subject",
+      "batch_size": 45,
+      "grouping": "product + table_prefix"
+    },
+    "hex_interpolation": {
+      "source_geography": "block_group",
+      "source_geometry": {
+        "tiger_year": 2024,
+        "source_url": "https://www2.census.gov/geo/tiger/TIGER2024/BG/tl_2024_06_bg.zip",
+        "zip_path": "/home/mwalker/san-diego-census-dashboard/scripts/py/.cache/tl_2024_06_bg.zip",
+        "water_erase_area_threshold": 0.75,
+        "feature_count_before_cleanup": 2058,
+        "feature_count_after_cleanup": 2057
+      },
+      "count_method": "area_weighted",
+      "moe_method": "weighted_piece_rss",
+      "median_method": "representative_point_with_largest_overlap_fallback",
+      "parity_relative_tolerance": 0.03,
+      "quantile_years": ["2022", "2023", "2024"]
+    }
+  }
+}

@@ -1,0 +1,1110 @@
+{
+  "metrics": [
+    {
+      "id": "home_value_median",
+      "label": "Median home value",
+      "group": "Income & Property",
+      "format": "currency",
+      "type": "direct",
+      "source_field": "home_value_median",
+      "moeKey": "home_value_median_moe",
+      "aggregation": "median",
+      "description": "ACS 5-year median home value (owner-occupied units).",
+      "provenance": {
+        "dataset": "ACS 5-year",
+        "table": "B25077",
+        "variable": "B25077_001",
+        "moe_level": 95
+      }
+    },
+    {
+      "id": "poverty_rate",
+      "label": "Poverty rate",
+      "group": "Income & Property",
+      "format": "percent",
+      "type": "ratio",
+      "numerator": "poverty_below",
+      "denominator": "poverty_universe",
+      "numeratorMoeKey": "poverty_below_moe",
+      "denominatorMoeKey": "poverty_universe_moe",
+      "moeMethod": "proportion",
+      "aggregation": "ratio",
+      "description": "ACS 5-year poverty rate computed as poverty_below / poverty_universe.",
+      "provenance": {
+        "dataset": "ACS 5-year",
+        "table": "B17001",
+        "numerator": "B17001_002",
+        "denominator": "B17001_001",
+        "moe_level": 95
+      }
+    }
+  ],
+  "catalog": {
+    "groups": [
+      {
+        "id": "age",
+        "label": "Age",
+        "metrics": [
+          {
+            "id": "age_20_29",
+            "label": "Age 20 29",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_20_29",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_20_29_moe"
+          },
+          {
+            "id": "age_30_49",
+            "label": "Age 30 49",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_30_49",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_30_49_moe"
+          },
+          {
+            "id": "age_50_64",
+            "label": "Age 50 64",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_50_64",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_50_64_moe"
+          },
+          {
+            "id": "age_65_plus",
+            "label": "Age 65 Plus",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_65_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_65_plus_moe"
+          },
+          {
+            "id": "age_total_pop_base",
+            "label": "Age Total Pop Base",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_total_pop_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_total_pop_base_moe"
+          },
+          {
+            "id": "age_under_20",
+            "label": "Age Under 20",
+            "group": "Age",
+            "type": "direct",
+            "format": "number",
+            "source_field": "age_under_20",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "age_under_20_moe"
+          }
+        ]
+      },
+      {
+        "id": "race__ethnicity",
+        "label": "Race / ethnicity",
+        "metrics": [
+          {
+            "id": "race_asian",
+            "label": "Race Asian",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_asian",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_asian_moe"
+          },
+          {
+            "id": "race_black",
+            "label": "Race Black",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_black",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_black_moe"
+          },
+          {
+            "id": "race_hispanic",
+            "label": "Race Hispanic",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_hispanic",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_hispanic_moe"
+          },
+          {
+            "id": "race_native",
+            "label": "Race Native",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_native",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_native_moe"
+          },
+          {
+            "id": "race_other_combined",
+            "label": "Race Other Combined",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_other_combined",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_other_combined_moe"
+          },
+          {
+            "id": "race_total_pop_base",
+            "label": "Race Total Pop Base",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_total_pop_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_total_pop_base_moe"
+          },
+          {
+            "id": "race_white",
+            "label": "Race White",
+            "group": "Race / ethnicity",
+            "type": "direct",
+            "format": "number",
+            "source_field": "race_white",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "race_white_moe"
+          }
+        ]
+      },
+      {
+        "id": "transportation",
+        "label": "Transportation",
+        "metrics": [
+          {
+            "id": "transport_public_transit",
+            "label": "Transport Public Transit",
+            "group": "Transportation",
+            "type": "direct",
+            "format": "number",
+            "source_field": "transport_public_transit",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "transport_public_transit_moe"
+          },
+          {
+            "id": "transport_total_base",
+            "label": "Transport Total Base",
+            "group": "Transportation",
+            "type": "direct",
+            "format": "number",
+            "source_field": "transport_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "transport_total_base_moe"
+          },
+          {
+            "id": "transport_work_from_home",
+            "label": "Transport Work From Home",
+            "group": "Transportation",
+            "type": "direct",
+            "format": "number",
+            "source_field": "transport_work_from_home",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "transport_work_from_home_moe"
+          }
+        ]
+      },
+      {
+        "id": "disability",
+        "label": "Disability",
+        "metrics": [
+          {
+            "id": "disability_no_disability",
+            "label": "Disability No Disability",
+            "group": "Disability",
+            "type": "direct",
+            "format": "number",
+            "source_field": "disability_no_disability",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "disability_no_disability_moe"
+          },
+          {
+            "id": "disability_total_pop_base",
+            "label": "Disability Total Pop Base",
+            "group": "Disability",
+            "type": "direct",
+            "format": "number",
+            "source_field": "disability_total_pop_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "disability_total_pop_base_moe"
+          },
+          {
+            "id": "disability_with_disability",
+            "label": "Disability With Disability",
+            "group": "Disability",
+            "type": "direct",
+            "format": "number",
+            "source_field": "disability_with_disability",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "disability_with_disability_moe"
+          }
+        ]
+      },
+      {
+        "id": "poverty",
+        "label": "Poverty",
+        "metrics": [
+          {
+            "id": "poverty_below",
+            "label": "Poverty Below",
+            "group": "Poverty",
+            "type": "direct",
+            "format": "number",
+            "source_field": "poverty_below",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "poverty_below_moe"
+          },
+          {
+            "id": "poverty_below_poverty_level",
+            "label": "Poverty Below Poverty Level",
+            "group": "Poverty",
+            "type": "direct",
+            "format": "number",
+            "source_field": "poverty_below_poverty_level",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "poverty_below_poverty_level_moe"
+          },
+          {
+            "id": "poverty_total_pop_base",
+            "label": "Poverty Total Pop Base",
+            "group": "Poverty",
+            "type": "direct",
+            "format": "number",
+            "source_field": "poverty_total_pop_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "poverty_total_pop_base_moe"
+          },
+          {
+            "id": "poverty_universe",
+            "label": "Poverty Universe",
+            "group": "Poverty",
+            "type": "direct",
+            "format": "number",
+            "source_field": "poverty_universe",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "poverty_universe_moe"
+          }
+        ]
+      },
+      {
+        "id": "internet",
+        "label": "Internet",
+        "metrics": [
+          {
+            "id": "internet_no_internet_access",
+            "label": "Internet No Internet Access",
+            "group": "Internet",
+            "type": "direct",
+            "format": "number",
+            "source_field": "internet_no_internet_access",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "internet_no_internet_access_moe"
+          },
+          {
+            "id": "internet_total_hh_base",
+            "label": "Internet Total HH Base",
+            "group": "Internet",
+            "type": "direct",
+            "format": "number",
+            "source_field": "internet_total_hh_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "internet_total_hh_base_moe"
+          },
+          {
+            "id": "internet_with_subscription",
+            "label": "Internet With Subscription",
+            "group": "Internet",
+            "type": "direct",
+            "format": "number",
+            "source_field": "internet_with_subscription",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "internet_with_subscription_moe"
+          }
+        ]
+      },
+      {
+        "id": "education",
+        "label": "Education",
+        "metrics": [
+          {
+            "id": "edu_bachelors_plus",
+            "label": "Edu Bachelors Plus",
+            "group": "Education",
+            "type": "direct",
+            "format": "number",
+            "source_field": "edu_bachelors_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "edu_bachelors_plus_moe"
+          },
+          {
+            "id": "edu_hs_or_less",
+            "label": "Edu Hs Or Less",
+            "group": "Education",
+            "type": "direct",
+            "format": "number",
+            "source_field": "edu_hs_or_less",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "edu_hs_or_less_moe"
+          },
+          {
+            "id": "edu_some_college",
+            "label": "Edu Some College",
+            "group": "Education",
+            "type": "direct",
+            "format": "number",
+            "source_field": "edu_some_college",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "edu_some_college_moe"
+          },
+          {
+            "id": "edu_total_pop_25+_base",
+            "label": "Edu Total Pop 25+ Base",
+            "group": "Education",
+            "type": "direct",
+            "format": "number",
+            "source_field": "edu_total_pop_25+_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "edu_total_pop_25+_base_moe"
+          }
+        ]
+      },
+      {
+        "id": "household_income_bands",
+        "label": "Household income bands",
+        "metrics": [
+          {
+            "id": "hh_income_100K_149K",
+            "label": "HH Income 100K 149K",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_100K_149K",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_100K_149K_moe"
+          },
+          {
+            "id": "hh_income_150K_199K",
+            "label": "HH Income 150K 199K",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_150K_199K",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_150K_199K_moe"
+          },
+          {
+            "id": "hh_income_200K_plus",
+            "label": "HH Income 200K Plus",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_200K_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_200K_plus_moe"
+          },
+          {
+            "id": "hh_income_30K_74K",
+            "label": "HH Income 30K 74K",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_30K_74K",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_30K_74K_moe"
+          },
+          {
+            "id": "hh_income_75K_99K",
+            "label": "HH Income 75K 99K",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_75K_99K",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_75K_99K_moe"
+          },
+          {
+            "id": "hh_income_base",
+            "label": "HH Income Base",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_base_moe"
+          },
+          {
+            "id": "hh_income_less_30K",
+            "label": "HH Income Less 30K",
+            "group": "Household income bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "hh_income_less_30K",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "hh_income_less_30K_moe"
+          }
+        ]
+      },
+      {
+        "id": "language",
+        "label": "Language",
+        "metrics": [
+          {
+            "id": "lang_speak_base",
+            "label": "Lang Speak Base",
+            "group": "Language",
+            "type": "direct",
+            "format": "number",
+            "source_field": "lang_speak_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "lang_speak_base_moe"
+          },
+          {
+            "id": "lang_speak_english_only",
+            "label": "Lang Speak English Only",
+            "group": "Language",
+            "type": "direct",
+            "format": "number",
+            "source_field": "lang_speak_english_only",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "lang_speak_english_only_moe"
+          },
+          {
+            "id": "lang_speak_spanish",
+            "label": "Lang Speak Spanish",
+            "group": "Language",
+            "type": "direct",
+            "format": "number",
+            "source_field": "lang_speak_spanish",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "lang_speak_spanish_moe"
+          },
+          {
+            "id": "lang_speak_spanish_low_english",
+            "label": "Lang Speak Spanish Low English",
+            "group": "Language",
+            "type": "direct",
+            "format": "number",
+            "source_field": "lang_speak_spanish_low_english",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "lang_speak_spanish_low_english_moe"
+          }
+        ]
+      },
+      {
+        "id": "commute",
+        "label": "Commute",
+        "metrics": [
+          {
+            "id": "commute_10_29min",
+            "label": "Commute 10 29min",
+            "group": "Commute",
+            "type": "direct",
+            "format": "number",
+            "source_field": "commute_10_29min",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "commute_10_29min_moe"
+          },
+          {
+            "id": "commute_30_59min",
+            "label": "Commute 30 59min",
+            "group": "Commute",
+            "type": "direct",
+            "format": "number",
+            "source_field": "commute_30_59min",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "commute_30_59min_moe"
+          },
+          {
+            "id": "commute_60_plus",
+            "label": "Commute 60 Plus",
+            "group": "Commute",
+            "type": "direct",
+            "format": "number",
+            "source_field": "commute_60_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "commute_60_plus_moe"
+          },
+          {
+            "id": "commute_base",
+            "label": "Commute Base",
+            "group": "Commute",
+            "type": "direct",
+            "format": "number",
+            "source_field": "commute_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "commute_base_moe"
+          },
+          {
+            "id": "commute_under_10min",
+            "label": "Commute Under 10min",
+            "group": "Commute",
+            "type": "direct",
+            "format": "number",
+            "source_field": "commute_under_10min",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "commute_under_10min_moe"
+          }
+        ]
+      },
+      {
+        "id": "housing_year_built",
+        "label": "Housing year built",
+        "metrics": [
+          {
+            "id": "housing_year_built_1960_1979",
+            "label": "Housing Year Built 1960 1979",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_1960_1979",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_1960_1979_moe"
+          },
+          {
+            "id": "housing_year_built_1980_1999",
+            "label": "Housing Year Built 1980 1999",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_1980_1999",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_1980_1999_moe"
+          },
+          {
+            "id": "housing_year_built_new_2000_2009",
+            "label": "Housing Year Built New 2000 2009",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_new_2000_2009",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_new_2000_2009_moe"
+          },
+          {
+            "id": "housing_year_built_old_pre_1960",
+            "label": "Housing Year Built Old Pre 1960",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_old_pre_1960",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_old_pre_1960_moe"
+          },
+          {
+            "id": "housing_year_built_total",
+            "label": "Housing Year Built Total",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_total",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_total_moe"
+          },
+          {
+            "id": "housing_year_built_very_new_2010_plus",
+            "label": "Housing Year Built Very New 2010 Plus",
+            "group": "Housing year built",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_year_built_very_new_2010_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_year_built_very_new_2010_plus_moe"
+          }
+        ]
+      },
+      {
+        "id": "housing_occupancy__tenure",
+        "label": "Housing occupancy / tenure",
+        "metrics": [
+          {
+            "id": "housing_occupancy_occupied",
+            "label": "Housing Occupancy Occupied",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_occupancy_occupied",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_occupancy_occupied_moe"
+          },
+          {
+            "id": "housing_occupancy_total_base",
+            "label": "Housing Occupancy Total Base",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_occupancy_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_occupancy_total_base_moe"
+          },
+          {
+            "id": "housing_occupancy_vacant",
+            "label": "Housing Occupancy Vacant",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_occupancy_vacant",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_occupancy_vacant_moe"
+          },
+          {
+            "id": "housing_tenure_owner_occupied",
+            "label": "Housing Tenure Owner Occupied",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_tenure_owner_occupied",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_tenure_owner_occupied_moe"
+          },
+          {
+            "id": "housing_tenure_renter_occupied",
+            "label": "Housing Tenure Renter Occupied",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_tenure_renter_occupied",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_tenure_renter_occupied_moe"
+          },
+          {
+            "id": "housing_tenure_total_base",
+            "label": "Housing Tenure Total Base",
+            "group": "Housing occupancy / tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_tenure_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_tenure_total_base_moe"
+          }
+        ]
+      },
+      {
+        "id": "housing_structure",
+        "label": "Housing structure",
+        "metrics": [
+          {
+            "id": "housing_units_structure_large_multi_10_plus",
+            "label": "Housing Units Structure Large Multi 10 Plus",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_large_multi_10_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_large_multi_10_plus_moe"
+          },
+          {
+            "id": "housing_units_structure_mobile_home",
+            "label": "Housing Units Structure Mobile Home",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_mobile_home",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_mobile_home_moe"
+          },
+          {
+            "id": "housing_units_structure_other",
+            "label": "Housing Units Structure Other",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_other",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_other_moe"
+          },
+          {
+            "id": "housing_units_structure_single_family",
+            "label": "Housing Units Structure Single Family",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_single_family",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_single_family_moe"
+          },
+          {
+            "id": "housing_units_structure_small_multi_2_to_9",
+            "label": "Housing Units Structure Small Multi 2 To 9",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_small_multi_2_to_9",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_small_multi_2_to_9_moe"
+          },
+          {
+            "id": "housing_units_structure_total_base",
+            "label": "Housing Units Structure Total Base",
+            "group": "Housing structure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "housing_units_structure_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "housing_units_structure_total_base_moe"
+          }
+        ]
+      },
+      {
+        "id": "vehicle_availability_by_tenure",
+        "label": "Vehicle availability by tenure",
+        "metrics": [
+          {
+            "id": "tenure_vehicles_owner_1_vehicle",
+            "label": "Tenure Vehicles Owner 1 Vehicle",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_owner_1_vehicle",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_owner_1_vehicle_moe"
+          },
+          {
+            "id": "tenure_vehicles_owner_2_vehicles",
+            "label": "Tenure Vehicles Owner 2 Vehicles",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_owner_2_vehicles",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_owner_2_vehicles_moe"
+          },
+          {
+            "id": "tenure_vehicles_owner_3_plus_vehicles",
+            "label": "Tenure Vehicles Owner 3 Plus Vehicles",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_owner_3_plus_vehicles",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_owner_3_plus_vehicles_moe"
+          },
+          {
+            "id": "tenure_vehicles_owner_no_vehicle",
+            "label": "Tenure Vehicles Owner No Vehicle",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_owner_no_vehicle",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_owner_no_vehicle_moe"
+          },
+          {
+            "id": "tenure_vehicles_owner_occupied_base",
+            "label": "Tenure Vehicles Owner Occupied Base",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_owner_occupied_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_owner_occupied_base_moe"
+          },
+          {
+            "id": "tenure_vehicles_renter_1_vehicle",
+            "label": "Tenure Vehicles Renter 1 Vehicle",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_renter_1_vehicle",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_renter_1_vehicle_moe"
+          },
+          {
+            "id": "tenure_vehicles_renter_2_vehicles",
+            "label": "Tenure Vehicles Renter 2 Vehicles",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_renter_2_vehicles",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_renter_2_vehicles_moe"
+          },
+          {
+            "id": "tenure_vehicles_renter_3_plus_vehicles",
+            "label": "Tenure Vehicles Renter 3 Plus Vehicles",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_renter_3_plus_vehicles",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_renter_3_plus_vehicles_moe"
+          },
+          {
+            "id": "tenure_vehicles_renter_no_vehicle",
+            "label": "Tenure Vehicles Renter No Vehicle",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_renter_no_vehicle",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_renter_no_vehicle_moe"
+          },
+          {
+            "id": "tenure_vehicles_renter_occupied_base",
+            "label": "Tenure Vehicles Renter Occupied Base",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_renter_occupied_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_renter_occupied_base_moe"
+          },
+          {
+            "id": "tenure_vehicles_total_base",
+            "label": "Tenure Vehicles Total Base",
+            "group": "Vehicle availability by tenure",
+            "type": "direct",
+            "format": "number",
+            "source_field": "tenure_vehicles_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "tenure_vehicles_total_base_moe"
+          }
+        ]
+      },
+      {
+        "id": "rent_burden",
+        "label": "Rent burden",
+        "metrics": [
+          {
+            "id": "rent_burden_affordable_under_30_percent",
+            "label": "Rent Burden Affordable Under 30 Percent",
+            "group": "Rent burden",
+            "type": "direct",
+            "format": "number",
+            "source_field": "rent_burden_affordable_under_30_percent",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "rent_burden_affordable_under_30_percent_moe"
+          },
+          {
+            "id": "rent_burden_moderate_30_to_49_percent",
+            "label": "Rent Burden Moderate 30 To 49 Percent",
+            "group": "Rent burden",
+            "type": "direct",
+            "format": "number",
+            "source_field": "rent_burden_moderate_30_to_49_percent",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "rent_burden_moderate_30_to_49_percent_moe"
+          },
+          {
+            "id": "rent_burden_not_computed",
+            "label": "Rent Burden Not Computed",
+            "group": "Rent burden",
+            "type": "direct",
+            "format": "number",
+            "source_field": "rent_burden_not_computed",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "rent_burden_not_computed_moe"
+          },
+          {
+            "id": "rent_burden_severe_50_percent_plus",
+            "label": "Rent Burden Severe 50 Percent Plus",
+            "group": "Rent burden",
+            "type": "direct",
+            "format": "number",
+            "source_field": "rent_burden_severe_50_percent_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "rent_burden_severe_50_percent_plus_moe"
+          },
+          {
+            "id": "rent_burden_total_base",
+            "label": "Rent Burden Total Base",
+            "group": "Rent burden",
+            "type": "direct",
+            "format": "number",
+            "source_field": "rent_burden_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "rent_burden_total_base_moe"
+          }
+        ]
+      },
+      {
+        "id": "home_value_bands",
+        "label": "Home value bands",
+        "metrics": [
+          {
+            "id": "home_value_high_500k_1m",
+            "label": "Home Value High 500k 1m",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_high_500k_1m",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_high_500k_1m_moe"
+          },
+          {
+            "id": "home_value_low_under_200k",
+            "label": "Home Value Low Under 200k",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_low_under_200k",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_low_under_200k_moe"
+          },
+          {
+            "id": "home_value_luxury_1m_1_5m",
+            "label": "Home Value Luxury 1m 1 5m",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_luxury_1m_1_5m",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_luxury_1m_1_5m_moe"
+          },
+          {
+            "id": "home_value_median",
+            "label": "Home Value Median",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "currency",
+            "source_field": "home_value_median",
+            "aggregation": "median",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_median_moe"
+          },
+          {
+            "id": "home_value_moderate_200k_500k",
+            "label": "Home Value Moderate 200k 500k",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_moderate_200k_500k",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_moderate_200k_500k_moe"
+          },
+          {
+            "id": "home_value_super_luxury_2m_plus",
+            "label": "Home Value Super Luxury 2m Plus",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_super_luxury_2m_plus",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_super_luxury_2m_plus_moe"
+          },
+          {
+            "id": "home_value_total_base",
+            "label": "Home Value Total Base",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_total_base",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_total_base_moe"
+          },
+          {
+            "id": "home_value_ultra_luxury_1_5m_2m",
+            "label": "Home Value Ultra Luxury 1 5m 2m",
+            "group": "Home value bands",
+            "type": "direct",
+            "format": "number",
+            "source_field": "home_value_ultra_luxury_1_5m_2m",
+            "aggregation": "sum",
+            "enabledInSidebar": false,
+            "moeKey": "home_value_ultra_luxury_1_5m_2m_moe"
+          }
+        ]
+      }
+    ]
+  }
+}
