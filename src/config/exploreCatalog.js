@@ -1,11 +1,7 @@
 const CURATED_EXPLORE_GROUPS = Object.freeze([
   {
     label: 'Population',
-    metrics: Object.freeze([
-      { id: 'age_total_pop_base', label: 'Total population' },
-      { id: 'age_under_20', label: 'Under 20' },
-      { id: 'age_65_plus', label: 'Age 65+' },
-    ]),
+    metrics: Object.freeze([{ id: 'age_total_pop_base', label: 'Total population' }]),
   },
   {
     label: 'Income & Property',
@@ -17,9 +13,11 @@ const CURATED_EXPLORE_GROUPS = Object.freeze([
   {
     label: 'Age',
     metrics: Object.freeze([
+      { id: 'age_under_20', label: 'Age Under 20' },
       { id: 'age_20_29', label: 'Age 20-29' },
       { id: 'age_30_49', label: 'Age 30-49' },
       { id: 'age_50_64', label: 'Age 50-64' },
+      { id: 'age_65_plus', label: 'Age 65+' },
     ]),
   },
   {
@@ -34,9 +32,9 @@ const CURATED_EXPLORE_GROUPS = Object.freeze([
   {
     label: 'Education',
     metrics: Object.freeze([
-      { id: 'edu_bachelors_plus', label: "Bachelor's+" },
-      { id: 'edu_some_college', label: 'Some college' },
       { id: 'edu_hs_or_less', label: 'High school or less' },
+      { id: 'edu_some_college', label: 'Some college' },
+      { id: 'edu_bachelors_plus', label: "Bachelor's+" },
     ]),
   },
   {
@@ -78,12 +76,12 @@ const CURATED_EXPLORE_GROUPS = Object.freeze([
   {
     label: 'Transportation',
     metrics: Object.freeze([
-      { id: 'transport_work_from_home', label: 'Work from home' },
-      { id: 'transport_public_transit', label: 'Public transit' },
       { id: 'commute_under_10min', label: 'Commute under 10 min' },
       { id: 'commute_10_29min', label: 'Commute 10-29 min' },
       { id: 'commute_30_59min', label: 'Commute 30-59 min' },
       { id: 'commute_60_plus', label: 'Commute 60+ min' },
+      { id: 'transport_work_from_home', label: 'Work from home' },
+      { id: 'transport_public_transit', label: 'Public transit' },
     ]),
   },
   {

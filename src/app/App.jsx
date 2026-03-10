@@ -53,6 +53,7 @@ const NUMBER_FORMATTER = new Intl.NumberFormat('en-US', {
 const CHOOSE_FOR_ME_EXTREME_PERCENTILE = 0.02;
 const CHOOSE_FOR_ME_MIN_RECORDS_FOR_PERCENTILE = 50;
 const CHOOSE_FOR_ME_FLY_TO_DURATION_MS = 1200;
+const QUANTILE_PROBS = Object.freeze([0.1, 0.3, 0.5, 0.7, 0.9]);
 const EMPTY_GEOJSON = { type: 'FeatureCollection', features: [] };
 
 function toFiniteNumber(value) {
@@ -61,6 +62,133 @@ function toFiniteNumber(value) {
   }
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
+}
+
+function resolveMetricType(metric) {
+  const explicitType = metric?.type ?? metric?.compute?.type;
+  if (explicitType) {
+    return explicitType;
+  }
+
+  if (metric?.source_field || metric?.key || metric?.compute?.key) {
+    return 'direct';
+  }
+
+  return null;
+}
+
+function getDirectKey(metric) {
+  return metric?.key ?? metric?.source_field ?? metric?.compute?.key ?? null;
+}
+
+function getRatioNumeratorKey(metric) {
+  return (
+    metric?.num ?? metric?.numerator ?? metric?.compute?.num ?? metric?.compute?.numerator ?? null
+  );
+}
+
+function getRatioDenominatorKey(metric) {
+  return (
+    metric?.den ??
+    metric?.denominator ??
+    metric?.compute?.den ??
+    metric?.compute?.denominator ??
+    null
+  );
+}
+
+function metricHasRequiredKeys(metric, sampleRecord) {
+  if (!metric || !sampleRecord || typeof sampleRecord !== 'object') {
+    return false;
+  }
+
+  const metricType = resolveMetricType(metric);
+  if (metricType === 'direct') {
+    const key = getDirectKey(metric);
+    return Boolean(key && key in sampleRecord);
+  }
+
+  if (metricType === 'ratio') {
+    const numeratorKey = getRatioNumeratorKey(metric);
+    const denominatorKey = getRatioDenominatorKey(metric);
+    return Boolean(
+      numeratorKey &&
+      denominatorKey &&
+      numeratorKey in sampleRecord &&
+      denominatorKey in sampleRecord,
+    );
+  }
+
+  return false;
+}
+
+function computeLinearQuantile(sortedValues, probability) {
+  if (!Array.isArray(sortedValues) || sortedValues.length === 0) {
+    return null;
+  }
+
+  const normalizedProbability = toFiniteNumber(probability);
+  if (normalizedProbability === null) {
+    return null;
+  }
+
+  const p = Math.max(0, Math.min(1, normalizedProbability));
+  const index = (sortedValues.length - 1) * p;
+  const lowerIndex = Math.floor(index);
+  const upperIndex = Math.ceil(index);
+  const lowerValue = sortedValues[lowerIndex];
+  const upperValue = sortedValues[upperIndex];
+
+  if (!Number.isFinite(lowerValue) || !Number.isFinite(upperValue)) {
+    return null;
+  }
+
+  if (lowerIndex === upperIndex) {
+    return lowerValue;
+  }
+
+  const weight = index - lowerIndex;
+  return lowerValue + (upperValue - lowerValue) * weight;
+}
+
+function normalizeQuantileValue(value) {
+  const numericValue = toFiniteNumber(value);
+  if (numericValue === null) {
+    return null;
+  }
+
+  const rounded = Number(numericValue.toFixed(6));
+  if (!Number.isFinite(rounded)) {
+    return null;
+  }
+
+  return Number.isInteger(rounded) ? rounded : rounded;
+}
+
+function computeRuntimeQuantileBreaks(values) {
+  if (!Array.isArray(values) || values.length === 0) {
+    return [];
+  }
+
+  const sortedFiniteValues = values
+    .map((value) => toFiniteNumber(value))
+    .filter((value) => value !== null)
+    .sort((a, b) => a - b);
+
+  if (!sortedFiniteValues.length) {
+    return [];
+  }
+
+  const breaks = [];
+  for (const probability of QUANTILE_PROBS) {
+    const quantileValue = computeLinearQuantile(sortedFiniteValues, probability);
+    const normalizedValue = normalizeQuantileValue(quantileValue);
+    if (normalizedValue !== null) {
+      breaks.push(normalizedValue);
+    }
+  }
+
+  return breaks;
 }
 
 function normalizeYearsPayload(payload) {
@@ -166,15 +294,6 @@ function getQuantilesForGeoYear(metadata, geoMode, year) {
   }
 
   return modeQuantiles;
-}
-
-function getQuantileBreaksForMetric(metadata, geoMode, year, metricId) {
-  if (!metricId) {
-    return [];
-  }
-
-  const quantilesForYear = getQuantilesForGeoYear(metadata, geoMode, year);
-  return normalizeQuantileBreaks(quantilesForYear?.[metricId]);
 }
 
 function formatLegendTick(value, format) {
@@ -342,12 +461,15 @@ function App() {
   const [metrics, setMetrics] = useState([]);
   const [isSharedDataLoading, setIsSharedDataLoading] = useState(true);
   const [isMapDataLoading, setIsMapDataLoading] = useState(false);
+  const [isRuntimeQuantilesLoading, setIsRuntimeQuantilesLoading] = useState(false);
   const [legendFilter, setLegendFilter] = useState(null);
+  const [runtimeQuantilesForCurrentContext, setRuntimeQuantilesForCurrentContext] = useState({});
   const chooseDataCacheRef = useRef({
     [GEO_MODES.HEX]: new Map(),
     [GEO_MODES.TRACT]: new Map(),
     tractsGeojson: null,
   });
+  const runtimeQuantilesCacheRef = useRef(new Map());
   const legendFilterPreviousSelectionRef = useRef(null);
   const legendFilterRequestIdRef = useRef(0);
 
@@ -564,14 +686,120 @@ function App() {
     [geoMode, metadata, year],
   );
 
+  const metricIdFingerprint = useMemo(
+    () => metrics.map((metric) => metric.id).join('|'),
+    [metrics],
+  );
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function computeRuntimeQuantileFallback() {
+      const yearKey = String(year ?? '');
+      if (!yearKey || metrics.length === 0) {
+        setRuntimeQuantilesForCurrentContext({});
+        setIsRuntimeQuantilesLoading(false);
+        return;
+      }
+
+      const cacheKey = `${geoMode}:${yearKey}:${metricIdFingerprint}`;
+      const cachedQuantiles = runtimeQuantilesCacheRef.current.get(cacheKey);
+      if (cachedQuantiles) {
+        setRuntimeQuantilesForCurrentContext(cachedQuantiles);
+        setIsRuntimeQuantilesLoading(false);
+        return;
+      }
+
+      setRuntimeQuantilesForCurrentContext({});
+      setIsRuntimeQuantilesLoading(true);
+
+      try {
+        const yearIndex = await loadYearIndexForGeoMode(geoMode, year);
+        if (isCancelled) {
+          return;
+        }
+
+        const records = Array.isArray(yearIndex?.records) ? yearIndex.records : [];
+        const sampleRecord = records.find((record) => record && typeof record === 'object') ?? null;
+        if (!sampleRecord) {
+          runtimeQuantilesCacheRef.current.set(cacheKey, {});
+          setRuntimeQuantilesForCurrentContext({});
+          setIsRuntimeQuantilesLoading(false);
+          return;
+        }
+
+        const fallbackQuantiles = {};
+        for (const metric of metrics) {
+          const metadataBreaks = normalizeQuantileBreaks(quantilesForCurrentGeoYear?.[metric.id]);
+          if (metadataBreaks.length > 0) {
+            continue;
+          }
+          if (!metricHasRequiredKeys(metric, sampleRecord)) {
+            continue;
+          }
+
+          const metricValues = [];
+          for (const record of records) {
+            const estimate = computeRecordMetricStats(metric, record)?.estimate;
+            if (Number.isFinite(estimate)) {
+              metricValues.push(estimate);
+            }
+          }
+
+          const breaks = computeRuntimeQuantileBreaks(metricValues);
+          if (breaks.length > 0) {
+            fallbackQuantiles[metric.id] = breaks;
+          }
+        }
+
+        runtimeQuantilesCacheRef.current.set(cacheKey, fallbackQuantiles);
+        setRuntimeQuantilesForCurrentContext(fallbackQuantiles);
+      } catch (error) {
+        if (!isCancelled) {
+          console.error('Failed to compute runtime quantile fallback:', error);
+          setRuntimeQuantilesForCurrentContext({});
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsRuntimeQuantilesLoading(false);
+        }
+      }
+    }
+
+    computeRuntimeQuantileFallback();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [geoMode, metricIdFingerprint, metrics, quantilesForCurrentGeoYear, year]);
+
+  const effectiveQuantilesForCurrentGeoYear = useMemo(() => {
+    const baseQuantiles = quantilesForCurrentGeoYear ?? {};
+    const fallbackEntries = Object.entries(runtimeQuantilesForCurrentContext ?? {});
+    if (!fallbackEntries.length) {
+      return baseQuantiles;
+    }
+
+    const mergedQuantiles = { ...baseQuantiles };
+    for (const [metricId, breaks] of fallbackEntries) {
+      const existingBreaks = normalizeQuantileBreaks(mergedQuantiles[metricId]);
+      if (existingBreaks.length > 0) {
+        continue;
+      }
+      mergedQuantiles[metricId] = breaks;
+    }
+
+    return mergedQuantiles;
+  }, [quantilesForCurrentGeoYear, runtimeQuantilesForCurrentContext]);
+
   const metricsForCurrentGeoMode = useMemo(() => {
     return metrics.map((metric) => ({
       ...metric,
       isAvailable:
-        Array.isArray(quantilesForCurrentGeoYear?.[metric.id]) &&
-        normalizeQuantileBreaks(quantilesForCurrentGeoYear[metric.id]).length > 0,
+        Array.isArray(effectiveQuantilesForCurrentGeoYear?.[metric.id]) &&
+        normalizeQuantileBreaks(effectiveQuantilesForCurrentGeoYear[metric.id]).length > 0,
     }));
-  }, [metrics, quantilesForCurrentGeoYear]);
+  }, [effectiveQuantilesForCurrentGeoYear, metrics]);
 
   const metricGroups = useMemo(() => {
     const groups = [];
@@ -623,6 +851,10 @@ function App() {
   }, [years]);
 
   useEffect(() => {
+    if (isRuntimeQuantilesLoading) {
+      return;
+    }
+
     if (!availableMetricsForGeoMode.length) {
       setActiveMetricId(null);
       return;
@@ -634,7 +866,7 @@ function App() {
     if (!stillAvailable) {
       setActiveMetricId(availableMetricsForGeoMode[0].id);
     }
-  }, [activeMetricId, availableMetricsForGeoMode]);
+  }, [activeMetricId, availableMetricsForGeoMode, isRuntimeQuantilesLoading]);
 
   const activeMetric = useMemo(
     () => availableMetricsForGeoMode.find((metric) => metric.id === activeMetricId) ?? null,
@@ -682,7 +914,7 @@ function App() {
       const selectedCandidate = pickExtremeCandidate(
         candidates,
         pickHigh,
-        getQuantileBreaksForMetric(metadata, geoMode, year, activeMetric.id),
+        normalizeQuantileBreaks(effectiveQuantilesForCurrentGeoYear?.[activeMetric.id]),
       );
 
       if (!selectedCandidate?.id) {
@@ -730,6 +962,7 @@ function App() {
     geoMode,
     legendFilter,
     loadChooseDataContext,
+    effectiveQuantilesForCurrentGeoYear,
     metadata,
     year,
   ]);
@@ -769,8 +1002,8 @@ function App() {
   }, [activeMetricId, clearLegendFilter, geoMode, legendFilter, year]);
 
   const quantileBreaks = useMemo(
-    () => getQuantileBreaksForMetric(metadata, geoMode, year, activeMetricId),
-    [activeMetricId, geoMode, metadata, year],
+    () => normalizeQuantileBreaks(effectiveQuantilesForCurrentGeoYear?.[activeMetricId]),
+    [activeMetricId, effectiveQuantilesForCurrentGeoYear],
   );
 
   const legendBins = useMemo(() => {
@@ -867,7 +1100,7 @@ function App() {
   );
 
   const geoLabel = useMemo(() => getGeoLabel(geoMode), [geoMode]);
-  const isLoading = isSharedDataLoading || isMapDataLoading;
+  const isLoading = isSharedDataLoading || isMapDataLoading || isRuntimeQuantilesLoading;
   const defaultViewState = metadata?.region?.defaultView;
 
   return (

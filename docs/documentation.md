@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** UI-3 — curated sidebar expansion + small tweaks
-- **Next milestone:** UI-3 follow-up — curated Explore metric expansion and sidebar polish
+- **Active milestone:** UI-3 follow-up — Explore availability + final sidebar close-out
+- **Next milestone:** UI-3 close-out — manual sidebar/profile smoke + final spacing pass
 
 ## Repository overview
 
@@ -1388,6 +1388,84 @@ npm run build
   categories.
 - Kept this polish pass within existing interaction behavior (no new tabs/modes; no Profile behavior changes).
 - Next milestone: `UI-3` close-out — final sidebar spacing/label polish + manual sidebar/profile smoke.
+
+## UI-3 follow-up changes (runtime quantile fallback for Explore availability)
+
+- Updated `src/app/App.jsx` metric availability wiring to use effective per-year quantiles:
+  - metadata quantiles remain first priority
+  - runtime fallback quantiles are computed when metadata breaks are missing
+  - availability, active metric gating, legend bins, and map coloring now use the merged quantile set
+- Added runtime quantile fallback computation in app state for the active `(geoMode, year)`:
+  - loads the already-cached year index via existing loader utilities
+  - computes estimate values per metric from record data (`computeRecordMetricStats(...)`)
+  - computes linear quantiles at `0.1, 0.3, 0.5, 0.7, 0.9` with six-decimal normalization to match pipeline style
+  - caches fallback quantiles per `(geoMode, year, metric-id-set)` to avoid repeat work
+- Added runtime-quantile loading guard in metric activation flow so year/mode changes do not prematurely reset
+  the active metric before fallback quantiles finish computing.
+- Added metric key pre-checks so fallback quantiles skip unsupported metrics quickly (important for hex mode where
+  only a subset of fields exist).
+- Result:
+  - tract Explore metrics are no longer blocked by metadata-only quantiles
+  - hex mode behavior remains bounded by available hex fields (still a smaller available subset)
+
+## Commands run and results (UI-3 follow-up runtime quantile fallback)
+
+- `npm run verify`:
+  - first run failed on Prettier formatting in `src/app/App.jsx`.
+  - after formatting (`npx prettier --write src/app/App.jsx`), rerun passed
+    (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- Data-availability spot check (Node): passed.
+  - curated Explore metrics: `37`
+  - tract metrics with finite estimates (2024): `37`
+  - hex metrics with finite estimates (2024): `2`
+
+## Decisions made (UI-3 follow-up runtime quantile fallback)
+
+- Kept metadata quantiles authoritative when present and used runtime quantiles only as additive fallback.
+- Scoped fallback quantiles to UI behavior only (no metadata file mutation and no pipeline schema changes).
+- Preserved expected geometry-mode behavior:
+  - tract mode now exposes curated metric breadth with data-driven breaks
+  - hex mode remains intentionally limited by available output fields until pipeline expansion.
+- Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
+
+## UI-3 follow-up changes (Explore ordering refinement)
+
+- Updated curated Explore ordering in `src/config/exploreCatalog.js` to match requested reading order:
+  - moved `Age Under 20` to the top of `Age`
+  - moved `Age 65+` to the bottom of `Age`
+  - kept `White` first in `Race / ethnicity`
+  - reordered `Education` to:
+    - `High school or less`
+    - `Some college`
+    - `Bachelor's+`
+  - kept `Home value bands` in ascending price order (least to most expensive)
+  - kept `Rent burden` ordered as:
+    - under 30%
+    - 30%-49%
+    - 50%+
+  - reordered `Transportation` so commute buckets are in categorical order (`under 10`, `10-29`, `30-59`,
+    `60+`) followed by mode rows
+  - kept internet rows adjacent and language rows adjacent in `Internet & Language`
+- Updated `src/components/Sidebar.jsx` Explore rendering to preserve curated metric order as configured:
+  - removed the label-based metric re-sort step that was overriding curated order in the UI
+  - kept per-group available/total counts unchanged
+
+## Commands run and results (UI-3 follow-up Explore ordering refinement)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up Explore ordering refinement)
+
+- Treated curated config order as the source of truth for metric sequence to avoid future alphabetical
+  reordering regressions.
+- Kept this pass scoped to Explore ordering and labeling only; no map interaction or data pipeline changes.
+- Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
 
 ## Known issues / follow-ups
 

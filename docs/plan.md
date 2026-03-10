@@ -723,12 +723,13 @@ Expand Explore sidebar metrics in a curated way and apply small UI polish withou
 - [ ] Add small UI tweaks:
   - [x] replace placeholder About/Data Sources modal copy with detailed project documentation
   - [x] expand `README.md` with detailed run/data/deploy guidance
-  - [ ] sidebar readability/polish
+  - [x] sidebar readability/polish
+  - [x] add runtime quantile fallback so tract Explore metrics remain available beyond metadata-limited defaults
   - [ ] minor spacing/label consistency improvements
 - [ ] Preserve Profile tab behavior and existing map interactions.
 
 ### Acceptance checkpoint
-- [ ] Explore shows curated expanded metrics with stable performance and readability.
+- [x] Explore shows curated expanded metrics with stable performance and readability.
 - [ ] Profile and map interaction behaviors remain intact.
 
 ### Validation commands

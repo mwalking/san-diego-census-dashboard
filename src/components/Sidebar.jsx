@@ -436,13 +436,6 @@ function Sidebar({
     return metricGroups
       .map((group) => {
         const normalizedMetrics = Array.isArray(group.metrics) ? [...group.metrics] : [];
-        normalizedMetrics.sort((left, right) => {
-          const availabilityDelta = Number(left.isDisabled) - Number(right.isDisabled);
-          if (availabilityDelta !== 0) {
-            return availabilityDelta;
-          }
-          return String(left.label).localeCompare(String(right.label));
-        });
 
         const availableCount = normalizedMetrics.reduce(
           (count, metric) => count + (metric.isDisabled ? 0 : 1),
