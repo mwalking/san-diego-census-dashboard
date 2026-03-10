@@ -28,7 +28,15 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Configure Pages (auto-enable)
+        if: ${{ secrets.PAGES_ENABLEMENT_TOKEN != '' }}
+        uses: actions/configure-pages@v5
+        with:
+          token: ${{ secrets.PAGES_ENABLEMENT_TOKEN }}
+          enablement: true
+
       - name: Configure Pages
+        if: ${{ secrets.PAGES_ENABLEMENT_TOKEN == '' }}
         uses: actions/configure-pages@v5
 
       - name: Install dependencies
