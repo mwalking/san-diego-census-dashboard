@@ -97,6 +97,35 @@ function getRatioDenominatorKey(metric) {
   );
 }
 
+function buildProportionMetricDefinition(metric) {
+  if (!metric || metric?.type === 'ratio' || !metric?.proportionOf) {
+    return metric;
+  }
+
+  const numeratorKey = getDirectKey(metric);
+  const denominatorKey = metric.proportionOf;
+  if (!numeratorKey || !denominatorKey) {
+    return metric;
+  }
+
+  return {
+    ...metric,
+    type: 'ratio',
+    aggregation: 'ratio',
+    format: 'percent',
+    numerator: numeratorKey,
+    denominator: denominatorKey,
+    numeratorMoeKey:
+      metric?.numeratorMoeKey ?? metric?.numMoeKey ?? metric?.moeKey ?? `${numeratorKey}_moe`,
+    denominatorMoeKey:
+      metric?.denominatorMoeKey ??
+      metric?.denMoeKey ??
+      metric?.proportionOfMoeKey ??
+      `${denominatorKey}_moe`,
+    moeMethod: metric?.moeMethod ?? 'proportion',
+  };
+}
+
 function metricHasRequiredKeys(metric, sampleRecord) {
   if (!metric || !sampleRecord || typeof sampleRecord !== 'object') {
     return false;
@@ -267,7 +296,9 @@ function normalizeMetricList(payload) {
     }
   }
 
-  return curateExploreMetrics(normalizedMetrics);
+  return curateExploreMetrics(normalizedMetrics).map((metric) =>
+    buildProportionMetricDefinition(metric),
+  );
 }
 
 function getQuantilesForGeoYear(metadata, geoMode, year) {

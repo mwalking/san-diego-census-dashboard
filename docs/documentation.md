@@ -1496,6 +1496,33 @@ npm run build
   into percent form.
 - Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
 
+## UI-3 follow-up changes (legend/map parity for proportion metrics)
+
+- Updated `src/app/App.jsx` metric normalization so curated rows with `proportionOf` are promoted to ratio
+  metric definitions at load time:
+  - `type: "ratio"`
+  - `aggregation: "ratio"`
+  - `format: "percent"`
+  - explicit numerator/denominator and MOE keys
+- Result:
+  - active-metric legend bins now display percent-formatted breaks for share rows
+  - map coloring and legend bucket selection are computed from the same ratio estimates shown in Explore rows
+  - selected/in-view/all summaries stay consistent with legend units
+
+## Commands run and results (UI-3 follow-up legend/map parity)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up legend/map parity)
+
+- Centralized proportion metric semantics in App-level metric definitions so legend, map, choose-for-me, and
+  sidebar all read the same metric contract.
+- Kept scope to metric-definition wiring only; no pipeline/data-file changes required.
+- Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
+
 ## Known issues / follow-ups
 
 - Bundle size warning exists after deck.gl/maplibre additions; optimization can be addressed later if needed.
