@@ -4,8 +4,8 @@
 
 ## Current status
 
-- **Active milestone:** H1 — data packaging for GitHub Pages
-- **Next milestone:** H2 — GitHub Pages deploy workflow
+- **Active milestone:** H2 — GitHub Pages deploy workflow
+- **Next milestone:** UI-3 — curated sidebar expansion + small tweaks (after H2 live validation)
 
 ## Repository overview
 
@@ -1189,6 +1189,50 @@ npm run build
   - manual browser smoke test for compressed path + fallback path is still pending
   - plain + compressed data snapshot should be committed together in a single H1 data commit
 - Next milestone after H1 close-out: `H2` — GitHub Pages deploy workflow.
+
+## Milestone H2 changes
+
+- Added GitHub Pages deploy workflow:
+  - `.github/workflows/pages.yml`
+  - triggers on push to `main` and manual `workflow_dispatch`
+  - uses `actions/configure-pages`, uploads `dist`, and deploys with `actions/deploy-pages`
+- Added deployment guardrails in workflow to enforce committed static data artifacts:
+  - asserts required plain files in `public/data/*`
+  - asserts required gzip sidecars (`.json.gz` / `.geojson.gz`)
+  - no Python pipeline steps run during deploy
+- Updated Vite config for project-site deployment path:
+  - `vite.config.mjs` now builds with `base: "/san-diego-census-dashboard/"`
+  - dev command still uses `/` base for local iteration
+- Confirmed build output includes the Pages prefix in bundled asset URLs and loader path derivation remains
+  BASE_URL-aware (`src/data/loadData.js`).
+
+## Commands run and results (Milestone H2)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+- `npm run build`: passed.
+- Prefix validation command:
+  - `rg -n "/san-diego-census-dashboard/" dist/index.html`
+  - result confirmed production asset paths include:
+    - `/san-diego-census-dashboard/assets/...`
+- Loader base-path contract check:
+  - `rg -n "BASE_URL|data/" src/data/loadData.js`
+  - confirmed loader continues to resolve requests via `import.meta.env.BASE_URL` and `data/<path>`.
+
+## Decisions made (Milestone H2)
+
+- Chose dedicated `pages.yml` workflow (separate from CI verify workflow) to keep deployment concerns isolated
+  from general lint/build checks.
+- Kept deploy job based only on committed repository artifacts (`public/data` + built app assets) and did not
+  introduce deploy-time Census fetches.
+- Used production-only Vite base override so local `npm run dev` stays simple while Pages build paths are
+  correct.
+- H2 pending close-out validations:
+  - run the Pages workflow on `main`
+  - perform live URL sanity check (map/data fetch/interactions under project path prefix)
+- Next milestone after H2 close-out: `UI-3` — curated sidebar expansion + small tweaks.
 
 ## Known issues / follow-ups
 

@@ -692,17 +692,18 @@ Ship compressed sidecars for large static data files while preserving plain JSON
 Deploy the static app to GitHub Pages project URL with automatic deploys on `main`.
 
 ### Tasks
-- [ ] Add GitHub Actions Pages deploy workflow.
-- [ ] Configure Vite base path for project Pages deploy:
-  - [ ] `/san-diego-census-dashboard/`
-- [ ] Deploy from committed `public/data` assets (no runtime Census API calls and no deploy-time Census
+- [x] Add GitHub Actions Pages deploy workflow.
+- [x] Configure Vite base path for project Pages deploy:
+  - [x] `/san-diego-census-dashboard/`
+- [x] Deploy from committed `public/data` assets (no runtime Census API calls and no deploy-time Census
   fetch).
-- [ ] Validate that `public/data/*` assets are served correctly from the Pages path prefix.
+- [x] Validate that `public/data/*` assets are served correctly from the Pages path prefix.
 
 ### Acceptance checkpoint
 - [ ] Live site loads and functions under GitHub Pages project URL.
 
 ### Validation commands
+- [x] Local build prefix check (`dist/index.html` asset paths include `/san-diego-census-dashboard/`)
 - [ ] GitHub Actions deploy workflow run (push to `main`)
 - [ ] Live Pages sanity check (map load + data fetch + interactions)
 
