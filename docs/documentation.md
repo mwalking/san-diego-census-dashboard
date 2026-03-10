@@ -1523,6 +1523,26 @@ npm run build
 - Kept scope to metric-definition wiring only; no pipeline/data-file changes required.
 - Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
 
+## UI-3 follow-up changes (default geography set to tracts)
+
+- Updated `src/app/App.jsx` initial state:
+  - changed default `geoMode` from `GEO_MODES.HEX` to `GEO_MODES.TRACT`
+- Result:
+  - first load now opens in census tract view by default
+  - existing geography toggle behavior and per-mode selection/hover state handling remain unchanged
+
+## Commands run and results (UI-3 follow-up default tract view)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up default tract view)
+
+- Kept the change to initial UI state only to avoid side effects in map interaction or data pipeline logic.
+- Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
+
 ## Known issues / follow-ups
 
 - Bundle size warning exists after deck.gl/maplibre additions; optimization can be addressed later if needed.

@@ -466,7 +466,7 @@ async function computeLegendBucketSelection({
 }
 
 function App() {
-  const [geoMode, setGeoMode] = useState(GEO_MODES.HEX);
+  const [geoMode, setGeoMode] = useState(GEO_MODES.TRACT);
   const [hoverIdByGeo, setHoverIdByGeo] = useState({
     [GEO_MODES.HEX]: null,
     [GEO_MODES.TRACT]: null,

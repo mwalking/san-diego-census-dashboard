@@ -727,6 +727,7 @@ Expand Explore sidebar metrics in a curated way and apply small UI polish withou
   - [x] show percent-based Explore row summaries for share metrics when denominator/base fields exist
   - [x] keep legend/map units aligned with share rows by promoting `proportionOf` metrics to ratio definitions
   - [x] add runtime quantile fallback so tract Explore metrics remain available beyond metadata-limited defaults
+  - [x] default initial geography view to census tracts
   - [ ] minor spacing/label consistency improvements
 - [ ] Preserve Profile tab behavior and existing map interactions.
 
