@@ -1467,6 +1467,35 @@ npm run build
 - Kept this pass scoped to Explore ordering and labeling only; no map interaction or data pipeline changes.
 - Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
 
+## UI-3 follow-up changes (Explore row proportions when applicable)
+
+- Updated curated Explore metric refs in `src/config/exploreCatalog.js` with `proportionOf` base fields for
+  share-style rows (age bands, race, education, tenure/occupancy, home value bands, rent burden, commute,
+  transportation modes, internet, language).
+- Updated `src/components/Sidebar.jsx` Explore row-stat computation:
+  - added proportion-aware metric transformation for rows tagged with `proportionOf`
+  - when applicable, row summary estimate/MOE is now computed as a ratio (`numerator / base`) and formatted as
+    percent (with MOE in percentage points)
+  - non-share rows (for example median home value, total population) continue to render as their original units
+- Kept this change scoped to Explore row summaries only:
+  - no map-color metric logic changes
+  - no Profile tab behavior changes
+
+## Commands run and results (UI-3 follow-up row proportions)
+
+- `npm run verify`: passed (`format:check`, `lint`, `build`).
+  - existing non-blocking build warnings remained:
+    - loaders.gl browser external warning (`spawn` export in browser bundle)
+    - chunk size warning (>500kB)
+
+## Decisions made (UI-3 follow-up row proportions)
+
+- Chose explicit `proportionOf` mapping in curated config instead of heuristic denominator inference to keep
+  behavior predictable and reviewable.
+- Kept percentage display limited to rows with explicit denominator metadata so totals/base rows are not forced
+  into percent form.
+- Next milestone: `UI-3` close-out — manual sidebar/profile smoke + final spacing/label consistency tweaks.
+
 ## Known issues / follow-ups
 
 - Bundle size warning exists after deck.gl/maplibre additions; optimization can be addressed later if needed.

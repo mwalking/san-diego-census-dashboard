@@ -724,6 +724,7 @@ Expand Explore sidebar metrics in a curated way and apply small UI polish withou
   - [x] replace placeholder About/Data Sources modal copy with detailed project documentation
   - [x] expand `README.md` with detailed run/data/deploy guidance
   - [x] sidebar readability/polish
+  - [x] show percent-based Explore row summaries for share metrics when denominator/base fields exist
   - [x] add runtime quantile fallback so tract Explore metrics remain available beyond metadata-limited defaults
   - [ ] minor spacing/label consistency improvements
 - [ ] Preserve Profile tab behavior and existing map interactions.

@@ -157,6 +157,39 @@ function getFeatureIdentifier(record, geoMode, selectedIds) {
   return selectedIds?.[0] ?? null;
 }
 
+function getDirectMetricKey(metric) {
+  return metric?.key ?? metric?.source_field ?? metric?.compute?.key ?? null;
+}
+
+function buildProportionMetricDefinition(metric) {
+  if (!metric || metric?.type === 'ratio' || !metric?.proportionOf) {
+    return metric;
+  }
+
+  const numeratorKey = getDirectMetricKey(metric);
+  const denominatorKey = metric.proportionOf;
+  if (!numeratorKey || !denominatorKey) {
+    return metric;
+  }
+
+  return {
+    ...metric,
+    type: 'ratio',
+    aggregation: 'ratio',
+    format: 'percent',
+    numerator: numeratorKey,
+    denominator: denominatorKey,
+    numeratorMoeKey:
+      metric?.numeratorMoeKey ?? metric?.numMoeKey ?? metric?.moeKey ?? `${numeratorKey}_moe`,
+    denominatorMoeKey:
+      metric?.denominatorMoeKey ??
+      metric?.denMoeKey ??
+      metric?.proportionOfMoeKey ??
+      `${denominatorKey}_moe`,
+    moeMethod: metric?.moeMethod ?? 'proportion',
+  };
+}
+
 function Sidebar({
   years = [],
   year,
@@ -329,10 +362,12 @@ function Sidebar({
         if (!metricDefinition) {
           continue;
         }
-        statsByMetric[metricRow.id] = computeAggregateMetricStats(
-          metricDefinition,
-          selectedRecords,
-        );
+
+        const metricForStats = buildProportionMetricDefinition(metricDefinition);
+        statsByMetric[metricRow.id] = {
+          metric: metricForStats,
+          stats: computeAggregateMetricStats(metricForStats, selectedRecords),
+        };
       }
     }
 
@@ -492,8 +527,10 @@ function Sidebar({
       };
     }
 
-    const stats = selectedStatsByMetricId?.[metricRow.id] ?? { estimate: null, moe: null };
-    const estimateLabel = formatMetricEstimate(metricDefinition, stats.estimate);
+    const metricSummaryEntry = selectedStatsByMetricId?.[metricRow.id] ?? null;
+    const metricForDisplay = metricSummaryEntry?.metric ?? metricDefinition;
+    const stats = metricSummaryEntry?.stats ?? { estimate: null, moe: null };
+    const estimateLabel = formatMetricEstimate(metricForDisplay, stats.estimate);
 
     if (stats?.note) {
       return {
@@ -505,7 +542,7 @@ function Sidebar({
 
     return {
       estimateLabel,
-      moeLabel: `± ${formatMetricMoe(metricDefinition, stats.moe)}`,
+      moeLabel: `± ${formatMetricMoe(metricForDisplay, stats.moe)}`,
       note: null,
     };
   }
